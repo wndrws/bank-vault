@@ -1,33 +1,33 @@
-@startuml
+ï»¿@startuml
 scale 1.5
 left to right direction
 skinparam monochrome true
 
-actor Êëèåíò as aClient
-actor "Îïåðàòîð\nõðàíèëèùà" as aOperator
-actor Ìåíåäæåð as aManager
+actor ÐšÐ»Ð¸ÐµÐ½Ñ‚ as aClient
+actor "ÐžÐ¿ÐµÑ€Ð°Ñ‚Ð¾Ñ€\nÑ…Ñ€Ð°Ð½Ð¸Ð»Ð¸Ñ‰Ð°" as aOperator
+actor ÐœÐµÐ½ÐµÐ´Ð¶ÐµÑ€ as aManager
 
-usecase "Çàÿâêà íà\nïîëó÷åíèå ÿ÷åéêè" as (apply)
-usecase "Ïîëîæèòü öåííîñòü\nâ ÿ÷åéêó" as (putPrecious)
-usecase "Èçúÿòü öåííîñòü\nèç ÿ÷åéêè" as (getPrecious)
-usecase "Ìàíèïóëÿöèÿ\nñ ÿ÷åéêîé" as (manipCell)
-usecase "Ìàíèïóëÿöèÿ\nñ öåííîñòüþ" as (manipPrecious)
-usecase "Ïðîâåðêà íàëè÷èÿ\nñâîáîäíûõ ÿ÷ååê\nïîäõîäÿùåãî ðàçìåðà" as (cellsCheck)
-usecase "Âíåñåíèå\nâ áàçó êëèåíòîâ" as (registerClient)
-usecase "Ïðîâåðêà\nïàñïîðòíûõ äàííûõ" as (passportCheck)
-usecase "Ïðîâåðêà\nêðåäèòíîé èñòîðèè" as (historyCheck)
-usecase "Âûáîð\nðàçìåðà ÿ÷åéêè" as (chooseCell)
-usecase "Îïëàòà\nàðåíäû ÿ÷åéêè" as (payForCell)
-usecase "Îïëàòà íàëè÷íûìè" as (payWithCash)
-usecase "Îïëàòà êàðòîé" as (payWithCard)
-usecase "Ñäåëàòü ñêèäêó" as (discount)
-usecase "Èäåíòèôèêàöèÿ\nêëèåíòà" as (identifyClient)
-usecase "Óâåäîìëåíèå\nìåíåäæåðà" as (notifyManager)
-usecase "Ïðîâåðêà ñîîòâåòñòâèÿ\nðàçìåðîâ" as (sizeCheck)
-usecase "Èçúÿòü" as (get)
-usecase "Ïîëîæèòü" as (put)
-usecase "Îòêðûòü" as (open)
-usecase "Çàêðûòü" as (close)
+usecase "Ð—Ð°ÑÐ²ÐºÐ° Ð½Ð°\nÐ¿Ð¾Ð»ÑƒÑ‡ÐµÐ½Ð¸Ðµ ÑÑ‡ÐµÐ¹ÐºÐ¸" as (apply)
+usecase "ÐŸÐ¾Ð»Ð¾Ð¶Ð¸Ñ‚ÑŒ Ñ†ÐµÐ½Ð½Ð¾ÑÑ‚ÑŒ\nÐ² ÑÑ‡ÐµÐ¹ÐºÑƒ" as (putPrecious)
+usecase "Ð˜Ð·ÑŠÑÑ‚ÑŒ Ñ†ÐµÐ½Ð½Ð¾ÑÑ‚ÑŒ\nÐ¸Ð· ÑÑ‡ÐµÐ¹ÐºÐ¸" as (getPrecious)
+usecase "ÐœÐ°Ð½Ð¸Ð¿ÑƒÐ»ÑÑ†Ð¸Ñ\nÑ ÑÑ‡ÐµÐ¹ÐºÐ¾Ð¹" as (manipCell)
+usecase "ÐœÐ°Ð½Ð¸Ð¿ÑƒÐ»ÑÑ†Ð¸Ñ\nÑ Ñ†ÐµÐ½Ð½Ð¾ÑÑ‚ÑŒÑŽ" as (manipPrecious)
+usecase "ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ° Ð½Ð°Ð»Ð¸Ñ‡Ð¸Ñ\nÑÐ²Ð¾Ð±Ð¾Ð´Ð½Ñ‹Ñ… ÑÑ‡ÐµÐµÐº\nÐ¿Ð¾Ð´Ñ…Ð¾Ð´ÑÑ‰ÐµÐ³Ð¾ Ñ€Ð°Ð·Ð¼ÐµÑ€Ð°" as (cellsCheck)
+usecase "Ð’Ð½ÐµÑÐµÐ½Ð¸Ðµ\nÐ² Ð±Ð°Ð·Ñƒ ÐºÐ»Ð¸ÐµÐ½Ñ‚Ð¾Ð²" as (registerClient)
+usecase "ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ°\nÐ¿Ð°ÑÐ¿Ð¾Ñ€Ñ‚Ð½Ñ‹Ñ… Ð´Ð°Ð½Ð½Ñ‹Ñ…" as (passportCheck)
+usecase "ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ°\nÐºÑ€ÐµÐ´Ð¸Ñ‚Ð½Ð¾Ð¹ Ð¸ÑÑ‚Ð¾Ñ€Ð¸Ð¸" as (historyCheck)
+usecase "Ð’Ñ‹Ð±Ð¾Ñ€\nÑ€Ð°Ð·Ð¼ÐµÑ€Ð° ÑÑ‡ÐµÐ¹ÐºÐ¸" as (chooseCell)
+usecase "ÐžÐ¿Ð»Ð°Ñ‚Ð°\nÐ°Ñ€ÐµÐ½Ð´Ñ‹ ÑÑ‡ÐµÐ¹ÐºÐ¸" as (payForCell)
+usecase "ÐžÐ¿Ð»Ð°Ñ‚Ð° Ð½Ð°Ð»Ð¸Ñ‡Ð½Ñ‹Ð¼Ð¸" as (payWithCash)
+usecase "ÐžÐ¿Ð»Ð°Ñ‚Ð° ÐºÐ°Ñ€Ñ‚Ð¾Ð¹" as (payWithCard)
+usecase "Ð¡Ð´ÐµÐ»Ð°Ñ‚ÑŒ ÑÐºÐ¸Ð´ÐºÑƒ" as (discount)
+usecase "Ð˜Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ†Ð¸Ñ\nÐºÐ»Ð¸ÐµÐ½Ñ‚Ð°" as (identifyClient)
+usecase "Ð£Ð²ÐµÐ´Ð¾Ð¼Ð»ÐµÐ½Ð¸Ðµ\nÐ¼ÐµÐ½ÐµÐ´Ð¶ÐµÑ€Ð°" as (notifyManager)
+usecase "ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ° ÑÐ¾Ð¾Ñ‚Ð²ÐµÑ‚ÑÑ‚Ð²Ð¸Ñ\nÑ€Ð°Ð·Ð¼ÐµÑ€Ð¾Ð²" as (sizeCheck)
+usecase "Ð˜Ð·ÑŠÑÑ‚ÑŒ" as (get)
+usecase "ÐŸÐ¾Ð»Ð¾Ð¶Ð¸Ñ‚ÑŒ" as (put)
+usecase "ÐžÑ‚ÐºÑ€Ñ‹Ñ‚ÑŒ" as (open)
+usecase "Ð—Ð°ÐºÑ€Ñ‹Ñ‚ÑŒ" as (close)
 
 aClient -- (apply)
 aClient -- (putPrecious)
@@ -40,7 +40,7 @@ aClient -- (getPrecious)
 (apply) ..> (payForCell) : <<include>>
 (payForCell) <|-- (payWithCash)
 (payForCell) <|-- (payWithCard)
-note bottom of (discount) : Åñëè êðåäèòíàÿ èñòîðèÿ õîðîøàÿ
+note bottom of (discount) : Ð•ÑÐ»Ð¸ ÐºÑ€ÐµÐ´Ð¸Ñ‚Ð½Ð°Ñ Ð¸ÑÑ‚Ð¾Ñ€Ð¸Ñ Ñ…Ð¾Ñ€Ð¾ÑˆÐ°Ñ
 
 (putPrecious) ..> (identifyClient) : <<include>>
 (putPrecious) ..> (notifyManager) : <<include>>
