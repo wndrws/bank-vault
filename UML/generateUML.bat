@@ -1,1 +1,2 @@
-java -jar plantuml.1.2018.1.jar -charset UTF-8 usecaseDiag.txt
+java -jar plantuml.jar -charset UTF-8 usecaseDiag.txt
+pause
