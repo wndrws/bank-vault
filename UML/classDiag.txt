@@ -3,7 +3,7 @@ scale 1.5
 left to right direction
 hide members
 
-package delivery <<Rectangle>> {
+package delivery <<Rectangle>> #DDDDDD {
   class VaultRequestGate 
   class VaultResponseGate
   class VaultLogger
