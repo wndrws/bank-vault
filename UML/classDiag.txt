@@ -1,0 +1,100 @@
+@startuml
+scale 1.5
+left to right direction
+hide members
+
+package delivery <<Rectangle>> {
+  class VaultRequestGate 
+  class VaultResponseGate
+  class VaultLogger
+  class VaultClientsBase
+  class PaymentSubystem
+}
+
+package boundaries <<Rectangle>> {
+  interface RequestGate
+  interface ResponseGate
+  interface NotificationGate
+  interface ClientsBase
+  interface PaymentGate
+}
+
+VaultRequestGate ..|> RequestGate
+VaultResponseGate ..|> ResponseGate
+VaultLogger ..|> NotificationGate
+VaultClientsBase ..|> ClientsBase
+PaymentSubystem ..|> PaymentGate
+
+package 3rd-party <<Cloud>> {
+  class CreditHistoryAPIImpl
+  hide CreditHistoryAPIImpl circle
+  interface CreditHistoryAPI
+}
+CreditHistoryAPIImpl .d.|> CreditHistoryAPI
+
+package interactors <<Rectangle>> {
+  class CellApplicationInteractor
+  abstract class CellManipulationInteractor
+  CellManipulationInteractor <|- CellPutterInteractor
+  CellGetterInteractor -|> CellManipulationInteractor
+}
+
+package entities <<Rectangle>> {
+  class Vault << (S,#FF7700) Singleton >>
+ 
+  Vault o--> "1..*" Cell 
+  Client "1 "  *--> "1 " PassportInfo
+  CreditHistory "0..1" -- "1 " Client
+  
+  enum CellSize
+  enum PaymentMethod
+  enum ManipulationType
+  PreciousValidator -[hidden]- CellSize
+  PreciousSizeValidator -[hidden]- PaymentMethod
+  Cell -[hidden]- ManipulationType
+  
+  package messaging <<Rectangle>> {
+  	class ResponseForClientInfo
+	class ResponseForCellChoice
+	class ResponseForPayment
+    class RequestWithClientInfo
+    class RequestWithCellChoice
+    class RequestWithPayment
+	class RequestWithManipulation
+	class ResponseForManipulation
+  }
+  RequestWithClientInfo -[hidden]- RequestWithCellChoice
+  RequestWithCellChoice -[hidden]- RequestWithPayment
+  ResponseForClientInfo -[hidden]- ResponseForCellChoice
+  ResponseForCellChoice -[hidden]- ResponseForPayment
+  RequestWithManipulation -[hidden]- ResponseForManipulation
+  'RequestWithPayment -> PaymentMethod
+  'RequestWithCellChoice -> CellSize
+  
+  interface PreciousValidator
+  class PreciousSizeValidator
+  PreciousSizeValidator .|> PreciousValidator
+  
+  interface ClientValidator
+  class ClientPassportValidator
+  ClientPassportValidator .|> ClientValidator
+  'Cell -[hidden]- ClientPassportValidator
+  ClientValidator -[hidden]- PreciousValidator
+}
+
+delivery -[hidden]- boundaries
+boundaries -[hidden]- interactors
+CreditHistoryAPIImpl -[hidden]- boundaries
+
+'RequestGate <.. CellApplicationInteractor
+'ResponseGate <.. CellApplicationInteractor
+'ClientsBase <.. CellApplicationInteractor
+'PaymentGate <.. CellApplicationInteractor
+'CreditHistoryAPI <.. CellApplicationInteractor
+
+'RequestGate <.. CellManipulationInteractor
+'ResponseGate <.. CellManipulationInteractor
+'ClientsBase <.. CellManipulationInteractor
+'NotificationGate <.. CellManipulationInteractor
+ 
+@enduml

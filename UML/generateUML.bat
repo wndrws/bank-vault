@@ -1,2 +1,2 @@
 java -jar plantuml.jar -charset UTF-8 usecaseDiag.txt
-pause
+java -jar plantuml.jar -charset UTF-8 classDiag.txt
