@@ -11,7 +11,7 @@ package delivery <<Rectangle>> #DDDDDD {
   class PaymentSubystem
 }
 
-package boundaries <<Rectangle>> {
+package boundaries {
   interface RequestGate
   interface ResponseGate
   interface NotificationGate
@@ -37,8 +37,8 @@ package 3rd-party <<Cloud>> {
   BlackListAPIImpl .d.|> BlackListAPI
 }
 
-package interactors <<Rectangle>> {
-  class BankVaultFacade << Facade >>
+package interactors {
+  class BankVaultFacade << (F,#FF7700) Facade >>
   class CellApplicationInteractor
   abstract class CellManipulationInteractor
   CellManipulationInteractor <|- CellPutterInteractor
@@ -50,29 +50,42 @@ package interactors <<Rectangle>> {
   'CellApplicationInteractor <. BankVaultFacade
 }
 
-package entities <<Rectangle>> {
+package entities {
   class Vault << (S,#FF7700) Singleton >>
+
  
-  Vault o--> "1..*" Cell 
+  Vault "1 " o--> "1..*" Cell 
   Client "1 "  *--> "1 " PassportInfo
   CreditHistory "0..1" -- "1 " Client
   
-  enum CellSize
-  enum PaymentMethod
-  enum ManipulationType
-  PreciousValidator -[hidden]- CellSize
-  PreciousSizeValidator -[hidden]- PaymentMethod
-  Cell -[hidden]- ManipulationType
+  class Precious
+  Cell "1" -- "0..1"  Precious
   
-  interface PreciousValidator
-  class PreciousSizeValidator
-  PreciousSizeValidator .|> PreciousValidator
+  together {
+    enum CellSize
+    enum PaymentMethod
+    enum ManipulationType
+
+    PaymentMethod -[hidden]- ManipulationType
+    ManipulationType -[hidden]- CellSize
+  }
+  'PreciousValidator -[hidden]- CellSize
+  'PreciousSizeValidator -[hidden]- PaymentMethod
+  'Cell -[hidden]- ManipulationType
+  
+  interface ManipulationValidator
+  class PutValidator
+  PutValidator .|> ManipulationValidator
   
   interface ClientValidator
   class ClientPassportValidator
   ClientPassportValidator .|> ClientValidator
-  'Cell -[hidden]- ClientPassportValidator
-  ClientValidator -[hidden]- PreciousValidator
+  ClientValidator -[hidden]- ManipulationValidator
+  
+  interface ClientIdentifier
+  class ClientInfoIdentifier
+  ClientInfoIdentifier .|> ClientIdentifier
+  ClientIdentifier -[hidden]- ClientValidator
 }
 
 delivery -[hidden]- boundaries
@@ -87,8 +100,82 @@ ResponseGate <|.. BankVaultFacade
 'CreditHistoryAPI <.. CellApplicationInteractor
 'ClientsBase <.. CellManipulationInteractor
 'NotificationGate <.. CellManipulationInteractor
- 
+
+''' Methods and fields '''
+skinparam classAttributeIconSize 0
+
+show ClientIdentifier methods
+ClientIdentifier : +isKnown(Client): boolean
+
+show ClientInfoIdentifier members
+ClientInfoIdentifier : -ClientsBase : clientsBase
+
+show ClientValidator methods
+ClientValidator : +isValid(Client): boolean
+
+show ClientPassportValidator members
+ClientPassportValidator : -{static} isValidPassportNumber(int): boolean
+
+show ManipulationValidator methods
+ManipulationValidator : +isAllowed(Precious, Cell): boolean
+
+show PutValidator members
+PutValidator : -{static} canBeFit(Precious, CellSize): boolean
+
+show CellSize members
+CellSize : SMALL
+CellSize : MEDIUM
+CellSize : BIG
+CellSize : +getVolume(): int
+
+show PaymentMethod fields
+PaymentMethod : CASH
+PaymentMethod : CARD
+
+show ManipulationType fields
+ManipulationType : PUT
+ManipulationType : GET
+
+show Vault members
+Vault : -EnumMap<CellSize, Cell> cells
+Vault : +requestCell(CellSize): Optional<Cell>
+
+show Cell members
+Cell : -int id
+Cell : -CellSize size
+Cell : -Precious containedPrecious
+Cell : +isEmpty(): boolean
+Cell : +{method} <i>getters</i>
+
+show Precious members
+Precious : -int volume
+Precious : -String name
+Precious : -Cell containerCell
+Precious : +{method} <i>getters</i>
+
+show CreditHistory fields
+CreditHistory : -Client client
+CreditHistory : ..
+CreditHistory : <i>other depends on CreditHistoryAPI</i>
+
+show Client members
+Client : -int id
+Client : -PassportInfo passportInfo
+Client : -CreditHistory creditHistory
+Client : +getPassportInfo(): PassportInfo
+Client : +hasGoodCreditHistory(\nPredicate<CreditHistory>): boolean
+
+show PassportInfo members
+PassportInfo : -int serialNumber
+PassportInfo : -String firstName
+PassportInfo : -String lastName
+PassportInfo : -String patronymic
+PassportInfo : -int age
+PassportInfo : +{method} <i>getters</i>
+
 @enduml
+
+
 
 @startuml
 scale 1.5
