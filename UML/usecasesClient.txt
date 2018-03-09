@@ -1,0 +1,45 @@
+@startuml
+scale 1.5
+left to right direction
+skinparam monochrome true
+
+actor Клиент as aClient
+
+usecase "Подать заявку на\nполучение ячейки" as (apply)
+usecase "Положить/изъять ценность" as (putgetPrecious)
+usecase "Манипуляция\nс ценностью" as (manipPrecious)
+usecase "Ввод\nпаспортных данных" as (enterPassportInfo)
+usecase "Выбор\nразмера ячейки" as (chooseCell)
+usecase "Оплата\nаренды ячейки" as (payForCell)
+usecase "Оплата наличными" as (payWithCash)
+usecase "Оплата картой" as (payWithCard)
+usecase "Аутентификация\nклиента" as (authenticateClient)
+usecase "Проверка соответствия\nразмеров" as (sizeCheck)
+usecase "Изъять" as (get)
+usecase "Положить" as (put)
+usecase "Продление аренды" as (keepLease)
+usecase "Прекращение аренды" as (quitLease)
+usecase "Оповещение о скором\nистечении срока аренды" as (notifyLeaseEnding)
+
+
+aClient -- (apply)
+aClient -- (putgetPrecious)
+aClient -- (keepLease)
+aClient -- (quitLease)
+
+(apply) ..> (enterPassportInfo) : <<include>>
+(apply) ..> (chooseCell) : <<include>>
+(apply) ..> (payForCell) : <<include>>
+(payForCell) <|-- (payWithCash)
+(payForCell) <|-- (payWithCard)
+
+(putgetPrecious) ..> (authenticateClient) : <<include>>
+(putgetPrecious) ..> (manipPrecious) : <<include>>
+(manipPrecious) <|-- (get)
+(manipPrecious) <|-- (put)
+(put) .> (sizeCheck) : <<include>>
+
+(keepLease) ..> (notifyLeaseEnding) : <<include>>
+(quitLease) ..> (notifyLeaseEnding) : <<include>>
+
+@enduml

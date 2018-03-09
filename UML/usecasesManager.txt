@@ -1,0 +1,28 @@
+@startuml
+scale 1.5
+left to right direction
+skinparam monochrome true
+
+actor Менеджер as aManager
+
+usecase "Прием заявки на\nполучение ячейки" as (apply)
+usecase "Проверка наличия\nсвободных ячеек\nподходящего размера" as (cellsCheck)
+usecase "Внесение\nв базу клиентов" as (registerClient)
+usecase "Проверка\nпаспортных данных" as (passportCheck)
+usecase "Проверка\nкредитной истории" as (historyCheck)
+usecase "Сделать скидку" as (discount)
+usecase "Прекращение аренды\nячейки клиентом" as (quitLease)
+
+aManager -- (apply)
+aManager -- (quitLease)
+
+(passportCheck) <. (apply) : <<include>>
+(apply) ..> (historyCheck) : <<include>>
+(apply) ..> (cellsCheck) : <<include>>
+
+(historyCheck) <. (discount) : <<extend>>
+note right of (discount) : Если кредитная история хорошая
+(apply) <.. (registerClient) : <<extend>>
+note right of (registerClient) : Если клиент еще не записан в базе
+
+@enduml

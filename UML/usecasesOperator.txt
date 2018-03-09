@@ -1,0 +1,22 @@
+@startuml
+scale 1.5
+left to right direction
+skinparam monochrome true
+
+actor "Оператор\nхранилища" as aOperator
+
+usecase "Обслуживание\nклиента" as (serve)
+usecase "Манипуляция\nс ячейкой" as (manipCell)
+usecase "Авторизация\nклиента" as (authorizeClient)
+usecase "Уведомление\nменеджера" as (notifyManager)
+usecase "Открыть" as (open)
+usecase "Закрыть" as (close)
+
+aOperator -- (serve)
+(serve) ..> (authorizeClient) : <<include>>
+(serve) ..> (manipCell) : <<include>>
+(serve) ..> (notifyManager) : <<include>>
+(manipCell) <|-d- (open)
+(manipCell) <|-d- (close)
+
+@enduml
