@@ -1,5 +1,7 @@
 package kspt.bank.domain;
 
+import kspt.bank.domain.entities.PassportInfo;
+
 public class ClientPassportValidator {
     private static final int DIGITS_COUNT_IN_SERIAL = 10;
 

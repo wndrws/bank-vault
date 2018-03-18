@@ -1,4 +1,4 @@
-package kspt.bank.domain;
+package kspt.bank.domain.entities;
 
 import lombok.Value;
 
