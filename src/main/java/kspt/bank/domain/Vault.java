@@ -7,16 +7,15 @@ import lombok.Synchronized;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public final class Vault {
-    private final static int NUMBER_OF_SMALL_CELLS = 20;
+    final static int NUMBER_OF_SMALL_CELLS = 20;
 
-    private final static int NUMBER_OF_MEDIUM_CELLS = 10;
+    final static int NUMBER_OF_MEDIUM_CELLS = 10;
 
-    private final static int NUMBER_OF_BIG_CELLS = 5;
+    final static int NUMBER_OF_BIG_CELLS = 5;
 
     private static int cellCounter = 0;
 
@@ -54,17 +53,17 @@ public final class Vault {
     }
 
     @Synchronized
-    public Optional<Cell> requestCell(final CellSize size) {
+    public Cell requestCell(final CellSize size) {
         final List<Cell> cellsOfRequestedSize = cells.getOrDefault(size, new ArrayList<>());
         if (cellsOfRequestedSize.size() > 0) {
             return findNotLeasedCell(cellsOfRequestedSize);
         } else {
-            return Optional.empty();
+            return null;
         }
     }
 
-    private static Optional<Cell> findNotLeasedCell(List<Cell> cellsOfRequestedSize) {
-        return cellsOfRequestedSize.stream().filter(Cell::isNotLeased).findAny();
+    private static Cell findNotLeasedCell(List<Cell> cellsOfRequestedSize) {
+        return cellsOfRequestedSize.stream().filter(Cell::isNotLeased).findAny().orElse(null);
     }
 
     int getNumberOfAvailableCells(final CellSize size) {

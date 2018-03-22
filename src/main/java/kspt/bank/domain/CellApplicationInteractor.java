@@ -13,6 +13,7 @@ public class CellApplicationInteractor {
     }
 
     public Optional<Cell> requestCellOfSize(final CellSize size) {
-        return Vault.getInstance().requestCell(size);
+        final Cell cell = Vault.getInstance().requestCell(size);
+        return cell != null ? Optional.of(cell) : Optional.empty();
     }
 }
