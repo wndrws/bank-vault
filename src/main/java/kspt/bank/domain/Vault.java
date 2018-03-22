@@ -43,13 +43,10 @@ public final class Vault {
     }
 
     static private List<Cell> createCellsOfSize(final int numberOfCells, final CellSize cellSize) {
-        try {
-            return IntStream.range(cellCounter, cellCounter + numberOfCells)
-                    .mapToObj(id -> new Cell(id, cellSize))
-                    .collect(Collectors.toList());
-        } finally {
-            cellCounter += numberOfCells;
-        }
+        return IntStream.range(cellCounter, cellCounter + numberOfCells)
+                .peek(__ -> cellCounter++) // dirty stream =P
+                .mapToObj(id -> new Cell(id, cellSize))
+                .collect(Collectors.toList());
     }
 
     @Synchronized
