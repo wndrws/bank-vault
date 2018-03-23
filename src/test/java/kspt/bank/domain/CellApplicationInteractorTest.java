@@ -1,25 +1,52 @@
 package kspt.bank.domain;
 
+import kspt.bank.boundaries.ClientsBase;
 import kspt.bank.domain.ClientPassportValidator.IncorrectPassportInfo;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.CellSize;
-import kspt.bank.domain.entities.Client;
 import kspt.bank.domain.entities.PassportInfo;
+import kspt.bank.domain.entities.PaymentMethod;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
 
 @SuppressWarnings("ConstantConditions")
 class CellApplicationInteractorTest {
-    private final CellApplicationInteractor interactor = new CellApplicationInteractor();
+    private final ClientsBase clientsBase = mock(ClientsBase.class);
+
+    private final CellApplicationInteractor interactor = new CellApplicationInteractor(clientsBase);
 
     @Test
-    void testAcceptClientInfo_Correct() {
-        interactor.acceptClientInfo(getSomeCorrectPassportInfo());
+    void testAcceptClientInfo_NewClient() {
+        // given
+        final PassportInfo passportInfo = getSomeCorrectPassportInfo();
+        when(clientsBase.containsClientWith(passportInfo)).thenReturn(false);
+        // when
+        interactor.acceptClientInfo(passportInfo);
+        // then
+        verify(clientsBase).addClientWith(passportInfo);
+    }
+
+    @Test
+    void testAcceptClientInfo_ExistingClient() {
+        // given
+        final PassportInfo passportInfo = getSomeCorrectPassportInfo();
+        when(clientsBase.containsClientWith(passportInfo)).thenReturn(true);
+        // when
+        interactor.acceptClientInfo(passportInfo);
+        // then
+        verify(clientsBase, never()).addClientWith(passportInfo);
     }
 
     static PassportInfo getSomeCorrectPassportInfo() {
@@ -48,15 +75,37 @@ class CellApplicationInteractorTest {
         assertThrows(IncorrectPassportInfo.class, () -> interactor.acceptClientInfo(userInfo));
     }
 
-    @Test
-    void testRequestCellOfSize() {
+    @ParameterizedTest
+    @ArgumentsSource(CellSizesWithTotalsProvider.class)
+    void testRequestCellOfSize(CellSize size, int totalCellsOfThatSize) {
         // given
-        final int cellsCount = Vault.getInstance().getNumberOfAvailableCells(CellSize.MEDIUM);
+        Assumptions.assumeTrue(totalCellsOfThatSize > 0);
         // when
-        final Optional<Cell> optionalCell = interactor.requestCellOfSize(CellSize.MEDIUM);
-        optionalCell.get().setLeaseholder(new Client(1, getSomeCorrectPassportInfo()));
-        final int availableCellsCount = Vault.getInstance().getNumberOfAvailableCells(CellSize.MEDIUM);
+        final Optional<Cell> optionalCell = interactor.requestCellOfSize(size);
         // then
-        assertThat(availableCellsCount).isEqualTo(cellsCount - 1);
+        assertTrue(optionalCell.isPresent());
     }
+
+    @ParameterizedTest
+    @EnumSource(PaymentMethod.class)
+    void testAcceptPayment_PositiveSum(PaymentMethod paymentMethod) {
+        final long sum = new Random().longs(1L, Long.MAX_VALUE).findFirst().getAsLong();
+        interactor.acceptPayment(sum, paymentMethod);
+    }
+
+    @ParameterizedTest
+    @EnumSource(PaymentMethod.class)
+    void testAcceptPayment_ZeroSum(PaymentMethod paymentMethod) {
+        final long sum = 0;
+        assertThrows(IllegalArgumentException.class, () -> interactor.acceptPayment(sum, paymentMethod));
+    }
+
+    @ParameterizedTest
+    @EnumSource(PaymentMethod.class)
+    void testAcceptPayment_NegativeSum(PaymentMethod paymentMethod) {
+        final long sum = new Random().longs(Long.MIN_VALUE, -1L).findFirst().getAsLong();
+        assertThrows(IllegalArgumentException.class, () -> interactor.acceptPayment(sum, paymentMethod));
+    }
+
+
 }

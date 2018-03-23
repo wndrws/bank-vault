@@ -3,16 +3,15 @@ package kspt.bank.domain;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.CellSize;
 import kspt.bank.domain.entities.Client;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.reflect.Field;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static kspt.bank.domain.CellApplicationInteractorTest.getSomeCorrectPassportInfo;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,7 +28,7 @@ class VaultTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideCellSizesWithTheirTotals")
+    @ArgumentsSource(CellSizesWithTotalsProvider.class)
     void testRequestCellOfSize_ShouldReturnNull(CellSize size, int totalCellsOfThatSize) {
         // given
         leaseCells(size, totalCellsOfThatSize);
@@ -67,19 +66,32 @@ class VaultTest {
         assertThat(cell1).isNotEqualTo(cell2);
     }
 
+    @ParameterizedTest
+    @ArgumentsSource(CellSizesWithTotalsProvider.class)
+    void testGetNumberOfAvailableCells_NoLeased(CellSize size, int totalCellsOfThatSize) {
+        // when
+        final int cellsNumber = Vault.getInstance().getNumberOfAvailableCells(size);
+        // then
+        assertThat(cellsNumber).isEqualTo(totalCellsOfThatSize);
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(CellSizesWithTotalsProvider.class)
+    void testGetNumberOfAvailableCells_SomeLeased(CellSize size, int totalCellsOfThatSize) {
+        // given
+        Assumptions.assumeTrue(totalCellsOfThatSize > 0);
+        leaseCells(size, 1);
+        // when
+        final int cellsNumber = Vault.getInstance().getNumberOfAvailableCells(size);
+        // then
+        assertThat(cellsNumber).isEqualTo(totalCellsOfThatSize - 1);
+    }
+
     @BeforeEach
     void resetSingleton()
     throws Exception {
         Field instance = Vault.class.getDeclaredField("instance");
         instance.setAccessible(true);
         instance.set(null, null);
-    }
-
-    private static Stream<Arguments> provideCellSizesWithTheirTotals() {
-        return Stream.of(
-                Arguments.of(CellSize.SMALL, Vault.NUMBER_OF_SMALL_CELLS),
-                Arguments.of(CellSize.MEDIUM, Vault.NUMBER_OF_MEDIUM_CELLS),
-                Arguments.of(CellSize.BIG, Vault.NUMBER_OF_BIG_CELLS)
-        );
     }
 }
