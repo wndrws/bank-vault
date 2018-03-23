@@ -8,5 +8,7 @@ public class Client {
 
     PassportInfo passportInfo;
 
-    // CreditHistory creditHistory;
+    String phone;
+
+    String email;
 }

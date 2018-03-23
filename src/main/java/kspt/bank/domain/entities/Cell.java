@@ -12,6 +12,8 @@ public class Cell {
 
     private Client leaseholder;
 
+    //TODO state related to payment?
+
     public boolean isEmpty() {
         return containedPrecious == null;
     }

@@ -41,7 +41,7 @@ class VaultTest {
     private void leaseCells(CellSize size, int numberOfCells) {
         IntStream.range(0, numberOfCells).forEach(i ->
                 Vault.getInstance().requestCell(size)
-                        .setLeaseholder(new Client(i, getSomeCorrectPassportInfo()))
+                        .setLeaseholder(new Client(i, getSomeCorrectPassportInfo(), "", ""))
         );
     }
 
@@ -59,7 +59,7 @@ class VaultTest {
     void testRequestCellOfSize_ShouldReturnTwoDifferentCells() {
         // given
         final Cell cell1 = Vault.getInstance().requestCell(CellSize.MEDIUM);
-        cell1.setLeaseholder(new Client(1, getSomeCorrectPassportInfo()));
+        cell1.setLeaseholder(new Client(1, getSomeCorrectPassportInfo(), "",""));
         // when
         final Cell cell2 = Vault.getInstance().requestCell(CellSize.MEDIUM);
         // then
