@@ -11,9 +11,11 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.reflect.Field;
+import java.time.Period;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 @SuppressWarnings("ConstantConditions")
 class VaultTest {
@@ -38,10 +40,12 @@ class VaultTest {
     }
 
     private void leaseCells(CellSize size, int numberOfCells) {
-        IntStream.range(0, numberOfCells).forEach(i ->
-                Vault.getInstance().requestCell(size)
-                        .setLeaseholder(new Client(i, PassportInfoGenerator.getCorrect(), "", ""))
-        );
+        IntStream.range(0, numberOfCells).forEach(__ ->
+                startLeasingForSomeClient(Vault.getInstance().requestCell(size)));
+    }
+
+    private static void startLeasingForSomeClient(final Cell cell) {
+        Vault.getInstance().startLeasing(cell, TestDataGenerator.getSampleClient(), Period.ofMonths(1));
     }
 
     @Test
@@ -58,7 +62,7 @@ class VaultTest {
     void testRequestCellOfSize_ShouldReturnTwoDifferentCells() {
         // given
         final Cell cell1 = Vault.getInstance().requestCell(CellSize.MEDIUM);
-        cell1.setLeaseholder(new Client(1, PassportInfoGenerator.getCorrect(), "",""));
+        startLeasingForSomeClient(cell1);
         // when
         final Cell cell2 = Vault.getInstance().requestCell(CellSize.MEDIUM);
         // then

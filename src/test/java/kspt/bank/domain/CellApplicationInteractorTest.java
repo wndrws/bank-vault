@@ -33,7 +33,7 @@ class CellApplicationInteractorTest {
     @Test
     void testAcceptClientInfo_NewClient() {
         // given
-        final PassportInfo passportInfo = PassportInfoGenerator.getCorrect();
+        final PassportInfo passportInfo = TestDataGenerator.getCorrectPassportInfo();
         when(clientsRepository.containsClientWith(passportInfo)).thenReturn(false);
         // when
         interactor.acceptClientInfo(passportInfo);
@@ -44,7 +44,7 @@ class CellApplicationInteractorTest {
     @Test
     void testAcceptClientInfo_ExistingClient() {
         // given
-        final PassportInfo passportInfo = PassportInfoGenerator.getCorrect();
+        final PassportInfo passportInfo = TestDataGenerator.getCorrectPassportInfo();
         when(clientsRepository.containsClientWith(passportInfo)).thenReturn(true);
         // when
         interactor.acceptClientInfo(passportInfo);
@@ -54,19 +54,19 @@ class CellApplicationInteractorTest {
 
     @Test
     void testAcceptClientInfo_IncorrectSerial() {
-        final PassportInfo userInfo = PassportInfoGenerator.getWithIncorrectSerial();
+        final PassportInfo userInfo = TestDataGenerator.getPassportInfoWithIncorrectSerial();
         assertThrows(IncorrectPassportInfo.class, () -> interactor.acceptClientInfo(userInfo));
     }
 
     @Test
     void testAcceptClientInfo_IncorrectFirstName() {
-        final PassportInfo userInfo = PassportInfoGenerator.getWithIncorrectFirstName();
+        final PassportInfo userInfo = TestDataGenerator.getPassportInfoWithIncorrectFirstName();
         assertThrows(IncorrectPassportInfo.class, () -> interactor.acceptClientInfo(userInfo));
     }
 
     @Test
     void testAcceptClientInfo_IncorrectLastName() {
-        final PassportInfo userInfo = PassportInfoGenerator.getWithIncorrectLastName();
+        final PassportInfo userInfo = TestDataGenerator.getPassportInfoWithIncorrectLastName();
         assertThrows(IncorrectPassportInfo.class, () -> interactor.acceptClientInfo(userInfo));
     }
 

@@ -2,11 +2,14 @@ package kspt.bank.domain;
 
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.CellSize;
+import kspt.bank.domain.entities.Client;
+import lombok.AllArgsConstructor;
 import lombok.Synchronized;
+import lombok.Value;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -22,6 +25,8 @@ public final class Vault {
     private static volatile Vault instance = null;
 
     private final EnumMap<CellSize, List<Cell>> cells;
+
+    private final Map<Cell, CellLeaseRecord> leasingInfo = new HashMap<>();
 
     public static Vault getInstance() {
         // Thread-safe lazy singleton implementation
@@ -59,12 +64,40 @@ public final class Vault {
         }
     }
 
-    private static Cell findNotLeasedCell(List<Cell> cellsOfRequestedSize) {
-        return cellsOfRequestedSize.stream().filter(Cell::isNotLeased).findAny().orElse(null);
+    private Cell findNotLeasedCell(List<Cell> cellsOfRequestedSize) {
+        return cellsOfRequestedSize.stream().filter(this::isNotLeased).findAny().orElse(null);
     }
 
     int getNumberOfAvailableCells(final CellSize size) {
         final List<Cell> cellsOfRequestedSize = cells.getOrDefault(size, new ArrayList<>());
-        return (int) cellsOfRequestedSize.stream().filter(Cell::isNotLeased).count();
+        return (int) cellsOfRequestedSize.stream().filter(this::isNotLeased).count();
+    }
+
+    public void startLeasing(final Cell cell, final Client leaseholder, final Period period) {
+        final LocalDate today = LocalDate.now();
+        leasingInfo.put(cell, new CellLeaseRecord(leaseholder, today, today.plus(period), true));
+    }
+
+    public void endLeasing(final Cell cell) {
+        leasingInfo.remove(cell);
+    }
+
+    public boolean isLeased(final Cell cell) {
+        return leasingInfo.containsKey(cell);
+    }
+
+    public boolean isNotLeased(final Cell cell) {
+        return !isLeased(cell);
+    }
+
+    @Value
+    private static class CellLeaseRecord {
+        private final Client leaseholder;
+
+        private final LocalDate leaseBegin;
+
+        private final LocalDate leaseEnd;
+
+        private final boolean paid;
     }
 }

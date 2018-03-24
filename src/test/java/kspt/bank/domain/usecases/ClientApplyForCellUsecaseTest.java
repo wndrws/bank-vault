@@ -5,13 +5,15 @@ import kspt.bank.boundaries.PaymentGate;
 import kspt.bank.boundaries.ResponseGate;
 import kspt.bank.domain.BankVaultFacade;
 import kspt.bank.domain.CellApplicationInteractor;
-import kspt.bank.domain.PassportInfoGenerator;
+import kspt.bank.domain.TestDataGenerator;
 import kspt.bank.domain.Vault;
 import kspt.bank.domain.entities.*;
 import kspt.bank.messaging.RequestWithCellChoice;
 import kspt.bank.messaging.RequestWithClientInfo;
 import kspt.bank.messaging.RequestWithPayment;
 import org.junit.jupiter.api.Test;
+
+import java.time.Period;
 
 import static org.mockito.Mockito.*;
 
@@ -27,7 +29,7 @@ class ClientApplyForCellUsecaseTest {
 
     @Test
     void testNormal_NewClient() {
-        final PassportInfo clientPassportInfo = PassportInfoGenerator.getCorrect();
+        final PassportInfo clientPassportInfo = TestDataGenerator.getCorrectPassportInfo();
         when(clientsRepository.containsClientWith(clientPassportInfo)).thenReturn(false);
         // 1. Клиент обращается к системе для получения банковской ячейки.
         testNormal(clientPassportInfo);
@@ -37,7 +39,7 @@ class ClientApplyForCellUsecaseTest {
 
     @Test
     void testNormal_ExistingClient() {
-        final PassportInfo clientPassportInfo = PassportInfoGenerator.getCorrect();
+        final PassportInfo clientPassportInfo = TestDataGenerator.getCorrectPassportInfo();
         when(clientsRepository.containsClientWith(clientPassportInfo)).thenReturn(true);
         // 1. Клиент обращается к системе для получения банковской ячейки.
         testNormal(clientPassportInfo);
@@ -67,7 +69,7 @@ class ClientApplyForCellUsecaseTest {
     @Test
     void testAlternative_IncorrectPassportInfo() {
         // Альтернатива: Некорректные паспортные данные
-        final PassportInfo clientPassportInfo = PassportInfoGenerator.getWithIncorrectSerial();
+        final PassportInfo clientPassportInfo = TestDataGenerator.getPassportInfoWithIncorrectSerial();
         // 2. Клиент предоставляет свои паспортные данные.
         final RequestWithClientInfo requestWithClientInfo =
                 new RequestWithClientInfo(clientPassportInfo);
@@ -89,7 +91,7 @@ class ClientApplyForCellUsecaseTest {
     private void leaseAllCellsOfSize(final CellSize size) {
         Cell cell = Vault.getInstance().requestCell(size);
         while (cell != null) {
-            cell.setLeaseholder(new Client(123, PassportInfoGenerator.getCorrect(), "", ""));
+            Vault.getInstance().startLeasing(cell, TestDataGenerator.getSampleClient(), Period.ofMonths(1));
             cell = Vault.getInstance().requestCell(size);
         }
     }

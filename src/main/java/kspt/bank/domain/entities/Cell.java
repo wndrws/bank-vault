@@ -10,8 +10,6 @@ public class Cell {
 
     private Precious containedPrecious;
 
-    private Client leaseholder;
-
     //TODO state related to payment?
 
     public boolean isEmpty() {
@@ -20,9 +18,5 @@ public class Cell {
 
     public void removeContainedPrecious() {
         containedPrecious = null;
-    }
-
-    public boolean isNotLeased() {
-        return leaseholder == null;
     }
 }
