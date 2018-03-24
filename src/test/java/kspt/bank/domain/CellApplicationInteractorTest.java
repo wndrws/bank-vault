@@ -1,6 +1,7 @@
 package kspt.bank.domain;
 
 import kspt.bank.boundaries.ClientsRepository;
+import kspt.bank.boundaries.PaymentGate;
 import kspt.bank.domain.ClientPassportValidator.IncorrectPassportInfo;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.CellSize;
@@ -24,7 +25,10 @@ import static org.mockito.Mockito.*;
 class CellApplicationInteractorTest {
     private final ClientsRepository clientsRepository = mock(ClientsRepository.class);
 
-    private final CellApplicationInteractor interactor = new CellApplicationInteractor(clientsRepository);
+    private final PaymentGate paymentGate = mock(PaymentGate.class);
+
+    private final CellApplicationInteractor interactor =
+            new CellApplicationInteractor(clientsRepository, paymentGate);
 
     @Test
     void testAcceptClientInfo_NewClient() {
@@ -97,6 +101,4 @@ class CellApplicationInteractorTest {
         final long sum = new Random().longs(Long.MIN_VALUE, -1L).findFirst().getAsLong();
         assertThrows(IllegalArgumentException.class, () -> interactor.acceptPayment(sum, paymentMethod));
     }
-
-
 }

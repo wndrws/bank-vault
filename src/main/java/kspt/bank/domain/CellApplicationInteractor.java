@@ -2,6 +2,7 @@ package kspt.bank.domain;
 
 import com.google.common.base.Preconditions;
 import kspt.bank.boundaries.ClientsRepository;
+import kspt.bank.boundaries.PaymentGate;
 import kspt.bank.domain.entities.*;
 import lombok.AllArgsConstructor;
 
@@ -11,8 +12,9 @@ import static kspt.bank.domain.PriceCalculator.*;
 
 @AllArgsConstructor
 public class CellApplicationInteractor {
-
     private final ClientsRepository clientsRepository;
+
+    private final PaymentGate paymentGate;
 
     public void acceptClientInfo(final PassportInfo clientInfo)
     throws ClientPassportValidator.IncorrectPassportInfo {
@@ -29,6 +31,7 @@ public class CellApplicationInteractor {
 
     public void acceptPayment(final long sum, final PaymentMethod paymentMethod) {
         Preconditions.checkArgument(sum > 0, "Payment must be positive");
+        paymentGate.acceptPayment(sum, paymentMethod);
     }
 
     long calculatePayment(final Cell cell) {
