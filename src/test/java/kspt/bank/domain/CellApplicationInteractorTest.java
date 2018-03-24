@@ -1,6 +1,6 @@
 package kspt.bank.domain;
 
-import kspt.bank.boundaries.ClientsBase;
+import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.domain.ClientPassportValidator.IncorrectPassportInfo;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.CellSize;
@@ -23,30 +23,30 @@ import static org.mockito.Mockito.*;
 
 @SuppressWarnings("ConstantConditions")
 class CellApplicationInteractorTest {
-    private final ClientsBase clientsBase = mock(ClientsBase.class);
+    private final ClientsRepository clientsRepository = mock(ClientsRepository.class);
 
-    private final CellApplicationInteractor interactor = new CellApplicationInteractor(clientsBase);
+    private final CellApplicationInteractor interactor = new CellApplicationInteractor(clientsRepository);
 
     @Test
     void testAcceptClientInfo_NewClient() {
         // given
         final PassportInfo passportInfo = getSomeCorrectPassportInfo();
-        when(clientsBase.containsClientWith(passportInfo)).thenReturn(false);
+        when(clientsRepository.containsClientWith(passportInfo)).thenReturn(false);
         // when
         interactor.acceptClientInfo(passportInfo);
         // then
-        verify(clientsBase).addClientWith(passportInfo);
+        verify(clientsRepository).addClientWith(passportInfo);
     }
 
     @Test
     void testAcceptClientInfo_ExistingClient() {
         // given
         final PassportInfo passportInfo = getSomeCorrectPassportInfo();
-        when(clientsBase.containsClientWith(passportInfo)).thenReturn(true);
+        when(clientsRepository.containsClientWith(passportInfo)).thenReturn(true);
         // when
         interactor.acceptClientInfo(passportInfo);
         // then
-        verify(clientsBase, never()).addClientWith(passportInfo);
+        verify(clientsRepository, never()).addClientWith(passportInfo);
     }
 
     static PassportInfo getSomeCorrectPassportInfo() {

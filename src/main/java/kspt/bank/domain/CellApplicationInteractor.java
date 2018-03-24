@@ -1,7 +1,7 @@
 package kspt.bank.domain;
 
 import com.google.common.base.Preconditions;
-import kspt.bank.boundaries.ClientsBase;
+import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.domain.entities.*;
 import lombok.AllArgsConstructor;
 
@@ -12,12 +12,12 @@ import static kspt.bank.domain.PriceCalculator.*;
 @AllArgsConstructor
 public class CellApplicationInteractor {
 
-    private final ClientsBase clientsBase;
+    private final ClientsRepository clientsRepository;
 
     public void acceptClientInfo(final PassportInfo clientInfo) {
         ClientPassportValidator.checkValidity(clientInfo);
-        if (!clientsBase.containsClientWith(clientInfo)) {
-            clientsBase.addClientWith(clientInfo);
+        if (!clientsRepository.containsClientWith(clientInfo)) {
+            clientsRepository.addClientWith(clientInfo);
         }
     }
 
