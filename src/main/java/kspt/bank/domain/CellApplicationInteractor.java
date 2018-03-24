@@ -14,7 +14,8 @@ public class CellApplicationInteractor {
 
     private final ClientsRepository clientsRepository;
 
-    public void acceptClientInfo(final PassportInfo clientInfo) {
+    public void acceptClientInfo(final PassportInfo clientInfo)
+    throws ClientPassportValidator.IncorrectPassportInfo {
         ClientPassportValidator.checkValidity(clientInfo);
         if (!clientsRepository.containsClientWith(clientInfo)) {
             clientsRepository.addClientWith(clientInfo);

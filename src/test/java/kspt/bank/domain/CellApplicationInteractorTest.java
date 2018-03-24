@@ -12,7 +12,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Random;
 
@@ -30,7 +29,7 @@ class CellApplicationInteractorTest {
     @Test
     void testAcceptClientInfo_NewClient() {
         // given
-        final PassportInfo passportInfo = getSomeCorrectPassportInfo();
+        final PassportInfo passportInfo = PassportInfoGenerator.getCorrect();
         when(clientsRepository.containsClientWith(passportInfo)).thenReturn(false);
         // when
         interactor.acceptClientInfo(passportInfo);
@@ -41,7 +40,7 @@ class CellApplicationInteractorTest {
     @Test
     void testAcceptClientInfo_ExistingClient() {
         // given
-        final PassportInfo passportInfo = getSomeCorrectPassportInfo();
+        final PassportInfo passportInfo = PassportInfoGenerator.getCorrect();
         when(clientsRepository.containsClientWith(passportInfo)).thenReturn(true);
         // when
         interactor.acceptClientInfo(passportInfo);
@@ -49,29 +48,21 @@ class CellApplicationInteractorTest {
         verify(clientsRepository, never()).addClientWith(passportInfo);
     }
 
-    static PassportInfo getSomeCorrectPassportInfo() {
-        return new PassportInfo("0409756123", "John", "Wick",
-                "", LocalDate.of(1980, 1, 1));
-    }
-
     @Test
     void testAcceptClientInfo_IncorrectSerial() {
-        final PassportInfo userInfo = new PassportInfo("123","John", "Wick",
-                "", LocalDate.of(1980, 1, 1));
+        final PassportInfo userInfo = PassportInfoGenerator.getWithIncorrectSerial();
         assertThrows(IncorrectPassportInfo.class, () -> interactor.acceptClientInfo(userInfo));
     }
 
     @Test
     void testAcceptClientInfo_IncorrectFirstName() {
-        final PassportInfo userInfo = new PassportInfo("0409756123","", "Wick",
-                "", LocalDate.of(1980, 1, 1));
+        final PassportInfo userInfo = PassportInfoGenerator.getWithIncorrectFirstName();
         assertThrows(IncorrectPassportInfo.class, () -> interactor.acceptClientInfo(userInfo));
     }
 
     @Test
     void testAcceptClientInfo_IncorrectLastName() {
-        final PassportInfo userInfo = new PassportInfo("0409756123","John", "",
-                "", LocalDate.of(1980, 1, 1));
+        final PassportInfo userInfo = PassportInfoGenerator.getWithIncorrectLastName();
         assertThrows(IncorrectPassportInfo.class, () -> interactor.acceptClientInfo(userInfo));
     }
 

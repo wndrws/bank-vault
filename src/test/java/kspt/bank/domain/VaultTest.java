@@ -13,7 +13,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.lang.reflect.Field;
 import java.util.stream.IntStream;
 
-import static kspt.bank.domain.CellApplicationInteractorTest.getSomeCorrectPassportInfo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("ConstantConditions")
@@ -41,7 +40,7 @@ class VaultTest {
     private void leaseCells(CellSize size, int numberOfCells) {
         IntStream.range(0, numberOfCells).forEach(i ->
                 Vault.getInstance().requestCell(size)
-                        .setLeaseholder(new Client(i, getSomeCorrectPassportInfo(), "", ""))
+                        .setLeaseholder(new Client(i, PassportInfoGenerator.getCorrect(), "", ""))
         );
     }
 
@@ -59,7 +58,7 @@ class VaultTest {
     void testRequestCellOfSize_ShouldReturnTwoDifferentCells() {
         // given
         final Cell cell1 = Vault.getInstance().requestCell(CellSize.MEDIUM);
-        cell1.setLeaseholder(new Client(1, getSomeCorrectPassportInfo(), "",""));
+        cell1.setLeaseholder(new Client(1, PassportInfoGenerator.getCorrect(), "",""));
         // when
         final Cell cell2 = Vault.getInstance().requestCell(CellSize.MEDIUM);
         // then
