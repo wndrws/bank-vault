@@ -1,10 +1,13 @@
 package kspt.bank.domain;
 
+import kspt.bank.domain.entities.CellApplication;
+import kspt.bank.domain.entities.CellApplicationStatus;
 import kspt.bank.domain.entities.Client;
 import kspt.bank.domain.entities.PassportInfo;
 import lombok.experimental.UtilityClass;
 
 import java.time.LocalDate;
+import java.time.Period;
 
 @UtilityClass
 public class TestDataGenerator {
@@ -29,6 +32,19 @@ public class TestDataGenerator {
     }
 
     public Client getSampleClient() {
-        return new Client(1, getCorrectPassportInfo(), "", "");
+        return new Client(getCorrectPassportInfo(), "", "");
+    }
+
+    public CellApplication getSampleCellApplication() {
+        return new CellApplication(getSampleClient());
+    }
+
+    public CellApplication getCellApplication(final CellApplicationStatus status) {
+        final CellApplication application = new CellApplication(getSampleClient());
+        application.setCell(Vault.getInstance().requestAnyCell());
+        application.setLeasePeriod(Period.ofMonths(1));
+        application.setLeaseCost(0L);
+        application.setStatus(status);
+        return application;
     }
 }

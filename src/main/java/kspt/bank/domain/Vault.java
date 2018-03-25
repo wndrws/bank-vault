@@ -1,17 +1,21 @@
 package kspt.bank.domain;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.CellSize;
 import kspt.bank.domain.entities.Client;
-import lombok.AllArgsConstructor;
 import lombok.Synchronized;
 import lombok.Value;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public final class Vault {
     final static int NUMBER_OF_SMALL_CELLS = 20;
@@ -20,6 +24,8 @@ public final class Vault {
 
     final static int NUMBER_OF_BIG_CELLS = 5;
 
+    final static Duration DEFAULT_PENDING_DURATION = Duration.ofMinutes(5);
+
     private static int cellCounter = 0;
 
     private static volatile Vault instance = null;
@@ -27,6 +33,11 @@ public final class Vault {
     private final EnumMap<CellSize, List<Cell>> cells;
 
     private final Map<Cell, CellLeaseRecord> leasingInfo = new HashMap<>();
+
+    private final Set<Cell> pendingCells = Collections.synchronizedSet(new HashSet<>());
+
+    private final ExecutorService pendingKeepersPool = Executors.newCachedThreadPool(
+            new ThreadFactoryBuilder().setNameFormat("vault-pendingKeepersPool-%d").build());
 
     public static Vault getInstance() {
         // Thread-safe lazy singleton implementation
@@ -64,18 +75,22 @@ public final class Vault {
         }
     }
 
+    Cell requestAnyCell() {
+        return Stream.of(CellSize.values()).map(this::requestCell).findFirst().orElse(null);
+    }
+
     private Cell findNotLeasedCell(List<Cell> cellsOfRequestedSize) {
-        return cellsOfRequestedSize.stream().filter(this::isNotLeased).findAny().orElse(null);
+        return cellsOfRequestedSize.stream().filter(this::isAvailable).findAny().orElse(null);
     }
 
     int getNumberOfAvailableCells(final CellSize size) {
         final List<Cell> cellsOfRequestedSize = cells.getOrDefault(size, new ArrayList<>());
-        return (int) cellsOfRequestedSize.stream().filter(this::isNotLeased).count();
+        return (int) cellsOfRequestedSize.stream().filter(this::isAvailable).count();
     }
 
     public void startLeasing(final Cell cell, final Client leaseholder, final Period period) {
         final LocalDate today = LocalDate.now();
-        leasingInfo.put(cell, new CellLeaseRecord(leaseholder, today, today.plus(period), true));
+        leasingInfo.put(cell, new CellLeaseRecord(leaseholder, today, today.plus(period)));
     }
 
     public void endLeasing(final Cell cell) {
@@ -86,8 +101,20 @@ public final class Vault {
         return leasingInfo.containsKey(cell);
     }
 
-    public boolean isNotLeased(final Cell cell) {
-        return !isLeased(cell);
+    public boolean isAvailable(final Cell cell) {
+        return !isLeased(cell) && !pendingCells.contains(cell);
+    }
+
+    public void pend(final Cell cell, final Duration duration) {
+        pendingCells.add(cell);
+        pendingKeepersPool.submit(() -> {
+            try {
+                Thread.sleep(duration.toMillis());
+                pendingCells.remove(cell);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Value
@@ -97,7 +124,5 @@ public final class Vault {
         private final LocalDate leaseBegin;
 
         private final LocalDate leaseEnd;
-
-        private final boolean paid;
     }
 }

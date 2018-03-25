@@ -2,13 +2,10 @@ package kspt.bank.domain;
 
 import kspt.bank.boundaries.RequestGate;
 import kspt.bank.boundaries.ResponseGate;
-import kspt.bank.domain.entities.Cell;
 import kspt.bank.messaging.RequestWithCellChoice;
 import kspt.bank.messaging.RequestWithClientInfo;
 import kspt.bank.messaging.RequestWithPayment;
 import lombok.RequiredArgsConstructor;
-
-import java.util.Optional;
 
 @RequiredArgsConstructor
 public class BankVaultFacade implements RequestGate {
@@ -19,7 +16,7 @@ public class BankVaultFacade implements RequestGate {
     @Override
     public void acceptClientInfo(RequestWithClientInfo request) {
         try {
-            caInteractor.acceptClientInfo(request.passportInfo);
+            caInteractor.createApplication(request.passportInfo, "", ""); // TODO
             responseGate.notifyAsCompleted(request);
         } catch (Throwable e) {
             responseGate.notifyAsFailed(request, e.getMessage());
@@ -29,8 +26,9 @@ public class BankVaultFacade implements RequestGate {
     @Override
     public void acceptCellChoice(RequestWithCellChoice request) {
         try {
-            final Optional<Cell> optionalCell = caInteractor.requestCellOfSize(request.cellSize);
-            if (optionalCell.isPresent()) {
+            final boolean success = false;
+            // TODO caInteractor.requestCell(request.cellSize, null, null);
+            if (success) {
                 responseGate.notifyAsCompleted(request);
             } else {
                 responseGate.notifyAsFailed(request,
@@ -44,7 +42,7 @@ public class BankVaultFacade implements RequestGate {
     @Override
     public void acceptPayment(RequestWithPayment request) {
         try {
-            caInteractor.acceptPayment(request.paymentSum, request.paymentMethod);
+            // TODO caInteractor.acceptPayment(request.paymentSum, request.paymentMethod);
             responseGate.notifyAsCompleted(request);
         } catch (Throwable e) {
             responseGate.notifyAsFailed(request, e.getMessage());

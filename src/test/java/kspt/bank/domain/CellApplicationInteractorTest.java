@@ -1,19 +1,17 @@
 package kspt.bank.domain;
 
+import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.boundaries.PaymentGate;
 import kspt.bank.domain.ClientPassportValidator.IncorrectPassportInfo;
-import kspt.bank.domain.entities.Cell;
-import kspt.bank.domain.entities.CellSize;
-import kspt.bank.domain.entities.PassportInfo;
-import kspt.bank.domain.entities.PaymentMethod;
+import kspt.bank.domain.entities.*;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.util.Optional;
+import java.time.Period;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,49 +23,63 @@ import static org.mockito.Mockito.*;
 class CellApplicationInteractorTest {
     private final ClientsRepository clientsRepository = mock(ClientsRepository.class);
 
+    private final ApplicationsRepository applicationsRepository = mock(ApplicationsRepository.class);
+
     private final PaymentGate paymentGate = mock(PaymentGate.class);
 
     private final CellApplicationInteractor interactor =
-            new CellApplicationInteractor(clientsRepository, paymentGate);
+            new CellApplicationInteractor(clientsRepository, applicationsRepository, paymentGate);
 
     @Test
-    void testAcceptClientInfo_NewClient() {
+    void testCreateApplication_NewClient() {
         // given
-        final PassportInfo passportInfo = TestDataGenerator.getCorrectPassportInfo();
-        when(clientsRepository.containsClientWith(passportInfo)).thenReturn(false);
+        final Client client = TestDataGenerator.getSampleClient();
+        when(clientsRepository.containsClientWith(client.getPassportInfo())).thenReturn(false);
         // when
-        interactor.acceptClientInfo(passportInfo);
+        final CellApplication application = interactor.createApplication(
+                client.getPassportInfo(), client.getPhone(), client.getEmail());
         // then
-        verify(clientsRepository).addClientWith(passportInfo);
+        assertThat(application.getLeaseholder()).isEqualToIgnoringGivenFields(client, "id");
+        assertThat(application.getStatus()).isEqualTo(CellApplicationStatus.CREATED);
+        verify(applicationsRepository).add(application);
+        verify(clientsRepository).add(argThat(c -> c.equalsIgnoringId(client)));
     }
 
+
+
     @Test
-    void testAcceptClientInfo_ExistingClient() {
+    void testCreateApplication_ExistingClient() {
         // given
-        final PassportInfo passportInfo = TestDataGenerator.getCorrectPassportInfo();
+        final Client client = TestDataGenerator.getSampleClient();
+        final PassportInfo passportInfo = client.getPassportInfo();
         when(clientsRepository.containsClientWith(passportInfo)).thenReturn(true);
+        when(clientsRepository.getClientWith(passportInfo)).thenReturn(client);
         // when
-        interactor.acceptClientInfo(passportInfo);
+        final CellApplication application = interactor.createApplication(
+                client.getPassportInfo(), client.getPhone(), client.getEmail());
         // then
-        verify(clientsRepository, never()).addClientWith(passportInfo);
+        assertThat(application.getLeaseholder()).isEqualTo(client);
+        assertThat(application.getStatus()).isEqualTo(CellApplicationStatus.CREATED);
+        verify(applicationsRepository).add(application);
+        verify(clientsRepository, never()).add(any());
     }
 
     @Test
-    void testAcceptClientInfo_IncorrectSerial() {
+    void testCreateApplication_IncorrectSerial() {
         final PassportInfo userInfo = TestDataGenerator.getPassportInfoWithIncorrectSerial();
-        assertThrows(IncorrectPassportInfo.class, () -> interactor.acceptClientInfo(userInfo));
+        assertThrows(IncorrectPassportInfo.class, () -> interactor.createApplication(userInfo, "", ""));
     }
 
     @Test
-    void testAcceptClientInfo_IncorrectFirstName() {
+    void testCreateApplication_IncorrectFirstName() {
         final PassportInfo userInfo = TestDataGenerator.getPassportInfoWithIncorrectFirstName();
-        assertThrows(IncorrectPassportInfo.class, () -> interactor.acceptClientInfo(userInfo));
+        assertThrows(IncorrectPassportInfo.class, () -> interactor.createApplication(userInfo, "", ""));
     }
 
     @Test
-    void testAcceptClientInfo_IncorrectLastName() {
+    void testCreateApplication_IncorrectLastName() {
         final PassportInfo userInfo = TestDataGenerator.getPassportInfoWithIncorrectLastName();
-        assertThrows(IncorrectPassportInfo.class, () -> interactor.acceptClientInfo(userInfo));
+        assertThrows(IncorrectPassportInfo.class, () -> interactor.createApplication(userInfo, "", ""));
     }
 
     @ParameterizedTest
@@ -75,30 +87,55 @@ class CellApplicationInteractorTest {
     void testRequestCellOfSize(CellSize size, int totalCellsOfThatSize) {
         // given
         Assumptions.assumeTrue(totalCellsOfThatSize > 0);
+        final Period leasePeriod = Period.ofMonths(1);
+        final CellApplication cellApplication = TestDataGenerator.getSampleCellApplication();
         // when
-        final Optional<Cell> optionalCell = interactor.requestCellOfSize(size);
+        final boolean success = interactor.requestCell(size, leasePeriod, cellApplication);
         // then
-        assertTrue(optionalCell.isPresent());
+        assertThat(success).isTrue();
+        assertThat(cellApplication.getCell()).isNotNull();
+        assertThat(cellApplication.getLeasePeriod()).isEqualTo(leasePeriod);
+        assertThat(cellApplication.getStatus()).isEqualTo(CellApplicationStatus.CELL_CHOSEN);
     }
 
     @ParameterizedTest
     @EnumSource(PaymentMethod.class)
     void testAcceptPayment_PositiveSum(PaymentMethod paymentMethod) {
+        // given
+        final CellApplication cellApplication =
+                TestDataGenerator.getCellApplication(CellApplicationStatus.APPROVED);
         final long sum = new Random().longs(1L, Long.MAX_VALUE).findFirst().getAsLong();
-        interactor.acceptPayment(sum, paymentMethod);
+        cellApplication.setLeaseCost(sum);
+        // when
+        interactor.acceptPayment(sum, paymentMethod, cellApplication);
+        // then
+        assertThat(cellApplication.getStatus()).isEqualTo(CellApplicationStatus.PAID);
+        assertTrue(Vault.getInstance().isLeased(cellApplication.getCell()));
     }
 
     @ParameterizedTest
     @EnumSource(PaymentMethod.class)
     void testAcceptPayment_ZeroSum(PaymentMethod paymentMethod) {
+        // given
+        final CellApplication cellApplication =
+                TestDataGenerator.getCellApplication(CellApplicationStatus.APPROVED);
+        // when
         final long sum = 0;
-        assertThrows(IllegalArgumentException.class, () -> interactor.acceptPayment(sum, paymentMethod));
+        // then
+        assertThrows(IllegalArgumentException.class,
+                () -> interactor.acceptPayment(sum, paymentMethod, cellApplication));
     }
 
     @ParameterizedTest
     @EnumSource(PaymentMethod.class)
     void testAcceptPayment_NegativeSum(PaymentMethod paymentMethod) {
+        // given
+        final CellApplication cellApplication =
+                TestDataGenerator.getCellApplication(CellApplicationStatus.APPROVED);
+        // when
         final long sum = new Random().longs(Long.MIN_VALUE, -1L).findFirst().getAsLong();
-        assertThrows(IllegalArgumentException.class, () -> interactor.acceptPayment(sum, paymentMethod));
+        // then
+        assertThrows(IllegalArgumentException.class,
+                () -> interactor.acceptPayment(sum, paymentMethod, cellApplication));
     }
 }

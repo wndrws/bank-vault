@@ -10,7 +10,7 @@ public class Cell {
 
     private Precious containedPrecious;
 
-    //TODO state related to payment?
+    // Should there be a state related to payment?
 
     public boolean isEmpty() {
         return containedPrecious == null;
