@@ -18,6 +18,7 @@ public class InMemoryApplicationsRepository implements ApplicationsRepository {
                 repository.getOrDefault(application.getLeaseholder().getId(), new HashSet<>());
         Preconditions.checkState(!clientsApplications.contains(application));
         clientsApplications.add(application);
+        repository.put(application.getLeaseholder().getId(), clientsApplications);
     }
 
     @Override

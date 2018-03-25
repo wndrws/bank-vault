@@ -5,6 +5,7 @@ import kspt.bank.domain.entities.CellSize;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
@@ -14,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PriceCalculatorTest {
     @ParameterizedTest
-    @MethodSource("provideLeaseVariants")
+    @ArgumentsSource(LeaseVariantsProvider.class)
     void testGetPriceFor(CellSize size, int numOfMonths) {
         // given
         final long expectedCost =
@@ -23,12 +24,6 @@ class PriceCalculatorTest {
         final long cost = PriceCalculator.getCostOf(new Cell(1, size), numOfMonths);
         // then
         assertThat(cost).isEqualTo(expectedCost);
-    }
-
-    private static Stream<Arguments> provideLeaseVariants() {
-        return Arrays.stream(CellSize.values()).flatMap(size -> Stream.of(
-                Arguments.of(size, 1), Arguments.of(size, 2), Arguments.of(size, 3)
-        ));
     }
 
     @Test
