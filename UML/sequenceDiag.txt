@@ -18,7 +18,7 @@ activate System
 deactivate System
 
 alt паспортныеДанные корректны
-  create participant "Заявка Клиента" as Application order 4
+  create participant ":Заявка Клиента" as Application order 4
   System -> Application : <<создать>>
   System --> Client : подтверждение
 else паспортныеДанные некорректны
