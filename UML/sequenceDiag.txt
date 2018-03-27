@@ -1,0 +1,93 @@
+@startuml
+scale 1.5
+
+skinparam monochrome true
+
+title <size:18>Подать заявку на получение ячейки</size>\n
+
+actor "Клиент" as Client order 1
+participant ":ИС Банка" as System order 2
+participant ":Хранилище" as Vault order 3
+participant ":Платёжная система" as PaymentGait order 5
+
+Client -> System : податьЗаявку\n(паспортныеДанные)
+activate System
+
+System -> System : проверить\n(паспортныеДанные)
+activate System
+deactivate System
+
+alt паспортныеДанные корректны
+  create participant "Заявка Клиента" as Application order 4
+  System -> Application : <<создать>>
+  System --> Client : подтверждение
+else паспортныеДанные некорректны
+  System --> Client : отказ
+end
+
+deactivate System
+
+Client -> System : указатьДеталиАренды\n(размерЯчейки, срок)
+activate System
+System -> Vault : запроситьЯчейку\n(размерЯчейки)
+activate Vault
+
+alt Подходящая ячейка имеется
+  Vault -> Vault : зарезервировать\n(ячейка, время)
+  activate Vault
+  deactivate Vault
+  Vault --> System : ячейка
+  System -> Application : задатьДеталиАренды(размерЯчейки, срок)
+  activate Application
+  deactivate Application
+  System -> Application : установитьСтатус(ЯЧЕЙКА_ВЫБРАНА)
+  activate Application
+  deactivate Application
+  System --> Client : подтверждение
+else Нет свободных ячеек запрошенного размера
+  Vault --> System : отказ
+  deactivate Vault
+  System --> Client : отказ
+  note right of Client
+    Предлагается выбрать
+    другую ячейку
+  end note
+end
+
+...после подтверждения Менеджером...
+note over Application
+Стоимость аренды задана
+Статус = ПОДТВЕРЖДЕНА
+end note
+
+System -> PaymentGait : выставитьСчетНаОплату
+activate PaymentGait
+System -> Application : установитьСтатус(ОЖИДАЕТ_ОПЛАТЫ)
+activate Application
+deactivate Application
+deactivate System
+Client -> PaymentGait : оплатитьСчет
+activate PaymentGait
+alt Оплата прошла успешно
+  PaymentGait -> System : подтвердитьОплату
+  deactivate PaymentGait
+  activate System
+  System -> Application : установитьСтатус(АРЕНДА_ОПЛАЧЕНА)
+  activate Application
+  deactivate Application
+  '''destroy Application'''
+  System -> Vault : подтвердитьАренду(ячейка)
+  activate Vault
+  deactivate Vault
+  System --> Client : подтверждение
+  deactivate System
+else Оплата не прошла
+  PaymentGait --> Client : отказ
+  note right of Client
+    Предлагается
+    повторить оплату
+  end note
+  deactivate PaymentGait
+end
+
+@enduml
