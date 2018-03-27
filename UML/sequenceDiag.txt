@@ -3,7 +3,7 @@ scale 1.5
 
 skinparam monochrome true
 
-title <size:18>Подать заявку на получение ячейки</size>\n
+title <size:18>Подать заявку на получение ячейки</size>
 
 actor "Клиент" as Client order 1
 participant ":ИС Банка" as System order 2
@@ -53,24 +53,21 @@ else Нет свободных ячеек запрошенного размер�
     другую ячейку
   end note
 end
+deactivate System
 
 ...после подтверждения Менеджером...
 note over Application
-Стоимость аренды задана
 Статус = ПОДТВЕРЖДЕНА
+Стоимость аренды задана
+end note
+note over PaymentGait
+Счет на оплату выставлен
 end note
 
-System -> PaymentGait : выставитьСчетНаОплату
-activate PaymentGait
-System -> Application : установитьСтатус(ОЖИДАЕТ_ОПЛАТЫ)
-activate Application
-deactivate Application
-deactivate System
 Client -> PaymentGait : оплатитьСчет
 activate PaymentGait
 alt Оплата прошла успешно
   PaymentGait -> System : подтвердитьОплату
-  deactivate PaymentGait
   activate System
   System -> Application : установитьСтатус(АРЕНДА_ОПЛАЧЕНА)
   activate Application
