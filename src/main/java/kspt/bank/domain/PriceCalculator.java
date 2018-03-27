@@ -6,7 +6,7 @@ import kspt.bank.domain.entities.Cell;
 public class PriceCalculator {
     final static long PRICE_OF_VOLUME_UNIT_PER_MONTH = 50L;
 
-    static long getCostOf(final Cell cell, final int numberOfMonths) {
+    public static long getCostOf(final Cell cell, final int numberOfMonths) {
         Preconditions.checkArgument(numberOfMonths > 0);
         return cell.getSize().getVolume() * PRICE_OF_VOLUME_UNIT_PER_MONTH * numberOfMonths;
     }

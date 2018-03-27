@@ -1,5 +1,6 @@
 package kspt.bank.domain.entities;
 
+import kspt.bank.domain.PriceCalculator;
 import lombok.Data;
 
 import java.time.Period;
@@ -18,11 +19,13 @@ public class CellApplication {
 
     private CellApplicationStatus status;
 
-    private Long leaseCost;
-
     public CellApplication(final Client leaseholder) {
         this.id = currentId++;
         this.status = CellApplicationStatus.CREATED;
         this.leaseholder = leaseholder;
+    }
+
+    public long calculateLeaseCost() {
+        return PriceCalculator.getCostOf(cell, leasePeriod.getMonths());
     }
 }

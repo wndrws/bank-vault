@@ -1,21 +1,40 @@
 package kspt.bank.domain;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.ClientsRepository;
-import kspt.bank.boundaries.PaymentGate;
+import kspt.bank.external.Invoice;
+import kspt.bank.external.PaymentGate;
 import kspt.bank.domain.entities.*;
-import lombok.AllArgsConstructor;
 
 import java.time.Period;
+import java.util.HashMap;
+import java.util.Map;
 
-@AllArgsConstructor
 public class CellApplicationInteractor {
     private final ClientsRepository clientsRepository;
 
     private final ApplicationsRepository applicationsRepository;
 
     private final PaymentGate paymentGate;
+
+    private final Map<Invoice, CellApplication> invoiceToApplicationMap;
+
+    public CellApplicationInteractor(final ClientsRepository clientsRepository,
+            final ApplicationsRepository applicationsRepository, PaymentGate paymentGate) {
+        this(clientsRepository, applicationsRepository, paymentGate, new HashMap<>());
+    }
+
+    @VisibleForTesting
+    CellApplicationInteractor(final ClientsRepository clientsRepository,
+            final ApplicationsRepository applicationsRepository, PaymentGate paymentGate,
+            final Map<Invoice, CellApplication> invoiceToApplicationMap) {
+        this.clientsRepository = clientsRepository;
+        this.applicationsRepository = applicationsRepository;
+        this.paymentGate = paymentGate;
+        this.invoiceToApplicationMap = invoiceToApplicationMap;
+    }
 
     public CellApplication createApplication(final PassportInfo passportInfo, final String phone,
             final String email) // TODO ? split implementations for existing and new client
@@ -53,26 +72,27 @@ public class CellApplicationInteractor {
         }
     }
 
-    public long approveApplication(final CellApplication application) {
+    public Invoice approveApplication(final CellApplication application) {
         Preconditions.checkState(application.getStatus() == CellApplicationStatus.CELL_CHOSEN);
+        final long leaseCost = calculatePayment(application);
+        final Invoice invoice = paymentGate.issueInvoice(leaseCost);
+        invoiceToApplicationMap.put(invoice, application);
         application.setStatus(CellApplicationStatus.APPROVED);
-        application.setLeaseCost(calculatePayment(application));
-        return application.getLeaseCost();
+        return invoice;
     }
 
-    public void acceptPayment(final long sum, final PaymentMethod paymentMethod,
-            final CellApplication application) {
+    public void acceptPayment(final Invoice invoice) {
+        final CellApplication application = invoiceToApplicationMap.get(invoice);
+        Preconditions.checkNotNull(application);
         Preconditions.checkState(application.getStatus() == CellApplicationStatus.APPROVED);
-        Preconditions.checkArgument(sum > 0 && sum == application.getLeaseCost());
-        paymentGate.acceptPayment(sum, paymentMethod);
+        Preconditions.checkState(invoice.isPaid());
         application.setStatus(CellApplicationStatus.PAID);
         Vault.getInstance().startLeasing(
                 application.getCell(), application.getLeaseholder(), application.getLeasePeriod());
     }
 
     private long calculatePayment(final CellApplication application) {
-        final long fullCost = PriceCalculator.getCostOf(
-                application.getCell(), application.getLeasePeriod().getMonths());
+        final long fullCost = application.calculateLeaseCost();
         return hasGoodCreditHistory(application.getLeaseholder()) ?
                 PriceCalculator.discount(fullCost, 25) : fullCost;
     }

@@ -2,9 +2,11 @@ package kspt.bank.domain;
 
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.ClientsRepository;
-import kspt.bank.boundaries.PaymentGate;
+import kspt.bank.external.Invoice;
+import kspt.bank.external.PaymentGate;
 import kspt.bank.domain.ClientPassportValidator.IncorrectPassportInfo;
 import kspt.bank.domain.entities.*;
+import kspt.bank.external.SimplePaymentSystem;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,7 +14,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.time.Period;
-import java.util.Random;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -25,10 +27,12 @@ class CellApplicationInteractorTest {
 
     private final ApplicationsRepository applicationsRepository = mock(ApplicationsRepository.class);
 
-    private final PaymentGate paymentGate = mock(PaymentGate.class);
+    private final PaymentGate paymentGate = new SimplePaymentSystem();
+
+    private final Map<Invoice, CellApplication> invoiceMap = mock(Map.class);
 
     private final CellApplicationInteractor interactor =
-            new CellApplicationInteractor(clientsRepository, applicationsRepository, paymentGate);
+            new CellApplicationInteractor(clientsRepository, applicationsRepository, paymentGate, invoiceMap);
 
     @Test
     void testCreateApplication_NewClient() {
@@ -100,42 +104,17 @@ class CellApplicationInteractorTest {
 
     @ParameterizedTest
     @EnumSource(PaymentMethod.class)
-    void testAcceptPayment_PositiveSum(PaymentMethod paymentMethod) {
+    void testAcceptPayment(PaymentMethod paymentMethod) {
         // given
         final CellApplication cellApplication =
                 TestDataGenerator.getCellApplication(CellApplicationStatus.APPROVED);
-        final long sum = new Random().longs(1L, Long.MAX_VALUE).findFirst().getAsLong();
-        cellApplication.setLeaseCost(sum);
+        final Invoice invoice = new Invoice(cellApplication.calculateLeaseCost());
+        when(invoiceMap.get(invoice)).thenReturn(cellApplication);
+        paymentGate.pay(invoice, invoice.getSum(), paymentMethod);
         // when
-        interactor.acceptPayment(sum, paymentMethod, cellApplication);
+        interactor.acceptPayment(invoice);
         // then
         assertThat(cellApplication.getStatus()).isEqualTo(CellApplicationStatus.PAID);
         assertTrue(Vault.getInstance().isLeased(cellApplication.getCell()));
-    }
-
-    @ParameterizedTest
-    @EnumSource(PaymentMethod.class)
-    void testAcceptPayment_ZeroSum(PaymentMethod paymentMethod) {
-        // given
-        final CellApplication cellApplication =
-                TestDataGenerator.getCellApplication(CellApplicationStatus.APPROVED);
-        // when
-        final long sum = 0;
-        // then
-        assertThrows(IllegalArgumentException.class,
-                () -> interactor.acceptPayment(sum, paymentMethod, cellApplication));
-    }
-
-    @ParameterizedTest
-    @EnumSource(PaymentMethod.class)
-    void testAcceptPayment_NegativeSum(PaymentMethod paymentMethod) {
-        // given
-        final CellApplication cellApplication =
-                TestDataGenerator.getCellApplication(CellApplicationStatus.APPROVED);
-        // when
-        final long sum = new Random().longs(Long.MIN_VALUE, -1L).findFirst().getAsLong();
-        // then
-        assertThrows(IllegalArgumentException.class,
-                () -> interactor.acceptPayment(sum, paymentMethod, cellApplication));
     }
 }
