@@ -14,6 +14,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.time.Period;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,7 +30,7 @@ class CellApplicationInteractorTest {
 
     private final PaymentGate paymentGate = new SimplePaymentSystem();
 
-    private final Map<Invoice, CellApplication> invoiceMap = mock(Map.class);
+    private final Map<Invoice, CellApplication> invoiceMap = mock(HashMap.class);
 
     private final CellApplicationInteractor interactor =
             new CellApplicationInteractor(clientsRepository, applicationsRepository, paymentGate, invoiceMap);
@@ -48,8 +49,6 @@ class CellApplicationInteractorTest {
         verify(applicationsRepository).add(application);
         verify(clientsRepository).add(argThat(c -> c.equalsIgnoringId(client)));
     }
-
-
 
     @Test
     void testCreateApplication_ExistingClient() {
@@ -100,6 +99,22 @@ class CellApplicationInteractorTest {
         assertThat(cellApplication.getCell()).isNotNull();
         assertThat(cellApplication.getLeasePeriod()).isEqualTo(leasePeriod);
         assertThat(cellApplication.getStatus()).isEqualTo(CellApplicationStatus.CELL_CHOSEN);
+    }
+
+    @Test
+    void testApproveApplication() {
+        // given
+        final CellApplication cellApplication =
+                TestDataGenerator.getCellApplication(CellApplicationStatus.CELL_CHOSEN);
+        when(invoiceMap.put(any(), any())).thenCallRealMethod();
+        when(invoiceMap.get(any())).thenCallRealMethod();
+        // when
+        final Invoice invoice = interactor.approveApplication(cellApplication);
+        // then
+        assertThat(invoice.isPaid()).isFalse();
+        assertThat(invoice.getSum()).isEqualTo(cellApplication.calculateLeaseCost());
+        assertThat(invoiceMap.get(invoice)).isEqualTo(cellApplication);
+        assertThat(cellApplication.getStatus()).isEqualTo(CellApplicationStatus.APPROVED);
     }
 
     @ParameterizedTest
