@@ -1,24 +1,32 @@
 package kspt.bank.domain;
 
-import kspt.bank.domain.CellManipulationInteractor;
-import kspt.bank.domain.TestDataGenerator;
-import kspt.bank.domain.Vault;
-import kspt.bank.domain.entities.Cell;
-import kspt.bank.domain.entities.CellSize;
-import kspt.bank.domain.entities.Client;
-import kspt.bank.domain.entities.Precious;
+import kspt.bank.boundaries.NotificationGate;
+import kspt.bank.domain.entities.*;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
 import java.time.Period;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
-public class CellManipulationInteractorTest {
-    private CellManipulationInteractor interactor = new CellManipulationInteractor();
+class CellManipulationInteractorTest {
+    private final ManipulationLog manipulationLog = mock(ManipulationLog.class);
+
+    private final NotificationGate notificationGate = mock(NotificationGate.class);
+
+    private final CellManipulationInteractor interactor =
+            new CellManipulationInteractor(manipulationLog, notificationGate);
 
     private final Client client = TestDataGenerator.getSampleClient();
 
@@ -49,9 +57,10 @@ public class CellManipulationInteractorTest {
         // given
         Vault.getInstance().startLeasing(cellOne, client, Period.ofMonths(1));
         // when
-        interactor.putPrecious(cellOne, myPrecious);
+        interactor.putPrecious(cellOne, myPrecious, client);
         // then
         assertThat(cellOne.getContainedPrecious()).isEqualTo(myPrecious);
+        verify(manipulationLog).logEvent(anyString(), eq(client), eq(cellOne));
     }
 
     @Test
@@ -60,7 +69,49 @@ public class CellManipulationInteractorTest {
         Vault.getInstance().startLeasing(cellThree, client, Period.ofMonths(3));
         // then
         assertThrows(PutManipulationValidator.ManipulationNotAllowed.class, // when
-                () -> interactor.putPrecious(cellThree, tooBigPrecious));
+                () -> interactor.putPrecious(cellThree, tooBigPrecious, client));
+    }
+
+    @Test
+    void testGetPrecious() {
+        // given
+        cellTwo.setContainedPrecious(myPrecious);
+        // when
+        final Precious precious = interactor.getPrecious(cellTwo, client);
+        // then
+        assertThat(precious).isEqualTo(myPrecious);
+        verify(manipulationLog).logEvent(anyString(), eq(client), eq(cellTwo));
+    }
+
+    @Test
+    void testOpenCell() {
+        // given
+        Assumptions.assumeFalse(Vault.getVaultHardware().isOpened(cellOne));
+        // when
+        interactor.openCell(cellOne, client);
+        // then
+        assertTrue(Vault.getVaultHardware().isOpened(cellOne));
+        verify(manipulationLog).logEvent(anyString(), eq(client), eq(cellOne));
+    }
+
+    @Test
+    void testCloseCell() {
+        // given
+        interactor.openCell(cellOne, client);
+        Assumptions.assumeTrue(Vault.getVaultHardware().isOpened(cellOne));
+        // when
+        interactor.closeCell(cellOne, client);
+        // then
+        assertFalse(Vault.getVaultHardware().isOpened(cellOne));
+        verify(manipulationLog, Mockito.times(2)).logEvent(anyString(), eq(client), eq(cellOne));
+    }
+
+    @Test
+    void testNotifyAboutManipulation() {
+        // when
+        interactor.notifyAboutManipulation(cellOne, client);
+        // then
+        verify(notificationGate).notifyManager(anyString());
     }
 
     @BeforeEach

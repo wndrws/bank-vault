@@ -17,7 +17,6 @@ class VaultHardware {
 
     final static int NUMBER_OF_BIG_CELLS = 5;
 
-    @Getter
     private final ImmutableSet<CellHardware> cells;
 
     VaultHardware() {
@@ -30,7 +29,7 @@ class VaultHardware {
 
     static private List<CellHardware> createCellsOfSize(final int numberOfCells, final CellSize cellSize) {
         return IntStream.range(0, numberOfCells)
-                .mapToObj(id -> new CellHardware(cellSize))
+                .mapToObj(__ -> new CellHardware(cellSize))
                 .collect(Collectors.toList());
     }
 
@@ -39,6 +38,28 @@ class VaultHardware {
                 .filter(cellHardware -> cellHardware.getSize() == size)
                 .map(cellHardware -> new Cell(cellHardware.getId(), cellHardware.getSize()))
                 .collect(Collectors.toList());
+    }
+
+    void openCell(final Cell cell) {
+        cells.stream()
+                .filter(cellHardware -> cellHardware.getId() == cell.getId())
+                .findFirst()
+                .ifPresent(CellHardware::open);
+    }
+
+    void closeCell(final Cell cell) {
+        cells.stream()
+                .filter(cellHardware -> cellHardware.getId() == cell.getId())
+                .findFirst()
+                .ifPresent(CellHardware::close);
+    }
+
+    boolean isOpened(final Cell cell) {
+        return cells.stream()
+                .filter(cellHardware -> cellHardware.getId() == cell.getId())
+                .findFirst()
+                .map(CellHardware::isOpened)
+                .orElseThrow(IllegalStateException::new);
     }
 
     @Getter
@@ -56,11 +77,11 @@ class VaultHardware {
             this.size = size;
         }
 
-        public void open() {
+        void open() {
             opened = true;
         }
 
-        public void close() {
+        void close() {
             opened = false;
         }
     }
