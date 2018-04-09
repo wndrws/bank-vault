@@ -29,14 +29,14 @@ public class CellManipulationInteractor {
     throws PutManipulationValidator.ManipulationNotAllowed {
         PutManipulationValidator.checkManipulation(cell, precious);
         cell.setContainedPrecious(precious);
-        manipulationLog.logEvent("Precious put to cell", client, cell);
+        manipulationLog.logPutManipulation("Precious put to cell", client, cell);
     }
 
     public Precious getPrecious(final Cell cell, final Client client) {
         final Precious precious = cell.getContainedPrecious();
         Preconditions.checkState(precious != null, "No precious in the cell " + cell);
         cell.removeContainedPrecious();
-        manipulationLog.logEvent("Precious got from cell", client, cell);
+        manipulationLog.logGetManipulation("Precious got from cell", client, cell);
         return precious;
     }
 

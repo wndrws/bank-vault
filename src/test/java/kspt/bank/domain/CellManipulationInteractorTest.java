@@ -60,7 +60,7 @@ class CellManipulationInteractorTest {
         interactor.putPrecious(cellOne, myPrecious, client);
         // then
         assertThat(cellOne.getContainedPrecious()).isEqualTo(myPrecious);
-        verify(manipulationLog).logEvent(anyString(), eq(client), eq(cellOne));
+        verify(manipulationLog).logPutManipulation(anyString(), eq(client), eq(cellOne));
     }
 
     @Test
@@ -80,7 +80,7 @@ class CellManipulationInteractorTest {
         final Precious precious = interactor.getPrecious(cellTwo, client);
         // then
         assertThat(precious).isEqualTo(myPrecious);
-        verify(manipulationLog).logEvent(anyString(), eq(client), eq(cellTwo));
+        verify(manipulationLog).logGetManipulation(anyString(), eq(client), eq(cellTwo));
     }
 
     @Test

@@ -12,7 +12,18 @@ public class ManipulationLog {
     private final List<Entry> manipulations = new ArrayList<>();
 
     public void logEvent(final String action, final Client client, final Cell cell) {
-        manipulations.add(new Entry(LocalDateTime.now(), client, cell, action));
+        manipulations.add(new Entry(
+                LocalDateTime.now(), client, cell, action, ManipulationType.NONE));
+    }
+
+    public void logPutManipulation(final String action, final Client client, final Cell cell) {
+        manipulations.add(new Entry(
+                LocalDateTime.now(), client, cell, action, ManipulationType.PUT));
+    }
+
+    public void logGetManipulation(final String action, final Client client, final Cell cell) {
+        manipulations.add(new Entry(
+                LocalDateTime.now(), client, cell, action, ManipulationType.GET));
     }
 
     @Value
@@ -24,5 +35,7 @@ public class ManipulationLog {
         Cell object;
 
         String action;
+
+        ManipulationType manipulationType;
     }
 }
