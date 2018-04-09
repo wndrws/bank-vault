@@ -69,20 +69,29 @@ class CellApplicationInteractorTest {
 
     @Test
     void testCreateApplication_IncorrectSerial() {
+        // given
         final PassportInfo userInfo = TestDataGenerator.getPassportInfoWithIncorrectSerial();
-        assertThrows(IncorrectPassportInfo.class, () -> interactor.createApplication(userInfo, "", ""));
+        // then
+        assertThrows(IncorrectPassportInfo.class, // when
+                () -> interactor.createApplication(userInfo, "", ""));
     }
 
     @Test
     void testCreateApplication_IncorrectFirstName() {
+        // given
         final PassportInfo userInfo = TestDataGenerator.getPassportInfoWithIncorrectFirstName();
-        assertThrows(IncorrectPassportInfo.class, () -> interactor.createApplication(userInfo, "", ""));
+        // then
+        assertThrows(IncorrectPassportInfo.class, // when
+                () -> interactor.createApplication(userInfo, "", ""));
     }
 
     @Test
     void testCreateApplication_IncorrectLastName() {
+        // given
         final PassportInfo userInfo = TestDataGenerator.getPassportInfoWithIncorrectLastName();
-        assertThrows(IncorrectPassportInfo.class, () -> interactor.createApplication(userInfo, "", ""));
+        // then
+        assertThrows(IncorrectPassportInfo.class, // when
+                () -> interactor.createApplication(userInfo, "", ""));
     }
 
     @ParameterizedTest

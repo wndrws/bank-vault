@@ -7,6 +7,4 @@ public class Precious {
     int volume;
 
     String name;
-
-    Cell containerCell;
 }

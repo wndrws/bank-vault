@@ -11,9 +11,9 @@ public class CellSizesWithTotalsProvider implements ArgumentsProvider {
     @Override
     public Stream<Arguments> provideArguments(ExtensionContext context) {
         return Stream.of(
-                Arguments.of(CellSize.SMALL, Vault.NUMBER_OF_SMALL_CELLS),
-                Arguments.of(CellSize.MEDIUM, Vault.NUMBER_OF_MEDIUM_CELLS),
-                Arguments.of(CellSize.BIG, Vault.NUMBER_OF_BIG_CELLS)
+                Arguments.of(CellSize.SMALL, VaultHardware.NUMBER_OF_SMALL_CELLS),
+                Arguments.of(CellSize.MEDIUM, VaultHardware.NUMBER_OF_MEDIUM_CELLS),
+                Arguments.of(CellSize.BIG, VaultHardware.NUMBER_OF_BIG_CELLS)
         );
     }
 }

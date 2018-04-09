@@ -2,10 +2,10 @@ package kspt.bank.domain;
 
 import kspt.bank.domain.entities.PassportInfo;
 
-public class ClientPassportValidator {
+class ClientPassportValidator {
     private static final int DIGITS_COUNT_IN_SERIAL = 10;
 
-    public static void checkValidity(PassportInfo info)
+    static void checkValidity(PassportInfo info)
     throws IncorrectPassportInfo {
         checkSerial(info);
         checkFirstName(info);
