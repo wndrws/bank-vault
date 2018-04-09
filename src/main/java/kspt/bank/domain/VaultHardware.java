@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-class VaultHardware {
+public class VaultHardware {
     final static int NUMBER_OF_SMALL_CELLS = 20;
 
     final static int NUMBER_OF_MEDIUM_CELLS = 10;
@@ -54,7 +54,7 @@ class VaultHardware {
                 .ifPresent(CellHardware::close);
     }
 
-    boolean isOpened(final Cell cell) {
+    public boolean isOpened(final Cell cell) {
         return cells.stream()
                 .filter(cellHardware -> cellHardware.getId() == cell.getId())
                 .findFirst()

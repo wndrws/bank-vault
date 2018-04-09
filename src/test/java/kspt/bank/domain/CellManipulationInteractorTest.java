@@ -53,7 +53,7 @@ class CellManipulationInteractorTest {
     }
 
     @Test
-    void testPutPrecious_ShouldNotThrow() {
+    void testPutPrecious() {
         // given
         Vault.getInstance().startLeasing(cellOne, client, Period.ofMonths(1));
         // when
@@ -64,12 +64,22 @@ class CellManipulationInteractorTest {
     }
 
     @Test
-    void testPutPrecious_ShouldThrow() {
+    void testPutPrecious_TooBigPrecious() {
         // given
         Vault.getInstance().startLeasing(cellThree, client, Period.ofMonths(3));
         // then
         assertThrows(PutManipulationValidator.ManipulationNotAllowed.class, // when
                 () -> interactor.putPrecious(cellThree, tooBigPrecious, client));
+    }
+
+    @Test
+    void testPutPrecious_NotEmptyCell() {
+        // given
+        Vault.getInstance().startLeasing(cellTwo, client, Period.ofMonths(2));
+        cellThree.setContainedPrecious(myPrecious);
+        // then
+        assertThrows(PutManipulationValidator.ManipulationNotAllowed.class, // when
+                () -> interactor.putPrecious(cellThree, new Precious(1, ""), client));
     }
 
     @Test
