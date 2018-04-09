@@ -18,6 +18,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/*
+    На данный момент не предусмотрено тестов для других сценариев использования,
+    так как они полностью покрываются тестами для бизнес-процессов с одной стороны
+    и модульными тестами классов, реализующими требуемую функциональность, - с другой.
+
+    Создание дополнительных тестов для каждого из сценариев приведет лишь к дублированию кода,
+    чего хотелось бы избежать, и конкретно этот класс будет удален при первой возможности.
+ */
 class ClientApplyForCellUsecaseTest {
     private final ClientsRepository clientsRepository = new InMemoryClientsRepository();
 
