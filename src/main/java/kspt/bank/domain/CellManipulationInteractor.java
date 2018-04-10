@@ -19,7 +19,7 @@ public class CellManipulationInteractor {
     private final NotificationGate notificationGate;
 
     public List<Cell> getClientsCells(final Client client) {
-        return Vault.getInstance().getCellsAndLeaseholders().entrySet().stream()
+        return Vault.getInstance().getLeasingController().getCellsAndLeaseholders().entrySet().stream()
                 .filter(cellToClient -> cellToClient.getValue().equals(client))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());

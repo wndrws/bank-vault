@@ -29,6 +29,7 @@ repositories {
 dependencies {
     compile slf4j, slf4jBinding
     compile group: 'com.google.guava', name: 'guava', version: '23.0'
+    compile 'com.statemachinesystems:mock-clock:1.0'
     testCompile group: 'org.assertj', name: 'assertj-core', version: '3.8.0'
     testCompile group: 'org.mockito', name: 'mockito-core', version: '2.11.0'
     testRuntime junit5

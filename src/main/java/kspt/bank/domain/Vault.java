@@ -1,5 +1,6 @@
 package kspt.bank.domain;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import kspt.bank.domain.entities.Cell;
@@ -9,6 +10,7 @@ import lombok.Getter;
 import lombok.Synchronized;
 import lombok.Value;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Period;
@@ -22,12 +24,16 @@ import java.util.stream.Stream;
 public final class Vault {
     final static Duration DEFAULT_PENDING_DURATION = Duration.ofMinutes(5);
 
+    @VisibleForTesting
+    public static Clock clock = Clock.systemDefaultZone();
+
     @Getter
     private final static VaultHardware vaultHardware = new VaultHardware();
 
     private final EnumMap<CellSize, List<Cell>> cells;
 
-    private final Map<Cell, CellLeaseRecord> leasingInfo = new HashMap<>();
+    @Getter
+    private final LeasingController leasingController = new LeasingController(clock);
 
     private final Set<Cell> pendingCells = Collections.synchronizedSet(new HashSet<>());
 
@@ -78,24 +84,11 @@ public final class Vault {
         return (int) cellsOfRequestedSize.stream().filter(this::isAvailable).count();
     }
 
-    public void startLeasing(final Cell cell, final Client leaseholder, final Period period) {
-        final LocalDate today = LocalDate.now();
-        leasingInfo.put(cell, new CellLeaseRecord(leaseholder, today, today.plus(period)));
-    }
-
-    public void endLeasing(final Cell cell) {
-        leasingInfo.remove(cell);
-    }
-
-    public boolean isLeased(final Cell cell) {
-        return leasingInfo.containsKey(cell);
-    }
-
     public boolean isAvailable(final Cell cell) {
-        return !isLeased(cell) && !pendingCells.contains(cell);
+        return !leasingController.isLeased(cell) && !pendingCells.contains(cell);
     }
 
-    public void pend(final Cell cell, final Duration duration) {
+    void pend(final Cell cell, final Duration duration) {
         pendingCells.add(cell);
         pendingKeepersPool.submit(() -> {
             try {
@@ -105,22 +98,5 @@ public final class Vault {
                 e.printStackTrace();
             }
         });
-    }
-
-    public ImmutableMap<Cell, Client> getCellsAndLeaseholders() {
-        return leasingInfo.entrySet().stream()
-                .map(entry -> new AbstractMap.SimpleEntry<>(
-                        entry.getKey(), entry.getValue().getLeaseholder()))
-                .collect(ImmutableMap.toImmutableMap(
-                        Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    @Value
-    private static class CellLeaseRecord {
-        private final Client leaseholder;
-
-        private final LocalDate leaseBegin;
-
-        private final LocalDate leaseEnd;
     }
 }

@@ -43,9 +43,9 @@ class CellManipulationInteractorTest {
     @Test
     void testGetClientsCells() {
         // given
-        Vault.getInstance().startLeasing(cellOne, client, Period.ofMonths(1));
-        Vault.getInstance().startLeasing(cellTwo, client, Period.ofMonths(2));
-        Vault.getInstance().startLeasing(cellThree, client, Period.ofMonths(3));
+        Vault.getInstance().getLeasingController().startLeasing(cellOne, client, Period.ofMonths(1));
+        Vault.getInstance().getLeasingController().startLeasing(cellTwo, client, Period.ofMonths(2));
+        Vault.getInstance().getLeasingController().startLeasing(cellThree, client, Period.ofMonths(3));
         // when
         final List<Cell> clientsCells = interactor.getClientsCells(client);
         // then
@@ -55,7 +55,7 @@ class CellManipulationInteractorTest {
     @Test
     void testPutPrecious() {
         // given
-        Vault.getInstance().startLeasing(cellOne, client, Period.ofMonths(1));
+        Vault.getInstance().getLeasingController().startLeasing(cellOne, client, Period.ofMonths(1));
         // when
         interactor.putPrecious(cellOne, myPrecious, client);
         // then
@@ -66,7 +66,7 @@ class CellManipulationInteractorTest {
     @Test
     void testPutPrecious_TooBigPrecious() {
         // given
-        Vault.getInstance().startLeasing(cellThree, client, Period.ofMonths(3));
+        Vault.getInstance().getLeasingController().startLeasing(cellThree, client, Period.ofMonths(3));
         // then
         assertThrows(PutManipulationValidator.ManipulationNotAllowed.class, // when
                 () -> interactor.putPrecious(cellThree, tooBigPrecious, client));
@@ -75,7 +75,7 @@ class CellManipulationInteractorTest {
     @Test
     void testPutPrecious_NotEmptyCell() {
         // given
-        Vault.getInstance().startLeasing(cellTwo, client, Period.ofMonths(2));
+        Vault.getInstance().getLeasingController().startLeasing(cellTwo, client, Period.ofMonths(2));
         cellThree.setContainedPrecious(myPrecious);
         // then
         assertThrows(PutManipulationValidator.ManipulationNotAllowed.class, // when

@@ -140,9 +140,12 @@ class ManipulationTest {
         smallCell = Vault.getInstance().requestCell(CellSize.SMALL);
         mediumCell = Vault.getInstance().requestCell(CellSize.MEDIUM);
         bigCell = Vault.getInstance().requestCell(CellSize.BIG);
-        Vault.getInstance().startLeasing(smallCell, roleClient.client, Period.ofMonths(1));
-        Vault.getInstance().startLeasing(mediumCell, roleClient.client, Period.ofMonths(2));
-        Vault.getInstance().startLeasing(bigCell, roleClient.client, Period.ofMonths(3));
+        Vault.getInstance().getLeasingController()
+                .startLeasing(smallCell, roleClient.client, Period.ofMonths(1));
+        Vault.getInstance().getLeasingController()
+                .startLeasing(mediumCell, roleClient.client, Period.ofMonths(2));
+        Vault.getInstance().getLeasingController()
+                .startLeasing(bigCell, roleClient.client, Period.ofMonths(3));
     }
 
     private void resetSingleton()

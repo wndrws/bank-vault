@@ -102,7 +102,8 @@ class BankVaultFacadeTest {
     private void leaseAllCellsOfSize(final CellSize size) {
         Cell cell = Vault.getInstance().requestCell(size);
         while (cell != null) {
-            Vault.getInstance().startLeasing(cell, TestDataGenerator.getSampleClient(), Period.ofMonths(1));
+            Vault.getInstance().getLeasingController()
+                    .startLeasing(cell, TestDataGenerator.getSampleClient(), Period.ofMonths(1));
             cell = Vault.getInstance().requestCell(size);
         }
     }

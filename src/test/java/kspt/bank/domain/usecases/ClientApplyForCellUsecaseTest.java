@@ -69,7 +69,7 @@ class ClientApplyForCellUsecaseTest {
 
     private void assertThatRightCellIsReserved(CellSize size, Period period) {
         assertFalse(Vault.getInstance().isAvailable(cellApplication.getCell()));
-        assertFalse(Vault.getInstance().isLeased(cellApplication.getCell()));
+        assertFalse(Vault.getInstance().getLeasingController().isLeased(cellApplication.getCell()));
         assertThat(cellApplication.getCell().getSize()).isEqualTo(size);
         assertThat(cellApplication.getLeasePeriod()).isEqualTo(period);
         assertThat(cellApplication.getStatus()).isEqualTo(CellApplicationStatus.CELL_CHOSEN);
@@ -81,7 +81,7 @@ class ClientApplyForCellUsecaseTest {
 
     private void assertThatCellIsLeased() {
         assertTrue(invoice.isPaid());
-        assertTrue(Vault.getInstance().isLeased(cellApplication.getCell()));
+        assertTrue(Vault.getInstance().getLeasingController().isLeased(cellApplication.getCell()));
         assertThat(cellApplication.getStatus()).isEqualTo(CellApplicationStatus.PAID);
     }
 

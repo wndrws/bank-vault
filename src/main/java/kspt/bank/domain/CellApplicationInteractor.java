@@ -87,7 +87,7 @@ public class CellApplicationInteractor {
         Preconditions.checkState(application.getStatus() == CellApplicationStatus.APPROVED);
         Preconditions.checkState(invoice.isPaid());
         application.setStatus(CellApplicationStatus.PAID);
-        Vault.getInstance().startLeasing(
+        Vault.getInstance().getLeasingController().startLeasing(
                 application.getCell(), application.getLeaseholder(), application.getLeasePeriod());
     }
 

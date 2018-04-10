@@ -45,7 +45,8 @@ class VaultTest {
     }
 
     private static void startLeasingForSomeClient(final Cell cell) {
-        Vault.getInstance().startLeasing(cell, TestDataGenerator.getSampleClient(), Period.ofMonths(1));
+        Vault.getInstance().getLeasingController()
+                .startLeasing(cell, TestDataGenerator.getSampleClient(), Period.ofMonths(1));
     }
 
     @Test
