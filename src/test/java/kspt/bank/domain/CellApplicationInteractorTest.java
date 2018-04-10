@@ -139,7 +139,6 @@ class CellApplicationInteractorTest {
         interactor.acceptPayment(invoice);
         // then
         assertThat(cellApplication.getStatus()).isEqualTo(CellApplicationStatus.PAID);
-        assertTrue(Vault.getInstance().getLeasingController()
-                .isLeased(cellApplication.getCell()));
+        assertTrue(Vault.getInstance().getLeasingController().isLeased(cellApplication.getCell()));
     }
 }

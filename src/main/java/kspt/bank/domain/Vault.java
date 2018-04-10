@@ -1,31 +1,24 @@
 package kspt.bank.domain;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.CellSize;
-import kspt.bank.domain.entities.Client;
 import lombok.Getter;
 import lombok.Synchronized;
-import lombok.Value;
 
 import java.time.Clock;
 import java.time.Duration;
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public final class Vault {
     final static Duration DEFAULT_PENDING_DURATION = Duration.ofMinutes(5);
 
     @VisibleForTesting
-    public static Clock clock = Clock.systemDefaultZone();
+    public static Clock CLOCK = Clock.systemDefaultZone();
 
     @Getter
     private final static VaultHardware vaultHardware = new VaultHardware();
@@ -33,7 +26,7 @@ public final class Vault {
     private final EnumMap<CellSize, List<Cell>> cells;
 
     @Getter
-    private final LeasingController leasingController = new LeasingController(clock);
+    private final LeasingController leasingController = new LeasingController(CLOCK);
 
     private final Set<Cell> pendingCells = Collections.synchronizedSet(new HashSet<>());
 

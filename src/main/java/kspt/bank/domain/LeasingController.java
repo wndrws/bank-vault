@@ -7,8 +7,6 @@ import kspt.bank.domain.entities.Client;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.Value;
-import lombok.experimental.Accessors;
 
 import java.time.Clock;
 import java.time.LocalDate;
