@@ -27,8 +27,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-class LeasingControlInteractorTest {
-    private final static long LEASING_TIMERS_CHECK_PERIOD_MS = 100;
+public class LeasingControlInteractorTest {
+    public final static long LEASING_TIMERS_CHECK_PERIOD_MS = 100;
 
     private final NotificationGate notificationGate = mock(NotificationGate.class);
 
