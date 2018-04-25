@@ -19,7 +19,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-class ManipulationTest {
+class ManipulationTest extends TestUsingDatabase {
     private final ManipulationLog manipulationLog = mock(ManipulationLog.class);
 
     private final NotificationGate notificationGate = mock(NotificationGate.class);

@@ -1,4 +1,4 @@
-package kspt.bank.domain;
+package kspt.bank.dao;
 
 import com.google.common.base.Preconditions;
 import kspt.bank.boundaries.ApplicationsRepository;
@@ -13,7 +13,7 @@ public class InMemoryApplicationsRepository implements ApplicationsRepository {
     private final Map<Integer, Set<CellApplication>> repository = new TreeMap<>();
 
     @Override
-    public void add(CellApplication application) {
+    public void save(CellApplication application) {
         final Set<CellApplication> clientsApplications =
                 repository.getOrDefault(application.getLeaseholder().getId(), new HashSet<>());
         Preconditions.checkState(!clientsApplications.contains(application));
@@ -26,7 +26,6 @@ public class InMemoryApplicationsRepository implements ApplicationsRepository {
         return repository.getOrDefault(client.getId(), new HashSet<>());
     }
 
-    @Override
     public Collection<CellApplication> getAll() {
         return repository.values().stream()
                 .flatMap(Collection::stream).collect(Collectors.toList());

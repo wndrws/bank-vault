@@ -51,7 +51,7 @@ public class LeasingControlInteractor {
         application.setStatus(CellApplicationStatus.APPROVED);
         application.setCell(cell);
         application.setLeasePeriod(leasePeriod);
-        applicationsRepository.add(application);
+        applicationsRepository.save(application);
         final long leaseCost = application.calculateLeaseCost();
         final Invoice invoice = paymentGate.issueInvoice(leaseCost);
         invoiceToApplicationMap.put(invoice, application);
@@ -64,6 +64,7 @@ public class LeasingControlInteractor {
         Preconditions.checkState(application.getStatus() == CellApplicationStatus.APPROVED);
         Preconditions.checkState(invoice.isPaid());
         application.setStatus(CellApplicationStatus.PAID);
+        applicationsRepository.save(application);
         Vault.getInstance().getLeasingController().startLeasing(
                 application.getCell(), application.getLeaseholder(), application.getLeasePeriod());
     }

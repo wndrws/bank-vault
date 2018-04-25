@@ -22,14 +22,17 @@ def junit5 = ["org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}",
               "org.junit.jupiter:junit-jupiter-params:${junitJupiterVersion}",
               "org.junit.platform:junit-platform-launcher:${junitPlatformVersion}"]
 
+def jdbcDriver = "org.postgresql:postgresql:42.2.0"
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
+    compile jdbcDriver
     compile slf4j, slf4jBinding
     compile group: 'com.google.guava', name: 'guava', version: '23.0'
-    compile 'com.statemachinesystems:mock-clock:1.0'
+    compile group: 'com.statemachinesystems', name: 'mock-clock', version: '1.0'
     testCompile group: 'org.assertj', name: 'assertj-core', version: '3.8.0'
     testCompile group: 'org.mockito', name: 'mockito-core', version: '2.11.0'
     testRuntime junit5

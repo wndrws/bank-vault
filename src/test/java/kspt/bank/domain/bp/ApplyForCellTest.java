@@ -2,6 +2,8 @@ package kspt.bank.domain.bp;
 
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.ClientsRepository;
+import kspt.bank.dao.DatabaseApplicationsRepository;
+import kspt.bank.dao.DatabaseClientsRepository;
 import kspt.bank.external.Invoice;
 import kspt.bank.external.PaymentGate;
 import kspt.bank.domain.*;
@@ -12,16 +14,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import java.lang.reflect.Field;
+import java.sql.SQLException;
 import java.time.Period;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ApplyForCellTest {
-    private final ClientsRepository clientsRepository = new InMemoryClientsRepository();
+class ApplyForCellTest extends TestUsingDatabase {
+    private final ClientsRepository clientsRepository = new DatabaseClientsRepository();
 
-    private final ApplicationsRepository applicationsRepository = new InMemoryApplicationsRepository();
+    private final ApplicationsRepository applicationsRepository = new DatabaseApplicationsRepository();
 
     private final PaymentGate paymentGate = new SimplePaymentSystem();
 
@@ -107,10 +110,11 @@ class ApplyForCellTest {
     }
 
     @BeforeEach
-    void resetSingleton()
+    private void resetSingleton()
     throws Exception {
         Field instance = Vault.class.getDeclaredField("instance");
         instance.setAccessible(true);
         instance.set(null, null);
     }
+
 }

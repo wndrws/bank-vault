@@ -1,14 +1,14 @@
 package kspt.bank.domain.entities;
 
+import kspt.bank.dao.AutoIdDomainObject;
+import kspt.bank.dao.DomainObject;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.experimental.NonFinal;
 
+@EqualsAndHashCode(callSuper = true)
 @Value
-public class Client {
-    @NonFinal
-    private static int currentId;
-
-    int id;
+public class Client extends AutoIdDomainObject {
 
     PassportInfo passportInfo;
 
@@ -17,7 +17,14 @@ public class Client {
     String email;
 
     public Client(final PassportInfo passportInfo, final String phone, final String email) {
-        this.id = currentId++;
+        super();
+        this.passportInfo = passportInfo;
+        this.phone = phone;
+        this.email = email;
+    }
+
+    public Client(int id, final PassportInfo passportInfo, final String phone, final String email) {
+        super(id);
         this.passportInfo = passportInfo;
         this.phone = phone;
         this.email = email;

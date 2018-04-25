@@ -1,4 +1,4 @@
-package kspt.bank.domain;
+package kspt.bank.dao;
 
 import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.domain.entities.Client;

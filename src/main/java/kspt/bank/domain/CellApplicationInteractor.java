@@ -42,7 +42,7 @@ public class CellApplicationInteractor {
         ClientPassportValidator.checkValidity(passportInfo);
         final CellApplication newApplication =
                 new CellApplication(getOrCreateClient(passportInfo, phone, email));
-        applicationsRepository.add(newApplication);
+        applicationsRepository.save(newApplication);
         return newApplication;
     }
 
@@ -67,6 +67,7 @@ public class CellApplicationInteractor {
             application.setCell(cell);
             application.setLeasePeriod(period);
             application.setStatus(CellApplicationStatus.CELL_CHOSEN);
+            applicationsRepository.save(application);
             Vault.getInstance().pend(cell, Vault.DEFAULT_PENDING_DURATION);
             return true;
         }
@@ -78,6 +79,7 @@ public class CellApplicationInteractor {
         final Invoice invoice = paymentGate.issueInvoice(leaseCost);
         invoiceToApplicationMap.put(invoice, application);
         application.setStatus(CellApplicationStatus.APPROVED);
+        applicationsRepository.save(application);
         return invoice;
     }
 
@@ -87,6 +89,7 @@ public class CellApplicationInteractor {
         Preconditions.checkState(application.getStatus() == CellApplicationStatus.APPROVED);
         Preconditions.checkState(invoice.isPaid());
         application.setStatus(CellApplicationStatus.PAID);
+        applicationsRepository.save(application);
         Vault.getInstance().getLeasingController().startLeasing(
                 application.getCell(), application.getLeaseholder(), application.getLeasePeriod());
     }

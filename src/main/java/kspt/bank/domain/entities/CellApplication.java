@@ -1,15 +1,18 @@
 package kspt.bank.domain.entities;
 
+import kspt.bank.dao.AutoIdDomainObject;
+import kspt.bank.dao.CellApplicationDataMapper;
+import kspt.bank.dao.DataMapperRegistry;
+import kspt.bank.dao.DomainObject;
 import kspt.bank.domain.PriceCalculator;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.Period;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class CellApplication {
-    private static long currentId = 0L;
-
-    private final long id;
+public class CellApplication extends AutoIdDomainObject {
 
     private final Client leaseholder;
 
@@ -20,9 +23,19 @@ public class CellApplication {
     private CellApplicationStatus status;
 
     public CellApplication(final Client leaseholder) {
-        this.id = currentId++;
+        super();
         this.status = CellApplicationStatus.CREATED;
         this.leaseholder = leaseholder;
+    }
+
+    public CellApplication(final int id, final Client leaseholder, final Cell cell,
+            final Period period, final CellApplicationStatus status) {
+        super(id);
+        this.status = CellApplicationStatus.CREATED;
+        this.leaseholder = leaseholder;
+        this.cell = cell;
+        this.leasePeriod = period;
+        this.status = status;
     }
 
     public long calculateLeaseCost() {

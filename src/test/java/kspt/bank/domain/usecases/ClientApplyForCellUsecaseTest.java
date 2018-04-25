@@ -2,6 +2,8 @@ package kspt.bank.domain.usecases;
 
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.ClientsRepository;
+import kspt.bank.dao.InMemoryApplicationsRepository;
+import kspt.bank.dao.InMemoryClientsRepository;
 import kspt.bank.domain.*;
 import kspt.bank.external.Invoice;
 import kspt.bank.external.PaymentGate;

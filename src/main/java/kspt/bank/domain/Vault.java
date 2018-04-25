@@ -21,7 +21,7 @@ public final class Vault {
     public static Clock CLOCK = Clock.systemDefaultZone();
 
     @Getter
-    private final static VaultHardware vaultHardware = new VaultHardware();
+    private static VaultHardware vaultHardware;
 
     private final EnumMap<CellSize, List<Cell>> cells;
 
@@ -48,6 +48,7 @@ public final class Vault {
     }
 
     private Vault() {
+        vaultHardware = new VaultHardware();
         cells = new EnumMap<>(CellSize.class);
         cells.put(CellSize.SMALL, vaultHardware.getCellsOfSize(CellSize.SMALL));
         cells.put(CellSize.MEDIUM, vaultHardware.getCellsOfSize(CellSize.MEDIUM));

@@ -2,7 +2,11 @@ package kspt.bank.domain.bp;
 
 import com.statemachinesystems.mockclock.MockClock;
 import kspt.bank.boundaries.ApplicationsRepository;
+import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.boundaries.NotificationGate;
+import kspt.bank.dao.DatabaseApplicationsRepository;
+import kspt.bank.dao.DatabaseClientsRepository;
+import kspt.bank.dao.InMemoryApplicationsRepository;
 import kspt.bank.domain.*;
 import kspt.bank.domain.entities.*;
 import kspt.bank.external.Invoice;
@@ -24,8 +28,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-class LeasingExpiryTest {
-    private final ApplicationsRepository applicationsRepository = new InMemoryApplicationsRepository();
+class LeasingExpiryTest extends TestUsingDatabase {
+    private final ClientsRepository clientsRepository = new DatabaseClientsRepository();
+
+    private final ApplicationsRepository applicationsRepository = new DatabaseApplicationsRepository();
 
     private final PaymentGate paymentGate = new SimplePaymentSystem();
 
@@ -147,7 +153,7 @@ class LeasingExpiryTest {
 
         final Precious precious = new Precious(1, "The Ring Of Power");
 
-        final Cell cell = Vault.getInstance().requestCell(CellSize.SMALL);
+        final Cell cell = new Cell(1, CellSize.SMALL);
 
         final Period initialLeasingPeriod = Period.ofDays(10);
 
@@ -181,6 +187,7 @@ class LeasingExpiryTest {
         resetSingleton();
         Vault.getInstance().getLeasingController().setTimersCheckPeriodMillis(
                 LeasingControlInteractorTest.LEASING_TIMERS_CHECK_PERIOD_MS);
+        clientsRepository.add(roleClient.client);
     }
 
     private void resetSingleton()

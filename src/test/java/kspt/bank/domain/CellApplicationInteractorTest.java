@@ -46,7 +46,7 @@ class CellApplicationInteractorTest {
         // then
         assertThat(application.getLeaseholder()).isEqualToIgnoringGivenFields(client, "id");
         assertThat(application.getStatus()).isEqualTo(CellApplicationStatus.CREATED);
-        verify(applicationsRepository).add(application);
+        verify(applicationsRepository).save(application);
         verify(clientsRepository).add(argThat(c -> c.equalsIgnoringId(client)));
     }
 
@@ -63,7 +63,7 @@ class CellApplicationInteractorTest {
         // then
         assertThat(application.getLeaseholder()).isEqualTo(client);
         assertThat(application.getStatus()).isEqualTo(CellApplicationStatus.CREATED);
-        verify(applicationsRepository).add(application);
+        verify(applicationsRepository).save(application);
         verify(clientsRepository, never()).add(any());
     }
 
