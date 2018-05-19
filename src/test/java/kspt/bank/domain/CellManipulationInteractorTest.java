@@ -30,11 +30,11 @@ class CellManipulationInteractorTest {
 
     private final Client client = TestDataGenerator.getSampleClient();
 
-    private final Cell cellOne = new Cell(1, CellSize.SMALL);
+    private Cell cellOne;
 
-    private final Cell cellTwo = new Cell(2, CellSize.MEDIUM);
+    private Cell cellTwo;
 
-    private final Cell cellThree = new Cell(3, CellSize.BIG);
+    private Cell cellThree;
 
     private final Precious myPrecious = new Precious(1, "The Ring Of Power");
 
@@ -125,7 +125,15 @@ class CellManipulationInteractorTest {
     }
 
     @BeforeEach
-    void resetSingleton()
+    void setUp()
+    throws Exception {
+        resetSingleton();
+        cellOne = Vault.getInstance().requestCell(CellSize.SMALL);
+        cellTwo = Vault.getInstance().requestCell(CellSize.MEDIUM);
+        cellThree = Vault.getInstance().requestCell(CellSize.BIG);
+    }
+
+    private void resetSingleton()
     throws Exception {
         Field instance = Vault.class.getDeclaredField("instance");
         instance.setAccessible(true);

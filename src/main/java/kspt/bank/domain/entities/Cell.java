@@ -9,6 +9,8 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class Cell extends ManualIdDomainObject {
+    public static boolean AUTOPERSIST = true;
+
     private final CellSize size;
 
     private Precious containedPrecious;
@@ -16,7 +18,7 @@ public class Cell extends ManualIdDomainObject {
     public Cell(final int id, final CellSize size) {
         super(id);
         this.size = size;
-        persist();
+        if (AUTOPERSIST) persist();
     }
 
     public Cell(final int id, final CellSize size, final Precious containedPrecious) {
@@ -31,12 +33,12 @@ public class Cell extends ManualIdDomainObject {
 
     public void setContainedPrecious(final Precious precious) {
         this.containedPrecious = precious;
-        persist();
+        if (AUTOPERSIST) persist();
     }
 
     public void removeContainedPrecious() {
         containedPrecious = null;
-        persist();
+        if (AUTOPERSIST) persist();
     }
 
     private void persist() {

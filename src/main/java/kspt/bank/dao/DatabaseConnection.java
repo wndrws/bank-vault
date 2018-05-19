@@ -13,14 +13,21 @@ public class DatabaseConnection {
     private static final String DB_NAME = "bank_vault";
     private static final String DB_USER = "jdbc";
     private static final String DB_PASS = "JavaJ";
+    private static final String DB_URL =
+            "jdbc:postgresql://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME;
 
-    @Getter(value = AccessLevel.PUBLIC, lazy = true)
-    private final static Connection connection = createConnection();
+    private static Connection connection;
+
+    public static synchronized Connection getConnection() {
+        if (connection == null) {
+            connection = createConnection();
+        }
+        return connection;
+    }
 
     private static Connection createConnection() {
-        final String url = "jdbc:postgresql://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME;
         try {
-            return DriverManager.getConnection(url, DB_USER, DB_PASS);
+            return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
@@ -30,6 +37,7 @@ public class DatabaseConnection {
     public static void closeConnection() {
         try {
             getConnection().close();
+            connection = null;
         } catch (SQLException e) {
             e.printStackTrace();
         }

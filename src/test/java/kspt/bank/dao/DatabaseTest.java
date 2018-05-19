@@ -22,6 +22,7 @@ class DatabaseTest {
     @BeforeAll
     static void openConnection()
     throws SQLException {
+        Cell.AUTOPERSIST = false;
         conn = DatabaseConnection.getConnection();
         conn.setAutoCommit(false);
     }
