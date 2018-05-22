@@ -1,6 +1,7 @@
 plugins {
     id 'io.franzbecker.gradle-lombok' version '1.10'
     id 'java'
+    id "org.jetbrains.kotlin.jvm" version "1.2.41"
 }
 
 lombok {
@@ -11,6 +12,7 @@ lombok {
 group 'kspt'
 version '0.1-SNAPSHOT'
 apply plugin: 'java'
+apply plugin: 'kotlin'
 sourceCompatibility = 1.8
 
 def slf4j = 'org.slf4j:slf4j-api:1.7.25'
@@ -33,9 +35,14 @@ dependencies {
     compile slf4j, slf4jBinding
     compile group: 'com.google.guava', name: 'guava', version: '23.0'
     compile group: 'com.statemachinesystems', name: 'mock-clock', version: '1.0'
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter', version: '2.0.2.RELEASE'
-    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.0.2.RELEASE'
     testCompile group: 'org.assertj', name: 'assertj-core', version: '3.8.0'
     testCompile group: 'org.mockito', name: 'mockito-core', version: '2.11.0'
     testRuntime junit5
+    // For Kotlin
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.2.41"
+    compile group: 'no.tornado', name: 'tornadofx', version: '1.7.16'
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget= 1.8
 }
