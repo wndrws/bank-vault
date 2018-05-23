@@ -1,0 +1,30 @@
+plugins {
+    id 'io.franzbecker.gradle-lombok' version '1.10'
+    id 'java'
+}
+
+lombok {
+    version = "1.16.18"
+    sha256 = ""
+}
+
+def slf4j = 'org.slf4j:slf4j-api:1.7.25'
+def slf4jBinding = ['ch.qos.logback:logback-core:1.2.3','ch.qos.logback:logback-classic:1.2.3']
+
+def junitPlatformVersion = '1.1.0'
+def junitJupiterVersion  = '5.1.0'
+def junit5 = ["org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}",
+              "org.junit.jupiter:junit-jupiter-params:${junitJupiterVersion}",
+              "org.junit.platform:junit-platform-launcher:${junitPlatformVersion}"]
+
+def jdbcDriver = "org.postgresql:postgresql:42.2.0"
+
+dependencies {
+    compile jdbcDriver
+    compile slf4j, slf4jBinding
+    compile group: 'com.google.guava', name: 'guava', version: '23.0'
+    compile group: 'com.statemachinesystems', name: 'mock-clock', version: '1.0'
+    testCompile group: 'org.assertj', name: 'assertj-core', version: '3.8.0'
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.11.0'
+    testRuntime junit5
+}

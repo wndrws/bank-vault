@@ -8,3 +8,6 @@
  */
 
 rootProject.name = 'bank-vault'
+include 'bank-vault-ui'
+include 'bank-vault-core'
+

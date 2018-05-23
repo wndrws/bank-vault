@@ -20,4 +20,11 @@ public class DatabaseApplicationsRepository implements ApplicationsRepository {
                 DataMapperRegistry.getMapper(CellApplication.class);
         return mapper.findAllByClient(client);
     }
+
+    @Override
+    public CellApplication find(Integer id) {
+        final CellApplicationDataMapper mapper = (CellApplicationDataMapper)
+                DataMapperRegistry.getMapper(CellApplication.class);
+        return mapper.find(id);
+    }
 }

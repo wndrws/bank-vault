@@ -3,7 +3,7 @@ package kspt.bank.views
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Insets
-import kspt.bank.controllers.ClientInfoController
+import kspt.bank.controllers.CellApplicationController
 import tornadofx.*
 import java.time.LocalDate
 
@@ -18,7 +18,7 @@ class ClientInfoView : View("Bank Vault") {
     private val phone = model.bind { SimpleStringProperty("") }
     private val email = model.bind { SimpleStringProperty("") }
 
-    private val clientInfoController: ClientInfoController by inject()
+    private val cellApplicationController: CellApplicationController by inject()
 
     override val root = vbox {
         padding = Insets(20.0)
@@ -63,7 +63,7 @@ class ClientInfoView : View("Bank Vault") {
                 anchorpaneConstraints { rightAnchor = 0 }
                 enableWhen(model.valid)
                 action {
-                    clientInfoController.processClientInfo(
+                    cellApplicationController.processClientInfo(
                             serial.value,
                             firstName.value,
                             lastName.value,

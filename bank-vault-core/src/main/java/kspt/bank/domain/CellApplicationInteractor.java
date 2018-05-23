@@ -7,16 +7,17 @@ import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.external.Invoice;
 import kspt.bank.external.PaymentGate;
 import kspt.bank.domain.entities.*;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Period;
 import java.util.HashMap;
 import java.util.Map;
 
-@Slf4j
 public class CellApplicationInteractor {
     private final ClientsRepository clientsRepository;
 
+    @Getter
     private final ApplicationsRepository applicationsRepository;
 
     private final PaymentGate paymentGate;
@@ -45,7 +46,6 @@ public class CellApplicationInteractor {
         final CellApplication newApplication =
                 new CellApplication(getOrCreateClient(passportInfo, phone, email));
         applicationsRepository.save(newApplication);
-        log.info("Created application: {}", newApplication);
         return newApplication;
     }
 

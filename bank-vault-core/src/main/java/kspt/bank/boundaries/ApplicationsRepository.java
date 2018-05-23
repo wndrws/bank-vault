@@ -9,4 +9,6 @@ public interface ApplicationsRepository {
     void save(CellApplication application);
 
     Collection<CellApplication> getByClient(Client client);
+
+    CellApplication find(Integer id);
 }

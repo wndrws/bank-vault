@@ -26,6 +26,14 @@ public class InMemoryApplicationsRepository implements ApplicationsRepository {
         return repository.getOrDefault(client.getId(), new HashSet<>());
     }
 
+    @Override
+    public CellApplication find(Integer id) {
+        return repository.entrySet().stream()
+                .flatMap(entry -> entry.getValue().stream())
+                .filter(app -> app.getId().equals(id))
+                .findFirst().orElse(null);
+    }
+
     public Collection<CellApplication> getAll() {
         return repository.values().stream()
                 .flatMap(Collection::stream).collect(Collectors.toList());

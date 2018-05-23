@@ -4,12 +4,12 @@ import kspt.bank.dao.InMemoryApplicationsRepository
 import kspt.bank.dao.InMemoryClientsRepository
 import kspt.bank.domain.CellApplicationInteractor
 import kspt.bank.external.SimplePaymentSystem
-import kspt.bank.services.ClientInfoService
+import kspt.bank.services.CellApplicationService
 import tornadofx.Controller
 
-class ClientInfoServiceBean : Controller() {
+class CellApplicationServiceBean : Controller() {
     private val cellApplicationInteractorBean : CellApplicationInteractorBean by inject()
-    val service by lazy { ClientInfoService(cellApplicationInteractorBean.interactor) }
+    val service by lazy { CellApplicationService(cellApplicationInteractorBean.interactor) }
 }
 
 class CellApplicationInteractorBean : Controller() {
