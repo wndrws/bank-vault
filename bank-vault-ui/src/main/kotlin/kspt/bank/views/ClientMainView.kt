@@ -28,11 +28,11 @@ class ClientMainView: View("Bank Vault") {
             "zone" to "Europe/Moscow"
     )
 
-    private val timerExecutor = Executors.newSingleThreadScheduledExecutor()
+    private var timerExecutor = Executors.newSingleThreadScheduledExecutor()
 
     private val cellsTable: TableView<CellTableEntry> by fxid("tableMyCells")
 
-    val testData = FXCollections.observableArrayList<CellTableEntry>()
+    val cellTableItems = FXCollections.observableArrayList<CellTableEntry>()
 
     init {
         initCellsTable()
@@ -45,7 +45,7 @@ class ClientMainView: View("Bank Vault") {
         cellsTable.readonlyColumn("Размер", CellTableEntry::size)
         cellsTable.readonlyColumn("Содержимое", CellTableEntry::precious)
         cellsTable.readonlyColumn("Аренда до", CellTableEntry::leaseEnding)
-        cellsTable.items = testData
+        cellsTable.items = cellTableItems
     }
 
     private fun initTimeRestClient() {
@@ -82,6 +82,7 @@ class ClientMainView: View("Bank Vault") {
 
     override fun onDock() {
         super.onDock()
+        timerExecutor = Executors.newSingleThreadScheduledExecutor()
         timerExecutor.scheduleAtFixedRate({ runLater { displayCurrentTime() } }, 0, 1, TimeUnit.SECONDS)
     }
 

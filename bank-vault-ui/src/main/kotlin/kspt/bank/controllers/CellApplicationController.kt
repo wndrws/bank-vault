@@ -70,7 +70,7 @@ class CellApplicationController : Controller() {
         val clientMainView = find(ClientMainView::class)
         val applicationsRepositoryBean = find(ApplicationsRepositoryBean::class)
         val app = applicationsRepositoryBean.repository.find(applicationId)
-        clientMainView.testData.add(CellTableEntry(app.cell?.id ?: -1, app.status.name,
+        clientMainView.cellTableItems.add(CellTableEntry(app.cell?.id ?: -1, app.status.name,
                 app.cell?.size?.asChoosableCellSize()?.toString() ?: "",
                 app.cell?.containedPrecious?.name ?: "", app.leasePeriod?.
                 let { LocalDate.now().plusDays(it.days.toLong()) } ?.toString() ?: ""))
