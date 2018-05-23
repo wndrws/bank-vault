@@ -53,7 +53,7 @@
                                     <Font size="24.0" />
                                  </font>
                               </Label>
-                              <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" text="23.05.2018 00:00:00" textAlignment="RIGHT" textFill="#9a9a9a" AnchorPane.rightAnchor="0.0">
+                              <Label fx:id="timer" alignment="CENTER_RIGHT" contentDisplay="RIGHT" text="23.05.2018 00:00:00" textAlignment="RIGHT" textFill="#9a9a9a" AnchorPane.rightAnchor="0.0">
                                  <font>
                                     <Font size="24.0" />
                                  </font>
