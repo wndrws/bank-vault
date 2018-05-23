@@ -6,8 +6,6 @@ import javafx.scene.control.Label
 import javafx.scene.control.TableView
 import javafx.scene.layout.AnchorPane
 import tornadofx.*
-import java.time.LocalDate
-import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -60,10 +58,10 @@ class ClientMainView: View("Bank Vault") {
         try {
             println(response.request.uri)
             println(response.statusCode)
-            if (response.ok()) {
-                time = response.one().getString("formatted")
+            time = if (response.ok()) {
+                response.one().getString("formatted")
             } else {
-                time = "<error reading time>"
+                "<error reading time>"
             }
         } finally {
             response.consume()
