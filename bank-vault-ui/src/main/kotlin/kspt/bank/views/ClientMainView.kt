@@ -5,12 +5,20 @@ import javafx.collections.FXCollections
 import javafx.scene.control.Label
 import javafx.scene.control.TableView
 import javafx.scene.layout.AnchorPane
+import kspt.bank.controllers.WebTimeController
+import kspt.bank.services.BankVaultCoreApplication
+import kspt.bank.services.WebTimeService
 import tornadofx.*
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 class ClientMainView: View("Bank Vault") {
     override val root : AnchorPane by fxml("/fxml/ClientMain.fxml")
+
+    private val timeController: WebTimeController by inject()
 
     private val timeProperty = SimpleStringProperty()
 
@@ -18,25 +26,15 @@ class ClientMainView: View("Bank Vault") {
 
     private val timer: Label by fxid("timer")
 
-    private val timeAPI: Rest by inject()
-
-    private val timeAPIQueryParams = mapOf(
-            "key" to "FH2D5XEBSYPA",
-            "format" to "json",
-            "fields" to "formatted",
-            "by" to "zone",
-            "zone" to "Europe/Moscow"
-    )
-
     private var timerExecutor = Executors.newSingleThreadScheduledExecutor()
 
     private val cellsTable: TableView<CellTableEntry> by fxid("tableMyCells")
 
-    val cellTableItems = FXCollections.observableArrayList<CellTableEntry>()
+    val cellTableItems = FXCollections.observableArrayList<CellTableEntry>()!!
 
     init {
         initCellsTable()
-        initTimeRestClient()
+        timer.bind(timeProperty)
     }
 
     private fun initCellsTable() {
@@ -48,24 +46,8 @@ class ClientMainView: View("Bank Vault") {
         cellsTable.items = cellTableItems
     }
 
-    private fun initTimeRestClient() {
-        timer.bind(timeProperty)
-        timeAPI.baseURI = "http://api.timezonedb.com/v2"
-    }
-
     private fun displayCurrentTime() {
-        val response = timeAPI.get("get-time-zone${timeAPIQueryParams.queryString}")
-        try {
-            println(response.request.uri)
-            println(response.statusCode)
-            time = if (response.ok()) {
-                response.one().getString("formatted")
-            } else {
-                "<error reading time>"
-            }
-        } finally {
-            response.consume()
-        }
+        time = timeController.getFormattedDateTime("Europe/Moscow")
     }
 
     fun lease() {

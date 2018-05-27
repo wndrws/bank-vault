@@ -89,8 +89,13 @@ public final class Vault {
                 Thread.sleep(duration.toMillis());
                 pendingCells.remove(cell);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
         });
+    }
+
+    public void stop() {
+        pendingKeepersPool.shutdownNow();
+        leasingController.stop();
     }
 }

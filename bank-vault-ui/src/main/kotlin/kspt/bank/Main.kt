@@ -1,19 +1,17 @@
 package kspt.bank
 
 import javafx.application.Application
+import kspt.bank.services.BankVaultCoreApplication
 import kspt.bank.views.ClientMainView
 import tornadofx.App
-import tornadofx.runAsync
 
 class MyApp: App(ClientMainView::class) {
-    private val server: WebServer by inject()
-
     init {
-        runAsync { server.start() }
+        BankVaultCoreApplication.start();
     }
 
     override fun stop() {
-        server.stop()
+        BankVaultCoreApplication.shutdown();
         super.stop()
     }
 }

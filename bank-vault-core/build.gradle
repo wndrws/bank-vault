@@ -8,9 +8,6 @@ lombok {
     sha256 = ""
 }
 
-def slf4j = 'org.slf4j:slf4j-api:1.7.25'
-def slf4jBinding = ['ch.qos.logback:logback-core:1.2.3','ch.qos.logback:logback-classic:1.2.3']
-
 def junitPlatformVersion = '1.1.0'
 def junitJupiterVersion  = '5.1.0'
 def junit5 = ["org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}",
@@ -19,9 +16,12 @@ def junit5 = ["org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}",
 
 def jdbcDriver = "org.postgresql:postgresql:42.2.0"
 
+def springBootVersion = '2.0.2.RELEASE'
+def springBoot = ["org.springframework.boot:spring-boot-starter-web:${springBootVersion}"]
+
 dependencies {
     compile jdbcDriver
-    compile slf4j, slf4jBinding
+    compile springBoot
     compile group: 'com.google.guava', name: 'guava', version: '23.0'
     compile group: 'com.statemachinesystems', name: 'mock-clock', version: '1.0'
     testCompile group: 'org.assertj', name: 'assertj-core', version: '3.8.0'

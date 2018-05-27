@@ -9,4 +9,11 @@ subprojects {
     version = '1.0'
     apply plugin: 'java'
     sourceCompatibility = 1.8
+
+    def slf4j = 'org.slf4j:slf4j-api:1.7.25'
+    def slf4jBinding = ['ch.qos.logback:logback-core:1.2.3','ch.qos.logback:logback-classic:1.2.3']
+
+    dependencies {
+        compile slf4j, slf4jBinding
+    }
 }

@@ -65,6 +65,10 @@ public class LeasingController {
         return false;
     }
 
+    public void stop() {
+        timersPool.shutdownNow();
+    }
+
     ImmutableMap<Cell, Client> getCellsAndLeaseholders() {
         return leasingInfo.entrySet().stream()
                 .map(entry -> new AbstractMap.SimpleEntry<>(
