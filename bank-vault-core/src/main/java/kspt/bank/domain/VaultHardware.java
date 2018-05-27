@@ -2,7 +2,7 @@ package kspt.bank.domain;
 
 import com.google.common.collect.ImmutableSet;
 import kspt.bank.domain.entities.Cell;
-import kspt.bank.domain.entities.CellSize;
+import kspt.bank.enums.CellSize;
 import lombok.Getter;
 
 import java.util.*;

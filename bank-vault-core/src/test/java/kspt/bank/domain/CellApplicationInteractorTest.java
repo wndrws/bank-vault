@@ -2,6 +2,9 @@ package kspt.bank.domain;
 
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.ClientsRepository;
+import kspt.bank.enums.CellApplicationStatus;
+import kspt.bank.enums.CellSize;
+import kspt.bank.enums.PaymentMethod;
 import kspt.bank.external.Invoice;
 import kspt.bank.external.PaymentGate;
 import kspt.bank.domain.ClientPassportValidator.IncorrectPassportInfo;

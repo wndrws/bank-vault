@@ -2,6 +2,7 @@ package kspt.bank.domain;
 
 import kspt.bank.boundaries.NotificationGate;
 import kspt.bank.domain.entities.*;
+import kspt.bank.enums.CellSize;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,8 +1,7 @@
 package kspt.bank.domain;
 
 import kspt.bank.domain.entities.Cell;
-import kspt.bank.domain.entities.CellSize;
-import kspt.bank.domain.entities.Client;
+import kspt.bank.enums.CellSize;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

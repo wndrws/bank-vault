@@ -3,6 +3,7 @@ package kspt.bank.domain.entities;
 import kspt.bank.dao.CellDataMapper;
 import kspt.bank.dao.DataMapperRegistry;
 import kspt.bank.dao.ManualIdDomainObject;
+import kspt.bank.enums.CellSize;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

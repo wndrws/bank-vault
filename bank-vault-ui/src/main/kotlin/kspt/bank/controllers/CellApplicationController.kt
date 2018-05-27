@@ -1,7 +1,7 @@
 package kspt.bank.controllers
 
 import javafx.stage.StageStyle
-import kspt.bank.domain.entities.CellSize
+import kspt.bank.enums.CellSize
 import kspt.bank.services.BankVaultCoreApplication
 import kspt.bank.services.BankVaultFacade
 import kspt.bank.views.*

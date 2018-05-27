@@ -1,6 +1,6 @@
 package kspt.bank.messaging;
 
-import kspt.bank.domain.entities.CellSize;
+import kspt.bank.enums.CellSize;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor

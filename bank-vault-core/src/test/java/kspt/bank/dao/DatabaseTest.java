@@ -2,7 +2,7 @@ package kspt.bank.dao;
 
 import kspt.bank.domain.TestDataGenerator;
 import kspt.bank.domain.entities.Cell;
-import kspt.bank.domain.entities.CellSize;
+import kspt.bank.enums.CellSize;
 import kspt.bank.domain.entities.Client;
 import kspt.bank.domain.entities.Precious;
 import org.junit.jupiter.api.*;

@@ -1,5 +1,6 @@
 package kspt.bank.domain.entities;
 
+import kspt.bank.enums.ManipulationType;
 import lombok.Getter;
 import lombok.Value;
 

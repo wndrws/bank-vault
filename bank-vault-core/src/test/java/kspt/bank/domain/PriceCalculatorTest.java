@@ -1,15 +1,10 @@
 package kspt.bank.domain;
 
 import kspt.bank.domain.entities.Cell;
-import kspt.bank.domain.entities.CellSize;
+import kspt.bank.enums.CellSize;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsSource;
-import org.junit.jupiter.params.provider.MethodSource;
-
-import java.util.Arrays;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -1,7 +1,7 @@
 package kspt.bank.domain;
 
 import kspt.bank.domain.entities.CellApplication;
-import kspt.bank.domain.entities.CellApplicationStatus;
+import kspt.bank.enums.CellApplicationStatus;
 import kspt.bank.domain.entities.Client;
 import kspt.bank.domain.entities.PassportInfo;
 import lombok.experimental.UtilityClass;

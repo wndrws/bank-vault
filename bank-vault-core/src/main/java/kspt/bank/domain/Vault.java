@@ -3,7 +3,7 @@ package kspt.bank.domain;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import kspt.bank.domain.entities.Cell;
-import kspt.bank.domain.entities.CellSize;
+import kspt.bank.enums.CellSize;
 import lombok.Getter;
 import lombok.Synchronized;
 

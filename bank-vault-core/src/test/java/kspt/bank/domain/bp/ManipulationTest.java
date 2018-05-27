@@ -5,6 +5,7 @@ import kspt.bank.domain.CellManipulationInteractor;
 import kspt.bank.domain.TestDataGenerator;
 import kspt.bank.domain.Vault;
 import kspt.bank.domain.entities.*;
+import kspt.bank.enums.CellSize;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;

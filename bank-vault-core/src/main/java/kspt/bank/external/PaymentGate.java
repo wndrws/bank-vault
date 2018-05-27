@@ -1,6 +1,6 @@
 package kspt.bank.external;
 
-import kspt.bank.domain.entities.PaymentMethod;
+import kspt.bank.enums.PaymentMethod;
 
 public interface PaymentGate {
     Invoice issueInvoice(long sum);

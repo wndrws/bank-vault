@@ -4,11 +4,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.ClientsRepository;
+import kspt.bank.enums.CellApplicationStatus;
+import kspt.bank.enums.CellSize;
 import kspt.bank.external.Invoice;
 import kspt.bank.external.PaymentGate;
 import kspt.bank.domain.entities.*;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 
 import java.time.Period;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package kspt.bank.domain.entities;
+package kspt.bank.enums;
 
 public enum ManipulationType {
     NONE, PUT, GET

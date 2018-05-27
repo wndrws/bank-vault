@@ -3,7 +3,7 @@ package kspt.bank.dao;
 import com.google.common.base.Preconditions;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.CellApplication;
-import kspt.bank.domain.entities.CellApplicationStatus;
+import kspt.bank.enums.CellApplicationStatus;
 import kspt.bank.domain.entities.Client;
 
 import java.sql.*;

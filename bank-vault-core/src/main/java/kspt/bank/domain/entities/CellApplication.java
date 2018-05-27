@@ -1,10 +1,8 @@
 package kspt.bank.domain.entities;
 
 import kspt.bank.dao.AutoIdDomainObject;
-import kspt.bank.dao.CellApplicationDataMapper;
-import kspt.bank.dao.DataMapperRegistry;
-import kspt.bank.dao.DomainObject;
 import kspt.bank.domain.PriceCalculator;
+import kspt.bank.enums.CellApplicationStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

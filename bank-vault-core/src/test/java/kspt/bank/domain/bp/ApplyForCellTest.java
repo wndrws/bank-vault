@@ -4,6 +4,9 @@ import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.dao.DatabaseApplicationsRepository;
 import kspt.bank.dao.DatabaseClientsRepository;
+import kspt.bank.enums.CellApplicationStatus;
+import kspt.bank.enums.CellSize;
+import kspt.bank.enums.PaymentMethod;
 import kspt.bank.external.Invoice;
 import kspt.bank.external.PaymentGate;
 import kspt.bank.domain.*;
@@ -14,7 +17,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import java.lang.reflect.Field;
-import java.sql.SQLException;
 import java.time.Period;
 
 import static org.assertj.core.api.Assertions.assertThat;

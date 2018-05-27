@@ -1,6 +1,6 @@
 package kspt.bank.messaging;
 
-import kspt.bank.domain.entities.PaymentMethod;
+import kspt.bank.enums.PaymentMethod;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor

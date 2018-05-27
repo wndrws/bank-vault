@@ -6,7 +6,7 @@ import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.NotificationGate;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.CellApplication;
-import kspt.bank.domain.entities.CellApplicationStatus;
+import kspt.bank.enums.CellApplicationStatus;
 import kspt.bank.domain.entities.Client;
 import kspt.bank.external.Invoice;
 import kspt.bank.external.PaymentGate;
