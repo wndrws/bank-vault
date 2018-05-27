@@ -16,7 +16,6 @@ public class PreciousDataMapper extends AbstractDataMapper {
         super(databaseConnection, useCache);
     }
 
-
     @Override
     protected String getTableName() {
         return TABLE_NAME;

@@ -2,12 +2,11 @@ package kspt.bank
 
 import javafx.application.Application
 import kspt.bank.controllers.NotificationController
-import kspt.bank.services.BankVaultCoreApplication
 import kspt.bank.views.ClientMainView
 import tornadofx.App
 
 class MyApp: App(ClientMainView::class) {
-    val notificationController: NotificationController by inject()
+    private val notificationController: NotificationController by inject()
 
     init {
         BankVaultCoreApplication.start(notificationController);

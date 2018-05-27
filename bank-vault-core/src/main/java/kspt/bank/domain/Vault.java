@@ -59,7 +59,7 @@ public final class Vault {
     public Cell requestCell(final CellSize size) {
         final List<Cell> cellsOfRequestedSize = cells.getOrDefault(size, new ArrayList<>());
         if (cellsOfRequestedSize.size() > 0) {
-            return findNotLeasedCell(cellsOfRequestedSize);
+            return findAvailableCell(cellsOfRequestedSize);
         } else {
             return null;
         }
@@ -69,7 +69,7 @@ public final class Vault {
         return Stream.of(CellSize.values()).map(this::requestCell).findFirst().orElse(null);
     }
 
-    private Cell findNotLeasedCell(List<Cell> cellsOfRequestedSize) {
+    private Cell findAvailableCell(List<Cell> cellsOfRequestedSize) {
         return cellsOfRequestedSize.stream().filter(this::isAvailable).findAny().orElse(null);
     }
 

@@ -41,7 +41,7 @@ public class CellApplicationInteractor {
     }
 
     public CellApplication createApplication(final PassportInfo passportInfo, final String phone,
-            final String email) // TODO ? split implementations for existing and new client
+            final String email)
     throws ClientPassportValidator.IncorrectPassportInfo {
         ClientPassportValidator.checkValidity(passportInfo);
         final CellApplication newApplication =

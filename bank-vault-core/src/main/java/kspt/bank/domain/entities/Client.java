@@ -1,10 +1,8 @@
 package kspt.bank.domain.entities;
 
 import kspt.bank.dao.AutoIdDomainObject;
-import kspt.bank.dao.DomainObject;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import lombok.experimental.NonFinal;
 
 @EqualsAndHashCode(callSuper = true)
 @Value

@@ -1,14 +1,7 @@
-package kspt.bank.services;
+package kspt.bank;
 
-import kspt.bank.boundaries.ApplicationsRepository;
-import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.boundaries.NotificationGate;
-import kspt.bank.dao.InMemoryApplicationsRepository;
-import kspt.bank.dao.InMemoryClientsRepository;
-import kspt.bank.domain.CellApplicationInteractor;
 import kspt.bank.domain.Vault;
-import kspt.bank.external.PaymentGate;
-import kspt.bank.external.SimplePaymentSystem;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
@@ -27,31 +20,8 @@ public class BankVaultCoreApplication {
     private static NotificationGate notificationGate;
 
     @Bean
-    public ApplicationsRepository applicationsRepository() {
-        return new InMemoryApplicationsRepository();
-    }
-
-    @Bean
-    public ClientsRepository clientsRepository() {
-        return new InMemoryClientsRepository();
-    }
-
-    @Bean
-    public PaymentGate paymentGate() {
-        return new SimplePaymentSystem();
-    }
-
-    @Bean
     public NotificationGate notificationGate() {
         return notificationGate;
-    }
-
-    @Bean
-    public CellApplicationInteractor cellApplicationInteractor(
-            final ApplicationsRepository applicationsRepository,
-            final ClientsRepository clientsRepository,
-            final PaymentGate paymentGate) {
-        return new CellApplicationInteractor(clientsRepository, applicationsRepository, paymentGate);
     }
 
     public static void start(NotificationGate ng) {

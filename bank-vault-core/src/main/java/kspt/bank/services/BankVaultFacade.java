@@ -28,18 +28,22 @@ public class BankVaultFacade {
     @Autowired
     private final ApplicationsRepository applicationsRepository;
 
+    @Autowired
+    private final TransactionManager transactionManager;
+
     public Integer acceptClientInfo(String serial, String firstName, String lastName,
             String patronymic, LocalDate birthday, String phone, String email) {
         final PassportInfo passportInfo = new PassportInfo(
                 serial, firstName, lastName, patronymic, birthday);
-        final CellApplication cellApplication = cellApplicationInteractor.createApplication(
-                passportInfo, phone, email);
+        final CellApplication cellApplication = transactionManager.runTransactional(() ->
+                cellApplicationInteractor.createApplication(passportInfo, phone, email));
         return cellApplication.getId();
     }
 
     public Boolean requestCell(CellSize size, Period leasePeriod, Integer cellApplicationId) {
-        return cellApplicationInteractor.requestCell(size, leasePeriod,
-                cellApplicationInteractor.getApplicationsRepository().find(cellApplicationId));
+        return transactionManager.runTransactional(() ->
+                cellApplicationInteractor.requestCell(size, leasePeriod,
+                cellApplicationInteractor.getApplicationsRepository().find(cellApplicationId)));
     }
 
     public Optional<CellDTO> findCellInfo(Integer cellApplicationId) {

@@ -25,7 +25,6 @@ abstract class AbstractDataMapper {
         } else try {
             return tryToFindOne(databaseConnection, id);
         } catch (SQLException e) {
-            DatabaseConnection.closeConnection();
             throw new RuntimeException(e);
         }
     }
@@ -59,7 +58,6 @@ abstract class AbstractDataMapper {
         try {
             tryToInsert(databaseConnection, object);
         } catch (SQLException e) {
-            DatabaseConnection.closeConnection();
             throw new RuntimeException(e);
         }
     }
@@ -89,7 +87,6 @@ abstract class AbstractDataMapper {
         try {
             return tryToUpdate(databaseConnection, object);
         } catch (SQLException e) {
-            DatabaseConnection.closeConnection();
             throw new RuntimeException(e);
         }
     }
@@ -110,7 +107,6 @@ abstract class AbstractDataMapper {
         try {
             tryToDelete(databaseConnection, object);
         } catch (SQLException e) {
-            DatabaseConnection.closeConnection();
             throw new RuntimeException(e);
         }
     }
@@ -144,7 +140,6 @@ abstract class AbstractDataMapper {
         try {
             return tryToFindOneByCustomWhere(databaseConnection, whereClause, args);
         } catch (SQLException e) {
-            DatabaseConnection.closeConnection();
             throw new RuntimeException(e);
         }
     }
@@ -175,7 +170,6 @@ abstract class AbstractDataMapper {
         try {
             return tryToFindAllByCustomWhere(databaseConnection, whereClause, args);
         } catch (SQLException e) {
-            DatabaseConnection.closeConnection();
             throw new RuntimeException(e);
         }
     }
@@ -191,6 +185,17 @@ abstract class AbstractDataMapper {
             results.add(findOne(rs.getInt(1)));
         }
         return results;
+    }
+
+    Integer selectMaxId() {
+        try {
+            final Statement st = databaseConnection.createStatement();
+            final ResultSet resultSet =
+                    st.executeQuery("SELECT max(" + PK_COLUMN_LABEL + ") FROM " + getTableName());
+            return resultSet.next() ? resultSet.getInt(1) : 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected abstract void doInsert(DomainObject object, PreparedStatement st) throws SQLException;

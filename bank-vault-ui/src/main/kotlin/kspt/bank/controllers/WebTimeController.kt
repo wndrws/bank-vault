@@ -1,6 +1,6 @@
 package kspt.bank.controllers
 
-import kspt.bank.services.BankVaultCoreApplication
+import kspt.bank.BankVaultCoreApplication
 import kspt.bank.services.WebTimeService
 import java.lang.Exception
 import java.time.ZoneId

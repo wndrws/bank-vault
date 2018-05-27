@@ -147,6 +147,30 @@ class DatabaseTest {
         assertThat(foundClient).isEqualToComparingFieldByField(client);
     }
 
+    @Test
+    void testSelectMaxId_EmptyTable() {
+        // given
+        DataMapperRegistry.initialize(conn, false);
+        final ClientDataMapper clientMapper = (ClientDataMapper) DataMapperRegistry.getMapper(Client.class);
+        // when
+        final Integer maxId = clientMapper.selectMaxId();
+        // then
+        assertThat(maxId).isEqualTo(0);
+    }
+
+    @Test
+    void testSelectMaxId_NonEmptyTable() {
+        // given
+        DataMapperRegistry.initialize(conn, false);
+        final ClientDataMapper clientMapper = (ClientDataMapper) DataMapperRegistry.getMapper(Client.class);
+        final Client client = TestDataGenerator.getSampleClient();
+        clientMapper.insert(client);
+        // when
+        final Integer maxId = clientMapper.selectMaxId();
+        // then
+        assertThat(maxId).isEqualTo(1);
+    }
+
     @AfterEach
     void tearDown()
     throws SQLException {

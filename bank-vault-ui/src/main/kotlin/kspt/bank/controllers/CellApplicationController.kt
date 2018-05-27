@@ -5,7 +5,7 @@ import kspt.bank.CellStatus
 import kspt.bank.ChoosableCellSize
 import kspt.bank.enums.CellApplicationStatus
 import kspt.bank.enums.CellSize
-import kspt.bank.services.BankVaultCoreApplication
+import kspt.bank.BankVaultCoreApplication
 import kspt.bank.services.BankVaultFacade
 import kspt.bank.views.*
 import java.lang.Exception
@@ -21,7 +21,7 @@ class CellApplicationController : ErrorHandlingController() {
                           birthday: LocalDate, email: String, phone: String) {
         try {
             val applicationId = bankVaultFacade.acceptClientInfo(
-                    serial, firstName, lastName, patronymic, birthday, email, phone)
+                    serial, firstName, lastName, patronymic, birthday, phone, email)
             val next = find<ClientCellChoiceView>("cellApplicationId" to applicationId)
             find(ClientInfoView::class).replaceWith(next, sizeToScene = true)
         } catch (e: Exception) {
