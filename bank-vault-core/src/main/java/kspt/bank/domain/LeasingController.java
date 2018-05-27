@@ -1,6 +1,7 @@
 package kspt.bank.domain;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Range;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.Client;
@@ -75,6 +76,14 @@ public class LeasingController {
                         entry.getKey(), entry.getValue().leaseholder))
                 .collect(ImmutableMap.toImmutableMap(
                         Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public Range<LocalDate> getInfo(final Cell cell) {
+        if (leasingInfo.containsKey(cell)) {
+            return Range.closed(leasingInfo.get(cell).leaseBegin, leasingInfo.get(cell).leaseEnd);
+        } else {
+            return null;
+        }
     }
 
     @RequiredArgsConstructor

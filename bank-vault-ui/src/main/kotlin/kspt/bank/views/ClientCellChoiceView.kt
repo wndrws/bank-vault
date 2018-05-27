@@ -2,10 +2,9 @@ package kspt.bank.views
 
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.geometry.Insets
-import javafx.scene.text.Font
+import kspt.bank.ChoosableCellSize
 import kspt.bank.controllers.CellApplicationController
 import tornadofx.*
 import java.time.Period
@@ -55,13 +54,5 @@ class ClientCellChoiceView : View() {
                 }
             }
         }
-    }
-}
-
-enum class ChoosableCellSize(val displayName: String) {
-    SMALL ("Малый"), MEDIUM ("Средний"), BIG ("Большой");
-
-    override fun toString(): String {
-        return this.displayName
     }
 }

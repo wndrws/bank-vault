@@ -1,6 +1,9 @@
 package kspt.bank.controllers
 
 import javafx.stage.StageStyle
+import kspt.bank.CellStatus
+import kspt.bank.ChoosableCellSize
+import kspt.bank.enums.CellApplicationStatus
 import kspt.bank.enums.CellSize
 import kspt.bank.services.BankVaultCoreApplication
 import kspt.bank.services.BankVaultFacade
@@ -62,12 +65,27 @@ class CellApplicationController : ErrorHandlingController() {
         }
     }
 
+    private fun CellApplicationStatus.asCellStatus() : CellStatus {
+        return when(this) {
+            CellApplicationStatus.CELL_CHOSEN -> CellStatus.BOOKED;
+            CellApplicationStatus.APPROVED -> CellStatus.AWAITING;
+            CellApplicationStatus.PAID -> CellStatus.PAID;
+            else -> throw IllegalStateException("Non-convertible cell application status!")
+        }
+    }
+
     private fun updateCellsTable(applicationId: Int) {
         val clientMainView = find(ClientMainView::class)
-        val app = bankVaultFacade.findCellApplication(applicationId)
-        clientMainView.cellTableItems.add(CellTableEntry(app.cell?.id ?: -1, app.status.name,
-                app.cell?.size?.asChoosableCellSize()?.toString() ?: "",
-                app.cell?.containedPrecious?.name ?: "", app.leasePeriod?.
-                let { LocalDate.now().plusDays(it.days.toLong()) } ?.toString() ?: ""))
+        val cellInfo = bankVaultFacade.findCellInfo(applicationId)
+        cellInfo.ifPresent {
+            clientMainView.cellTableItems.add(ClientMainView.CellTableEntry(
+                    it.codeName,
+                    it.status.asCellStatus().displayName,
+                    it.size.asChoosableCellSize().displayName,
+                    it.containedPreciousName,
+                    it.leaseBegin?.toString() ?: "",
+                    it.leasePeriod.days)
+            )
+        }
     }
 }

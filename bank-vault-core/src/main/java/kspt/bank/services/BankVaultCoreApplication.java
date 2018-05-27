@@ -2,6 +2,7 @@ package kspt.bank.services;
 
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.ClientsRepository;
+import kspt.bank.boundaries.NotificationGate;
 import kspt.bank.dao.InMemoryApplicationsRepository;
 import kspt.bank.dao.InMemoryClientsRepository;
 import kspt.bank.domain.CellApplicationInteractor;
@@ -23,6 +24,8 @@ public class BankVaultCoreApplication {
     @Getter
     private static ConfigurableApplicationContext applicationContext;
 
+    private static NotificationGate notificationGate;
+
     @Bean
     public ApplicationsRepository applicationsRepository() {
         return new InMemoryApplicationsRepository();
@@ -39,6 +42,11 @@ public class BankVaultCoreApplication {
     }
 
     @Bean
+    public NotificationGate notificationGate() {
+        return notificationGate;
+    }
+
+    @Bean
     public CellApplicationInteractor cellApplicationInteractor(
             final ApplicationsRepository applicationsRepository,
             final ClientsRepository clientsRepository,
@@ -46,7 +54,8 @@ public class BankVaultCoreApplication {
         return new CellApplicationInteractor(clientsRepository, applicationsRepository, paymentGate);
     }
 
-    public static void start() {
+    public static void start(NotificationGate ng) {
+        notificationGate = ng;
         applicationContext = SpringApplication.run(BankVaultCoreApplication.class);
     }
 

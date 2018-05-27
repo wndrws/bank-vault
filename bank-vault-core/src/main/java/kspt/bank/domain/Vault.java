@@ -94,6 +94,10 @@ public final class Vault {
         });
     }
 
+    public boolean isPending(final Cell cell) {
+        return pendingCells.contains(cell);
+    }
+
     public void stop() {
         pendingKeepersPool.shutdownNow();
         leasingController.stop();
