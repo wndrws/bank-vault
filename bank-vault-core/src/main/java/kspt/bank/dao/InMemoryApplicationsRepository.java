@@ -33,7 +33,8 @@ public class InMemoryApplicationsRepository implements ApplicationsRepository {
                 .findFirst().orElse(null);
     }
 
-    public Collection<CellApplication> getAll() {
+    @Override
+    public Collection<CellApplication> findAll() {
         return repository.values().stream()
                 .flatMap(Collection::stream).collect(Collectors.toList());
     }

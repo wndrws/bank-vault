@@ -6,13 +6,12 @@ import javafx.collections.FXCollections
 import javafx.geometry.Insets
 import kspt.bank.ChoosableCellSize
 import kspt.bank.controllers.CellApplicationController
+import kspt.bank.controllers.UserModel
 import tornadofx.*
 import java.time.Period
 
 class ClientCellChoiceView : View() {
     private val model = ViewModel()
-
-    private val cellApplicationId: Int by param()
 
     private val cellSizes = FXCollections.observableArrayList(*ChoosableCellSize.values())
 
@@ -48,9 +47,8 @@ class ClientCellChoiceView : View() {
                 anchorpaneConstraints { rightAnchor = 0 }
                 enableWhen(model.valid)
                 action {
-                    println("Выбранный размер = ${selectedSize.value}")
                     cellApplicationController.processCellRequest(selectedSize.value,
-                            Period.ofDays(period.value.toInt()), cellApplicationId)
+                            Period.ofDays(period.value.toInt()))
                 }
             }
         }

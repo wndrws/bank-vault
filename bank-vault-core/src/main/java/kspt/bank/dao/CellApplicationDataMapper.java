@@ -101,4 +101,9 @@ public class CellApplicationDataMapper extends AbstractDataMapper {
     List<CellApplication> findAllByClient(final Client client) {
         return findAllByCustomWhere("client_id = ?", client.getId());
     }
+
+    @SuppressWarnings("unchecked")
+    List<CellApplication> findAll() {
+        return super.findAll();
+    }
 }

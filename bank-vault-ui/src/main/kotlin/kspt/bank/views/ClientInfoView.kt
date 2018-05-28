@@ -3,7 +3,8 @@ package kspt.bank.views
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Insets
-import kspt.bank.controllers.CellApplicationController
+import kspt.bank.controllers.LoginController
+import kspt.bank.dto.ClientDTO
 import tornadofx.*
 import java.time.LocalDate
 
@@ -18,7 +19,10 @@ class ClientInfoView : View("Bank Vault") {
     private val phone = model.bind { SimpleStringProperty("") }
     private val email = model.bind { SimpleStringProperty("") }
 
-    private val cellApplicationController: CellApplicationController by inject()
+    private val username: String by param()
+    private val password: String by param()
+
+    private val loginController: LoginController by inject()
 
     override val root = vbox {
         padding = Insets(20.0)
@@ -52,26 +56,25 @@ class ClientInfoView : View("Bank Vault") {
         }
 
         anchorpane {
-            button("Назад" ) {
+            button("Отмена" ) {
                 anchorpaneConstraints { leftAnchor = 0 }
                 action {
-                    find(ClientInfoView::class).replaceWith(ClientMainView::class, sizeToScene = true)
+                    loginController.logout()
                 }
 
             }
-            button("Дальше") {
+            button("ОК") {
                 anchorpaneConstraints { rightAnchor = 0 }
                 enableWhen(model.valid)
                 action {
-                    cellApplicationController.processClientInfo(
+                    loginController.register(username, password, ClientDTO(
                             serial.value,
                             firstName.value,
                             lastName.value,
                             patronymic.value,
                             birthday.value,
                             email.value,
-                            phone.value
-                    )
+                            phone.value))
                 }
             }
         }

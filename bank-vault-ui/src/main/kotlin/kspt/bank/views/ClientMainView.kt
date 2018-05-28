@@ -5,6 +5,7 @@ import javafx.collections.FXCollections
 import javafx.scene.control.Label
 import javafx.scene.control.TableView
 import javafx.scene.layout.AnchorPane
+import kspt.bank.controllers.LoginController
 import kspt.bank.controllers.WebTimeController
 import tornadofx.*
 import java.util.concurrent.Executors
@@ -12,6 +13,8 @@ import java.util.concurrent.TimeUnit
 
 class ClientMainView: View("Bank Vault") {
     override val root : AnchorPane by fxml("/fxml/ClientMain.fxml")
+
+    private val loginController: LoginController by inject()
 
     private val timeController: WebTimeController by inject()
 
@@ -44,7 +47,7 @@ class ClientMainView: View("Bank Vault") {
 
 
     fun lease() {
-        this.replaceWith(ClientInfoView::class, sizeToScene = true)
+        this.replaceWith(ClientCellChoiceView::class, sizeToScene = true)
     }
 
     fun putPrecious() {
@@ -53,6 +56,10 @@ class ClientMainView: View("Bank Vault") {
 
     fun getPrecious() {
         println("GET")
+    }
+
+    fun logout() {
+        loginController.logout();
     }
 
     override fun onDock() {

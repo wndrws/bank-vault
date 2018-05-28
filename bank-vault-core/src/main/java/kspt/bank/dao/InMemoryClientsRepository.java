@@ -25,6 +25,13 @@ public class InMemoryClientsRepository implements ClientsRepository {
     }
 
     @Override
+    public Client find(Integer id) {
+        return clients.stream()
+                .filter(client -> client.getId().equals(id))
+                .findFirst().orElse(null);
+    }
+
+    @Override
     public void add(Client client) {
         clients.add(client);
     }

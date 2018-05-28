@@ -76,5 +76,4 @@ public class ClientDataMapper extends AbstractDataMapper {
         return (Client) findOneByCustomWhere("serial=? AND first_name=? AND last_name=?",
                 info.getSerial(), info.getFirstName(), info.getLastName());
     }
-
 }

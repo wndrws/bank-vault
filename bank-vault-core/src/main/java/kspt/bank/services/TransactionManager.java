@@ -70,6 +70,10 @@ class TransactionManager {
         }
     }
 
+    void runTransactional(Runnable action) {
+        runTransactional(() -> { action.run(); return null; });
+    }
+
     private void startTransaction()
     throws SQLException {
         if (persistenceEnabled) {

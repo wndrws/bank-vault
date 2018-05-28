@@ -187,6 +187,26 @@ abstract class AbstractDataMapper {
         return results;
     }
 
+    List findAll() {
+        try {
+            return tryToFindAll(databaseConnection);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List tryToFindAll(Connection conn)
+    throws SQLException {
+        final String query = "SELECT " + PK_COLUMN_LABEL + " FROM " + getTableName();
+        final Statement statement = conn.createStatement();
+        final ResultSet rs = statement.executeQuery(query);
+        final List<DomainObject> results = new ArrayList<>();
+        while (rs.next()) {
+            results.add(findOne(rs.getInt(1)));
+        }
+        return results;
+    }
+
     Integer selectMaxId() {
         try {
             final Statement st = databaseConnection.createStatement();

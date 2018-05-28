@@ -1,14 +1,13 @@
 package kspt.bank.dto;
 
-import com.google.common.collect.Range;
 import kspt.bank.enums.CellApplicationStatus;
 import kspt.bank.enums.CellSize;
-import lombok.AllArgsConstructor;
+import lombok.Value;
 
 import java.time.LocalDate;
 import java.time.Period;
 
-@AllArgsConstructor
+@Value
 public final class CellDTO {
     public final String codeName;
 

@@ -17,6 +17,12 @@ public class DatabaseClientsRepository implements ClientsRepository {
     }
 
     @Override
+    public Client find(Integer id) {
+        final ClientDataMapper mapper = (ClientDataMapper) DataMapperRegistry.getMapper(Client.class);
+        return mapper.find(id);
+    }
+
+    @Override
     public void add(Client client) {
         final ClientDataMapper mapper = (ClientDataMapper) DataMapperRegistry.getMapper(Client.class);
         mapper.insert(client);

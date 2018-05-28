@@ -11,4 +11,6 @@ public interface ApplicationsRepository {
     Collection<CellApplication> getByClient(Client client);
 
     CellApplication find(Integer id);
+
+    Collection<CellApplication> findAll();
 }

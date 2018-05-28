@@ -8,5 +8,7 @@ public interface ClientsRepository {
 
     Client getClientWith(PassportInfo passportInfo);
 
+    Client find(Integer id);
+
     void add(Client client);
 }
