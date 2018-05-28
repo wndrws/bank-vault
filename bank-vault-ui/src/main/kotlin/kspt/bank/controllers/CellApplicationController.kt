@@ -4,6 +4,7 @@ import javafx.stage.StageStyle
 import kspt.bank.BankVaultCoreApplication
 import kspt.bank.CellStatus
 import kspt.bank.ChoosableCellSize
+import kspt.bank.dto.CellDTO
 import kspt.bank.enums.CellApplicationStatus
 import kspt.bank.enums.CellSize
 import kspt.bank.services.BankVaultFacade
@@ -68,14 +69,22 @@ class CellApplicationController : ErrorHandlingController() {
         val clientMainView = find(ClientMainView::class)
         val cellInfo = bankVaultFacade.findCellInfo(applicationId)
         cellInfo.ifPresent {
-            clientMainView.cellTableItems.add(ClientMainView.CellTableEntry(
-                    it.codeName,
-                    it.status.asCellStatus().displayName,
-                    it.size.asChoosableCellSize().displayName,
-                    it.containedPreciousName,
-                    it.leaseBegin?.toString() ?: "",
-                    it.leasePeriod.days)
-            )
+            clientMainView.cellTableItems.add(it.toCellTableEntry())
         }
+    }
+
+    private fun CellDTO.toCellTableEntry(): ClientMainView.CellTableEntry =
+            ClientMainView.CellTableEntry(
+                    this.codeName,
+                    this.status.asCellStatus().displayName,
+                    this.size.asChoosableCellSize().displayName,
+                    this.containedPreciousName,
+                    this.leaseBegin?.toString() ?: "",
+                    this.leasePeriod.days)
+
+    fun fillCellsTable() {
+        val clientsCellsInfo = bankVaultFacade.findCellsInfoByClient(userModel.id.value.toInt())
+        find(ClientMainView::class).cellTableItems.setAll(
+                clientsCellsInfo.map { it.toCellTableEntry() })
     }
 }

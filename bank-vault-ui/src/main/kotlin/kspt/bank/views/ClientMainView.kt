@@ -5,6 +5,7 @@ import javafx.collections.FXCollections
 import javafx.scene.control.Label
 import javafx.scene.control.TableView
 import javafx.scene.layout.AnchorPane
+import kspt.bank.controllers.CellApplicationController
 import kspt.bank.controllers.LoginController
 import kspt.bank.controllers.WebTimeController
 import tornadofx.*
@@ -13,6 +14,8 @@ import java.util.concurrent.TimeUnit
 
 class ClientMainView: View("Bank Vault") {
     override val root : AnchorPane by fxml("/fxml/ClientMain.fxml")
+
+    private val cellApplicationController: CellApplicationController by inject()
 
     private val loginController: LoginController by inject()
 
@@ -24,7 +27,7 @@ class ClientMainView: View("Bank Vault") {
 
     private val timer: Label by fxid("timer")
 
-    private var timerExecutor = Executors.newSingleThreadScheduledExecutor()
+    var timerExecutor = Executors.newSingleThreadScheduledExecutor()
 
     private val cellsTable: TableView<CellTableEntry> by fxid("tableMyCells")
 
@@ -64,6 +67,7 @@ class ClientMainView: View("Bank Vault") {
 
     override fun onDock() {
         super.onDock()
+        cellApplicationController.fillCellsTable()
         timerExecutor = Executors.newSingleThreadScheduledExecutor()
         timerExecutor.scheduleAtFixedRate({
             val datetime = timeController.getFormattedDateTime("Europe/Moscow")
@@ -74,6 +78,7 @@ class ClientMainView: View("Bank Vault") {
     override fun onUndock() {
         super.onUndock()
         timerExecutor.shutdown()
+        cellTableItems.clear()
     }
 
     class CellTableEntry(val id: String, val status: String, val size: String, val precious: String,

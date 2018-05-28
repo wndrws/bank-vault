@@ -86,16 +86,17 @@ public class BankVaultFacade {
         return String.format("%s%03d", prefix, cell.getId());
     }
 
-//    public List<CellDTO> findCellsInfoByClient(Integer clientId) {
-//        final CellApplication app = applicationsRepository.find(cellApplicationId);
-//        final Cell cell = app.getCell();
-//        if (cell == null) {
-//            return Optional.empty();
-//        } else {
-//            return Optional.of(new CellDTO(getCodeName(cell), cell.getSize(), app.getStatus(),
-//                    getLeaseBegin(cell), app.getLeasePeriod(), getContainedPreciousName(cell)));
-//        }
-//    }
+    public List<CellDTO> findCellsInfoByClient(Integer clientId) {
+        final List<CellApplication> applications = applicationsRepository.findAll().stream()
+                .filter(app -> app.getLeaseholder().getId().equals(clientId))
+                .collect(Collectors.toList());
+        return applications.stream()
+                .map(app -> {
+                    final Cell cell = app.getCell();
+                    return new CellDTO(getCodeName(cell), cell.getSize(), app.getStatus(),
+                            getLeaseBegin(cell), app.getLeasePeriod(), getContainedPreciousName(cell));
+                }).collect(Collectors.toList());
+    }
 
     public List<CellApplicationDTO> findAllCellApplications() {
         return applicationsRepository.findAll().stream().map(app -> {

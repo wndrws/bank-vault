@@ -43,7 +43,7 @@ class LoginController : Controller() {
     fun register(username: String, password: String, clientInfo: ClientDTO) {
         runLater { status = "" }
         val userId = loginService.registerUser(Credentials(username, password), clientInfo)
-        runLater { userModel.item = User(userId, clientInfo) }
+        userModel.item = User(userId, clientInfo)
         find(ClientInfoView::class).replaceWith(ClientMainView::class, sizeToScene = true)
     }
 
