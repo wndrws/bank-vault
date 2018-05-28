@@ -3,6 +3,7 @@ package kspt.bank.services;
 import kspt.bank.dao.DataMapperRegistry;
 import kspt.bank.dao.DatabaseConnection;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +30,9 @@ class TransactionManager {
 
     private Savepoint savepoint;
 
+    @Autowired
+    private CellPendingService cellPendingService;
+
     @PostConstruct
     private void openConnection()
     throws SQLException {
@@ -45,6 +49,7 @@ class TransactionManager {
     @PreDestroy
     private void closeConnection()
     throws SQLException {
+        runTransactional(() -> cellPendingService.deletePendingApplications());
         if (usingDatabase) {
             if (!autocommitEnabled && !persistenceEnabled) {
                 connection.rollback(savepoint);

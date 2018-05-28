@@ -97,6 +97,10 @@ public class CellApplicationDataMapper extends AbstractDataMapper {
         return (CellApplication) findOne(id);
     }
 
+    CellApplication findByCell(Cell cell) {
+        return (CellApplication) findOneByCustomWhere("cell_id = ?", cell.getId());
+    }
+
     @SuppressWarnings("unchecked")
     List<CellApplication> findAllByClient(final Client client) {
         return findAllByCustomWhere("client_id = ?", client.getId());

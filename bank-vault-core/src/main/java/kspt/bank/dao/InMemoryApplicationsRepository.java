@@ -2,8 +2,10 @@ package kspt.bank.dao;
 
 import com.google.common.base.Preconditions;
 import kspt.bank.boundaries.ApplicationsRepository;
+import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.CellApplication;
 import kspt.bank.domain.entities.Client;
+import kspt.bank.enums.CellApplicationStatus;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,5 +39,15 @@ public class InMemoryApplicationsRepository implements ApplicationsRepository {
     public Collection<CellApplication> findAll() {
         return repository.values().stream()
                 .flatMap(Collection::stream).collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteApplicationForCell(Cell cell) {
+        final Optional<CellApplication> application = repository.values().stream()
+                .flatMap(Collection::stream)
+                .filter(app -> app.getCell().equals(cell)).findFirst();
+        if (application.isPresent()) {
+            repository.get(application.get().getLeaseholder().getId()).remove(application.get());
+        }
     }
 }

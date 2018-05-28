@@ -1,6 +1,7 @@
 package kspt.bank.dao;
 
 import kspt.bank.boundaries.ApplicationsRepository;
+import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.CellApplication;
 import kspt.bank.domain.entities.Client;
 
@@ -33,5 +34,13 @@ public class DatabaseApplicationsRepository implements ApplicationsRepository {
         final CellApplicationDataMapper mapper = (CellApplicationDataMapper)
                 DataMapperRegistry.getMapper(CellApplication.class);
         return mapper.findAll();
+    }
+
+    @Override
+    public void deleteApplicationForCell(Cell cell) {
+        final CellApplicationDataMapper mapper = (CellApplicationDataMapper)
+                DataMapperRegistry.getMapper(CellApplication.class);
+        final CellApplication application = mapper.findByCell(cell);
+        mapper.delete(application);
     }
 }

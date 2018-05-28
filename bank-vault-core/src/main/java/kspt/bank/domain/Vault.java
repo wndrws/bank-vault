@@ -28,6 +28,7 @@ public final class Vault {
     @Getter
     private final LeasingController leasingController = new LeasingController(CLOCK);
 
+    @Getter
     private final Set<Cell> pendingCells = Collections.synchronizedSet(new HashSet<>());
 
     private final ExecutorService pendingKeepersPool = Executors.newCachedThreadPool(
