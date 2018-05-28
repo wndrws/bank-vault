@@ -4,7 +4,11 @@ CREATE TYPE cell_app_status as ENUM ('CREATED','CELL_CHOSEN','APPROVED','PAID');
 CREATE TABLE Cell (
     id          integer     PRIMARY KEY,
     size        cell_size   NOT NULL,
-    precious_id integer     DEFAULT NULL REFERENCES Precious(id)
+    precious_id integer     DEFAULT NULL REFERENCES Precious(id),
+    client_id   integer     DEFAULT NULL REFERENCES Client(id),
+    lease_begin date        ,
+    lease_end   date        ,
+    expired     boolean
 );
 
 CREATE TABLE Precious (

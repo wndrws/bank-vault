@@ -5,9 +5,7 @@ import com.google.common.collect.Range;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.Client;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -37,7 +35,8 @@ public class LeasingController {
 
     public void startLeasing(final Cell cell, final Client leaseholder, final Period period) {
         final LocalDate today = LocalDate.now(clock);
-        leasingInfo.put(cell, new CellLeaseRecord(leaseholder, today, today.plus(period)));
+        leasingInfo.put(cell, new CellLeaseRecord(leaseholder, today, today.plus(period), false));
+        cell.setCellLeaseRecord(leasingInfo.get(cell));
         timersPool.scheduleAtFixedRate(this::checkLeasingPeriods,
                 timersCheckPeriodMillis, timersCheckPeriodMillis, TimeUnit.MILLISECONDS);
     }
@@ -53,6 +52,7 @@ public class LeasingController {
 
     public void endLeasing(final Cell cell) {
         leasingInfo.remove(cell);
+        cell.setCellLeaseRecord(null);
     }
 
     public boolean isLeased(final Cell cell) {
@@ -86,14 +86,15 @@ public class LeasingController {
         }
     }
 
-    @RequiredArgsConstructor
-    private static class CellLeaseRecord {
-        final Client leaseholder;
+    @AllArgsConstructor
+    @EqualsAndHashCode
+    public static class CellLeaseRecord {
+        public final Client leaseholder;
 
-        final LocalDate leaseBegin;
+        public final LocalDate leaseBegin;
 
-        final LocalDate leaseEnd;
+        public final LocalDate leaseEnd;
 
-        boolean expired = false;
+        public boolean expired = false;
     }
 }
