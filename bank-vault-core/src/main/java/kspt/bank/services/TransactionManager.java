@@ -30,9 +30,6 @@ class TransactionManager {
 
     private Savepoint savepoint;
 
-    @Autowired
-    private CellPendingService cellPendingService;
-
     @PostConstruct
     private void openConnection()
     throws SQLException {
@@ -49,7 +46,6 @@ class TransactionManager {
     @PreDestroy
     private void closeConnection()
     throws SQLException {
-        runTransactional(() -> cellPendingService.deletePendingApplications());
         if (usingDatabase) {
             if (!autocommitEnabled && !persistenceEnabled) {
                 connection.rollback(savepoint);

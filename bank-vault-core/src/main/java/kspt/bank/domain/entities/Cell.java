@@ -21,6 +21,8 @@ public class Cell extends ManualIdDomainObject {
 
     private LeasingController.CellLeaseRecord cellLeaseRecord;
 
+    private boolean pending = false;
+
     public Cell(final int id, final CellSize size) {
         super(id);
         this.size = size;
@@ -28,11 +30,17 @@ public class Cell extends ManualIdDomainObject {
     }
 
     public Cell(final int id, final CellSize size, final Precious containedPrecious,
-            final LeasingController.CellLeaseRecord cellLeaseRecord) {
+            final LeasingController.CellLeaseRecord cellLeaseRecord, final boolean pending) {
         super(id);
         this.size = size;
         this.containedPrecious = containedPrecious;
         this.cellLeaseRecord = cellLeaseRecord;
+        this.pending = pending;
+    }
+
+    public void setPending(boolean val) {
+        this.pending = val;
+        if (AUTOPERSIST) persist();
     }
 
     public boolean isEmpty() {
@@ -50,8 +58,7 @@ public class Cell extends ManualIdDomainObject {
     }
 
     private void persist() {
-        final CellDataMapper mapper =
-                (CellDataMapper) DataMapperRegistry.getMapper(Cell.class);
+        final CellDataMapper mapper = (CellDataMapper) DataMapperRegistry.getMapper(Cell.class);
         if (mapper != null) {
             mapper.save(this);
         }

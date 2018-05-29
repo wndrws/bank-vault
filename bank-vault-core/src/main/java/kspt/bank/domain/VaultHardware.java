@@ -27,6 +27,12 @@ public class VaultHardware {
                 .collect(ImmutableSet.toImmutableSet());
     }
 
+    VaultHardware(final EnumMap<CellSize, List<Cell>> cellsEntitiesBySize) {
+        cells = cellsEntitiesBySize.entrySet().stream().flatMap(entry -> entry.getValue().stream())
+                .map(cell -> new CellHardware(cell.getId(), cell.getSize()))
+                .collect(ImmutableSet.toImmutableSet());
+    }
+
     static private List<CellHardware> createCellsOfSize(final int numberOfCells, final CellSize cellSize) {
         return IntStream.range(0, numberOfCells)
                 .mapToObj(__ -> new CellHardware(cellSize))
@@ -74,6 +80,11 @@ public class VaultHardware {
 
         CellHardware(CellSize size) {
             id = ++currentId;
+            this.size = size;
+        }
+
+        CellHardware(int id, CellSize size) {
+            this.id = id;
             this.size = size;
         }
 

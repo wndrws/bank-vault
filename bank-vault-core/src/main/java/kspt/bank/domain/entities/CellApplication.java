@@ -37,6 +37,6 @@ public class CellApplication extends AutoIdDomainObject {
     }
 
     public long calculateLeaseCost() {
-        return PriceCalculator.getCostOf(cell, leasePeriod.getMonths());
+        return PriceCalculator.getCostOf(cell, leasePeriod.getDays());
     }
 }

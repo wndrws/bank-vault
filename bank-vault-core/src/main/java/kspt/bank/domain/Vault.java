@@ -2,6 +2,8 @@ package kspt.bank.domain;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import kspt.bank.dao.CellDataMapper;
+import kspt.bank.dao.DataMapperRegistry;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.enums.CellSize;
 import lombok.Getter;
@@ -12,6 +14,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class Vault {
@@ -27,9 +30,6 @@ public final class Vault {
 
     @Getter
     private final LeasingController leasingController = new LeasingController(CLOCK);
-
-    @Getter
-    private final Set<Cell> pendingCells = Collections.synchronizedSet(new HashSet<>());
 
     private final ExecutorService pendingKeepersPool = Executors.newCachedThreadPool(
             new ThreadFactoryBuilder().setNameFormat("vault-pendingKeepersPool-%d").build());
@@ -49,11 +49,18 @@ public final class Vault {
     }
 
     private Vault() {
-        vaultHardware = new VaultHardware();
-        cells = new EnumMap<>(CellSize.class);
-        cells.put(CellSize.SMALL, vaultHardware.getCellsOfSize(CellSize.SMALL));
-        cells.put(CellSize.MEDIUM, vaultHardware.getCellsOfSize(CellSize.MEDIUM));
-        cells.put(CellSize.BIG, vaultHardware.getCellsOfSize(CellSize.BIG));
+        final CellDataMapper mapper = (CellDataMapper) DataMapperRegistry.getMapper(Cell.class);
+        if (mapper != null) {
+            cells = mapper.findAll().stream().collect(Collectors.groupingBy(
+                    Cell::getSize, () -> new EnumMap<>(CellSize.class), Collectors.toList()));
+            vaultHardware = new VaultHardware(cells);
+        } else {
+            vaultHardware = new VaultHardware();
+            cells = new EnumMap<>(CellSize.class);
+            cells.put(CellSize.SMALL, vaultHardware.getCellsOfSize(CellSize.SMALL));
+            cells.put(CellSize.MEDIUM, vaultHardware.getCellsOfSize(CellSize.MEDIUM));
+            cells.put(CellSize.BIG, vaultHardware.getCellsOfSize(CellSize.BIG));
+        }
     }
 
     @Synchronized
@@ -80,15 +87,23 @@ public final class Vault {
     }
 
     public boolean isAvailable(final Cell cell) {
-        return !leasingController.isLeased(cell) && !pendingCells.contains(cell);
+        return !leasingController.isLeased(cell) && !isPending(cell);
+    }
+
+    public Set<Cell> getPendingCells() {
+        final CellDataMapper mapper = (CellDataMapper) DataMapperRegistry.getMapper(Cell.class);
+        if (mapper != null) {
+            return new HashSet<>(mapper.findAllPendingCells());
+        }
+        return new HashSet<>();
     }
 
     void pend(final Cell cell, final Duration duration) {
-        pendingCells.add(cell);
+        cell.setPending(true);
         pendingKeepersPool.submit(() -> {
             try {
                 Thread.sleep(duration.toMillis());
-                pendingCells.remove(cell);
+                cell.setPending(false);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -96,7 +111,11 @@ public final class Vault {
     }
 
     public boolean isPending(final Cell cell) {
-        return pendingCells.contains(cell);
+        final CellDataMapper mapper = (CellDataMapper) DataMapperRegistry.getMapper(Cell.class);
+        if (mapper != null) {
+            return mapper.isPending(cell);
+        }
+        return false;
     }
 
     public void stop() {

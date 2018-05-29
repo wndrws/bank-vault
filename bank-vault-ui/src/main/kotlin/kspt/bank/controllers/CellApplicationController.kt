@@ -4,6 +4,7 @@ import javafx.stage.StageStyle
 import kspt.bank.BankVaultCoreApplication
 import kspt.bank.CellStatus
 import kspt.bank.ChoosableCellSize
+import kspt.bank.dto.CellApplicationDTO
 import kspt.bank.dto.CellDTO
 import kspt.bank.enums.CellApplicationStatus
 import kspt.bank.enums.CellSize
@@ -11,6 +12,7 @@ import kspt.bank.services.BankVaultFacade
 import kspt.bank.views.ClientCellChoiceView
 import kspt.bank.views.ClientMainView
 import kspt.bank.views.ErrorModalView
+import kspt.bank.views.ManagerMainView
 import java.lang.Exception
 import java.time.Period
 
@@ -73,7 +75,7 @@ class CellApplicationController : ErrorHandlingController() {
         }
     }
 
-    private fun CellDTO.toCellTableEntry(): ClientMainView.CellTableEntry =
+    private fun CellDTO.toCellTableEntry() =
             ClientMainView.CellTableEntry(
                     this.codeName,
                     this.status.asCellStatus().displayName,
@@ -87,4 +89,15 @@ class CellApplicationController : ErrorHandlingController() {
         find(ClientMainView::class).cellTableItems.setAll(
                 clientsCellsInfo.map { it.toCellTableEntry() })
     }
+
+    fun fillCellApplicationList() {
+        val cellApplications = bankVaultFacade.findAllCellApplications()
+        find(ManagerMainView::class).cellApplicationListItems.setAll(
+                cellApplications.map { it.toCellApplicationListEntry() }
+        )
+    }
+
+    private fun CellApplicationDTO.toCellApplicationListEntry() =
+            ManagerMainView.CellApplicationListEntry(this.cell.codeName,
+                    "${this.leaseholder.firstName} ${this.leaseholder.lastName}", this)
 }

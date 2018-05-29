@@ -8,7 +8,8 @@ CREATE TABLE Cell (
     client_id   integer     DEFAULT NULL REFERENCES Client(id),
     lease_begin date        ,
     lease_end   date        ,
-    expired     boolean
+    expired     boolean     ,
+    pending     boolean
 );
 
 CREATE TABLE Precious (

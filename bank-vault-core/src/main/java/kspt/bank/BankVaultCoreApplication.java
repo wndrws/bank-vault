@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 
@@ -24,9 +25,9 @@ public class BankVaultCoreApplication {
         return notificationGate;
     }
 
-    public static void start(NotificationGate ng) {
+    public static void start(NotificationGate ng, String[] argv) {
         notificationGate = ng;
-        applicationContext = SpringApplication.run(BankVaultCoreApplication.class);
+        applicationContext = SpringApplication.run(BankVaultCoreApplication.class, argv);
     }
 
     public static void shutdown() {

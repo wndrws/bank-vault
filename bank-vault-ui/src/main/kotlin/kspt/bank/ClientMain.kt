@@ -18,5 +18,6 @@ class ClientApp: BankVaultApp() {
 }
 
 fun main(args: Array<String>) {
+    BankVaultApp.argv = args
     Application.launch(ClientApp::class.java, *args)
 }

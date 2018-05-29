@@ -8,11 +8,12 @@ import kspt.bank.domain.entities.Precious;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.List;
 
 public class CellDataMapper extends AbstractDataMapper {
     private static final String TABLE_NAME = "Cell";
 
-    private static final String COLUMNS = "size, precious_id, client_id, lease_begin, lease_end, expired";
+    private static final String COLUMNS = "size, precious_id, client_id, lease_begin, lease_end, expired, pending";
 
     CellDataMapper(final Connection databaseConnection, final boolean useCache) {
         super(databaseConnection, useCache);
@@ -30,13 +31,13 @@ public class CellDataMapper extends AbstractDataMapper {
 
     @Override
     protected String getCreateQuery() {
-        return "INSERT INTO " + TABLE_NAME + " VALUES (?, ?::cell_size, ?, ?, ?, ?, ?)";
+        return "INSERT INTO " + TABLE_NAME + " VALUES (?, ?::cell_size, ?, ?, ?, ?, ?, ?)";
     }
 
     @Override
     protected String getUpdateQuery() {
         return "UPDATE " + TABLE_NAME +
-                " SET (" + COLUMNS + ") = (?::cell_size, ?, ?, ?, ?, ?) WHERE "
+                " SET (" + COLUMNS + ") = (?::cell_size, ?, ?, ?, ?, ?, ?) WHERE "
                 + AbstractDataMapper.PK_COLUMN_LABEL + "=?";
     }
 
@@ -58,6 +59,7 @@ public class CellDataMapper extends AbstractDataMapper {
             insertStatement.setNull(6, Types.DATE);
             insertStatement.setNull(7, Types.BOOLEAN);
         }
+        insertStatement.setBoolean(8, cell.isPending());
     }
 
     @Override
@@ -78,7 +80,8 @@ public class CellDataMapper extends AbstractDataMapper {
             updateStatement.setNull(5, Types.DATE);
             updateStatement.setNull(6, Types.BOOLEAN);
         }
-        updateStatement.setInt(7, cell.getId());
+        updateStatement.setBoolean(7, cell.isPending());
+        updateStatement.setInt(8, cell.getId());
     }
 
     @Override
@@ -87,6 +90,7 @@ public class CellDataMapper extends AbstractDataMapper {
         final CellSize size = CellSize.valueOf(rs.getString("size"));
         final Integer containedPreciousId = rs.getInt("precious_id");
         final Integer leaseholderId = rs.getInt("client_id");
+        final Boolean pending = rs.getBoolean("pending");
         LeasingController.CellLeaseRecord cellLeaseRecord = null;
         final ClientDataMapper clientMapper = (ClientDataMapper)
                 DataMapperRegistry.getMapper(Client.class);
@@ -100,11 +104,25 @@ public class CellDataMapper extends AbstractDataMapper {
         }
         final PreciousDataMapper preciousMapper = (PreciousDataMapper)
                 DataMapperRegistry.getMapper(Precious.class);
-        return preciousMapper == null ? new Cell(id, size, null, cellLeaseRecord) :
-                new Cell(id, size, preciousMapper.find(containedPreciousId), cellLeaseRecord);
+        return preciousMapper == null ? new Cell(id, size, null, cellLeaseRecord, pending) :
+                new Cell(id, size, preciousMapper.find(containedPreciousId), cellLeaseRecord, pending);
     }
 
     public Cell find(final Integer id) {
         return (Cell) findOne(id);
+    }
+
+    public boolean isPending(final Cell cell) {
+        return findOneByCustomWhere("id = ? AND pending = ?", cell.getId(), Boolean.TRUE) != null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Cell> findAllPendingCells() {
+        return findAllByCustomWhere("pending = ?", Boolean.TRUE);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Cell> findAll() {
+        return super.findAll();
     }
 }

@@ -11,12 +11,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PriceCalculatorTest {
     @ParameterizedTest
     @ArgumentsSource(LeaseVariantsProvider.class)
-    void testGetPriceFor(CellSize size, int numOfMonths) {
+    void testGetPriceFor(CellSize size, int numOfDays) {
         // given
         final long expectedCost =
-                PriceCalculator.PRICE_OF_VOLUME_UNIT_PER_MONTH * numOfMonths * size.getVolume();
+                PriceCalculator.PRICE_OF_VOLUME_UNIT_PER_DAY * numOfDays * size.getVolume();
         // when
-        final long cost = PriceCalculator.getCostOf(new Cell(1, size), numOfMonths);
+        final long cost = PriceCalculator.getCostOf(new Cell(1, size), numOfDays);
         // then
         assertThat(cost).isEqualTo(expectedCost);
     }
