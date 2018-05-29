@@ -11,7 +11,7 @@ import kspt.bank.dto.ClientDTO
 import tornadofx.*
 import java.time.Period
 
-class ManagerMainView : View() {
+class ManagerMainView : View("Bank Vault") {
     override val root: AnchorPane by fxml("/fxml/ManagerMain.fxml")
 
     private val cellApplicationController: CellApplicationController by inject()
@@ -81,6 +81,10 @@ class ManagerMainView : View() {
 
     override fun onDock() {
         super.onDock()
+        refresh()
+    }
+
+    fun refresh() {
         cellApplicationController.fillCellApplicationList()
     }
 

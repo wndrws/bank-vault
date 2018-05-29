@@ -13,6 +13,7 @@ import kspt.bank.views.ClientCellChoiceView
 import kspt.bank.views.ClientMainView
 import kspt.bank.views.ErrorModalView
 import kspt.bank.views.ManagerMainView
+import tornadofx.runLater
 import java.lang.Exception
 import java.time.Period
 
@@ -86,15 +87,20 @@ class CellApplicationController : ErrorHandlingController() {
 
     fun fillCellsTable() {
         val clientsCellsInfo = bankVaultFacade.findCellsInfoByClient(userModel.id.value.toInt())
-        find(ClientMainView::class).cellTableItems.setAll(
-                clientsCellsInfo.map { it.toCellTableEntry() })
+        runLater {
+            find(ClientMainView::class).cellTableItems.setAll(
+                    clientsCellsInfo.map { it.toCellTableEntry() })
+        }
     }
 
     fun fillCellApplicationList() {
         val cellApplications = bankVaultFacade.findAllCellApplications()
-        find(ManagerMainView::class).cellApplicationListItems.setAll(
-                cellApplications.map { it.toCellApplicationListEntry() }
-        )
+        runLater {
+            find(ManagerMainView::class).cellApplicationListItems.setAll(
+                    cellApplications.map { it.toCellApplicationListEntry() }
+            )
+        }
+
     }
 
     private fun CellApplicationDTO.toCellApplicationListEntry() =
