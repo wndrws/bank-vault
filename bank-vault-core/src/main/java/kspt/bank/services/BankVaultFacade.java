@@ -103,7 +103,7 @@ public class BankVaultFacade {
             final CellDTO cellInfo = findCellInfo(app.getId()).orElse(null);
             final ClientDTO clientInfo = findClientInfo(app.getLeaseholder().getId())
                     .orElseThrow(() -> new IllegalStateException("Leaseholder is not a client!"));
-            return new CellApplicationDTO(cellInfo, clientInfo, app.getLeasePeriod(),
+            return new CellApplicationDTO(app.getId(), cellInfo, clientInfo, app.getLeasePeriod(),
                     app.getStatus(), app.calculateLeaseCost());
         }).collect(Collectors.toList());
     }
@@ -118,5 +118,17 @@ public class BankVaultFacade {
                     passportInfo.getLastName(), passportInfo.getPatronymic(),
                     passportInfo.getBirthDate(), client.getEmail(), client.getPhone()));
         }
+    }
+
+    public void approveApplication(Integer appId) {
+        transactionManager.runTransactional(() ->
+                cellApplicationInteractor.approveApplication(applicationsRepository.find(appId))
+        );
+    }
+
+    public void declineApplication(Integer appId) {
+        transactionManager.runTransactional(() ->
+                applicationsRepository.deleteApplication(appId)
+        );
     }
 }

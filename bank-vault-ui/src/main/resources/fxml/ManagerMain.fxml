@@ -46,12 +46,12 @@
                   <Separator prefWidth="200.0" />
                   <HBox alignment="BOTTOM_CENTER" prefHeight="62.0" prefWidth="740.0" spacing="20.0" VBox.vgrow="ALWAYS">
                      <children>
-                        <Button fx:id="btnApprove" mnemonicParsing="false" text="Одобрить" textFill="#16b926">
+                        <Button fx:id="btnApprove" mnemonicParsing="false" onAction="#approve" text="Одобрить" textFill="#16b926">
                            <font>
                               <Font size="24.0" />
                            </font>
                         </Button>
-                        <Button fx:id="btnDecline" mnemonicParsing="false" text="Отклонить" textFill="#cd4e4e">
+                        <Button fx:id="btnDecline" mnemonicParsing="false" onAction="#decline" text="Отклонить" textFill="#cd4e4e">
                            <font>
                               <Font size="24.0" />
                            </font>

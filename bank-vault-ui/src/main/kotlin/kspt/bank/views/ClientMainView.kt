@@ -29,6 +29,8 @@ class ClientMainView: View("Bank Vault") {
 
     var timerExecutor = Executors.newSingleThreadScheduledExecutor()
 
+    var tableUpdater = Executors.newSingleThreadScheduledExecutor()
+
     private val cellsTable: TableView<CellTableEntry> by fxid("tableMyCells")
 
     val cellTableItems = FXCollections.observableArrayList<CellTableEntry>()!!
@@ -73,11 +75,16 @@ class ClientMainView: View("Bank Vault") {
             val datetime = timeController.getFormattedDateTime("Europe/Moscow")
             runLater { time = datetime }
         }, 0, 1, TimeUnit.SECONDS)
+        tableUpdater = Executors.newSingleThreadScheduledExecutor()
+        tableUpdater.scheduleAtFixedRate({
+            cellApplicationController.fillCellsTable()
+        }, 1, 3, TimeUnit.SECONDS)
     }
 
     override fun onUndock() {
         super.onUndock()
         timerExecutor.shutdown()
+        tableUpdater.shutdown()
         cellTableItems.clear()
     }
 

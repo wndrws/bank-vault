@@ -36,7 +36,7 @@ class TransactionManager {
         if (usingDatabase) {
             connection = DatabaseConnection.getConnection();
             connection.setAutoCommit(autocommitEnabled);
-            DataMapperRegistry.initialize(connection, true);
+            DataMapperRegistry.initialize(connection, false);
             if (!autocommitEnabled && !persistenceEnabled) {
                 savepoint = connection.setSavepoint();
             }

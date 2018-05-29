@@ -13,6 +13,7 @@ class ClientApp: BankVaultApp() {
 
     override fun stop() {
         find(ClientMainView::class).timerExecutor.shutdownNow()
+        find(ClientMainView::class).tableUpdater.shutdownNow()
         super.stop()
     }
 }

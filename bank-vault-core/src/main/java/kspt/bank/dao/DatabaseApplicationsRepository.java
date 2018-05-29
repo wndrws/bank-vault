@@ -43,4 +43,12 @@ public class DatabaseApplicationsRepository implements ApplicationsRepository {
         final CellApplication application = mapper.findByCell(cell);
         mapper.delete(application);
     }
+
+    @Override
+    public void deleteApplication(Integer id) {
+        final CellApplicationDataMapper mapper = (CellApplicationDataMapper)
+                DataMapperRegistry.getMapper(CellApplication.class);
+        final CellApplication application = mapper.find(id);
+        mapper.delete(application);
+    }
 }

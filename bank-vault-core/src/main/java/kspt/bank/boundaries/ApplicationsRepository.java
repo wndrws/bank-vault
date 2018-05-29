@@ -16,4 +16,6 @@ public interface ApplicationsRepository {
     Collection<CellApplication> findAll();
 
     void deleteApplicationForCell(Cell cell);
+
+    void deleteApplication(Integer id);
 }

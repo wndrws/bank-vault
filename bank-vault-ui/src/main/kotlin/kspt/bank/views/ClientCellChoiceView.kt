@@ -30,7 +30,12 @@ class ClientCellChoiceView : View() {
                     combobox(selectedSize, cellSizes).required()
                 }
                 field("Период аренды (дней):") {
-                    textfield(period).required()
+                    textfield(period).validator {
+                        if (it.isNullOrBlank()) error("This field is required")
+                        else if (it?.isInt() != true) error("Введите число")
+                        else if (it.toInt() <= 0) error("Недопустимое число")
+                        else null
+                    }
                 }
             }
         }

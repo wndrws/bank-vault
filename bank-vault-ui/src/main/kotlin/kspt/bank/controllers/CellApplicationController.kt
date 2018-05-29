@@ -25,7 +25,7 @@ class CellApplicationController : ErrorHandlingController() {
     private val userModel: UserModel by inject()
 
     fun processCellRequest(size: ChoosableCellSize, period: Period) {
-        try {
+        errorAware("processCellRequest") {
             val applicationId = bankVaultFacade.acceptClientInfo(userModel.clientInfo.value)
             val success = bankVaultFacade.requestCell(
                     size.asCellSize(), period, applicationId)
@@ -37,9 +37,6 @@ class CellApplicationController : ErrorHandlingController() {
                 updateCellsTable(applicationId)
                 find(ClientCellChoiceView::class).replaceWith(ClientMainView::class, sizeToScene = true)
             }
-        } catch (e: Exception) {
-            displayError(e)
-            logger.error("Failed to process cell request", e)
         }
     }
 
@@ -86,7 +83,10 @@ class CellApplicationController : ErrorHandlingController() {
                     this.leasePeriod.days)
 
     fun fillCellsTable() {
-        val clientsCellsInfo = bankVaultFacade.findCellsInfoByClient(userModel.id.value.toInt())
+        var clientsCellsInfo: List<CellDTO> = emptyList()
+        errorAware("findCellsInfoByClient") {
+            clientsCellsInfo = bankVaultFacade.findCellsInfoByClient(userModel.id.value.toInt())
+        }
         runLater {
             find(ClientMainView::class).cellTableItems.setAll(
                     clientsCellsInfo.map { it.toCellTableEntry() })
@@ -94,7 +94,11 @@ class CellApplicationController : ErrorHandlingController() {
     }
 
     fun fillCellApplicationList() {
-        val cellApplications = bankVaultFacade.findAllCellApplications()
+        var cellApplications: List<CellApplicationDTO> = emptyList()
+        errorAware("findAllCellApplications") {
+            cellApplications = bankVaultFacade.findAllCellApplications()
+                    .filter { it.status == CellApplicationStatus.CELL_CHOSEN }
+        }
         runLater {
             find(ManagerMainView::class).cellApplicationListItems.setAll(
                     cellApplications.map { it.toCellApplicationListEntry() }
@@ -106,4 +110,16 @@ class CellApplicationController : ErrorHandlingController() {
     private fun CellApplicationDTO.toCellApplicationListEntry() =
             ManagerMainView.CellApplicationListEntry(this.cell.codeName,
                     "${this.leaseholder.firstName} ${this.leaseholder.lastName}", this)
+
+    fun approveApplication(applicationId: Int) {
+        errorAware {
+            bankVaultFacade.approveApplication(applicationId)
+        }
+    }
+
+    fun declineApplication(applicationId: Int) {
+        errorAware {
+            bankVaultFacade.declineApplication(applicationId)
+        }
+    }
 }

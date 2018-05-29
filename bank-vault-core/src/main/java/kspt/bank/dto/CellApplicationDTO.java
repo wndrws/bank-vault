@@ -7,6 +7,8 @@ import java.time.Period;
 
 @Value
 public class CellApplicationDTO {
+    public final Integer id;
+
     public final CellDTO cell;
 
     public final ClientDTO leaseholder;

@@ -88,6 +88,22 @@ class ManagerMainView : View("Bank Vault") {
         cellApplicationController.fillCellApplicationList()
     }
 
+    fun approve() {
+        if (!model.isEmpty) {
+            cellApplicationController.approveApplication(model.item.info.id)
+            cellApplicationListItems.remove(model.item)
+            model.item = null
+        }
+    }
+
+    fun decline() {
+        if (!model.isEmpty) {
+            cellApplicationController.declineApplication(model.item.info.id)
+            cellApplicationListItems.remove(model.item)
+            model.item = null
+        }
+    }
+
     data class CellApplicationListEntry(
             val cellCode: String, val client: String, val info: CellApplicationDTO)
 

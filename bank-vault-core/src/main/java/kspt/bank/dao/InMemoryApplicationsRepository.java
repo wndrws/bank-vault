@@ -50,4 +50,14 @@ public class InMemoryApplicationsRepository implements ApplicationsRepository {
             repository.get(application.get().getLeaseholder().getId()).remove(application.get());
         }
     }
+
+    @Override
+    public void deleteApplication(Integer id) {
+        final Optional<CellApplication> application = repository.values().stream()
+                .flatMap(Collection::stream)
+                .filter(app -> app.getId().equals(id)).findFirst();
+        if (application.isPresent()) {
+            repository.get(application.get().getLeaseholder().getId()).remove(application.get());
+        }
+    }
 }
