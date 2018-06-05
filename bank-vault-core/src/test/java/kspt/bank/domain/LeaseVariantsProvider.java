@@ -12,7 +12,7 @@ public class LeaseVariantsProvider implements ArgumentsProvider {
     @Override
     public Stream<Arguments> provideArguments(ExtensionContext context) {
         return Arrays.stream(CellSize.values()).flatMap(size -> Stream.of(
-                Arguments.of(size, 1), Arguments.of(size, 2), Arguments.of(size, 3)
+                Arguments.of(size, 2), Arguments.of(size, 30), Arguments.of(size, 45)
         ));
     }
 }

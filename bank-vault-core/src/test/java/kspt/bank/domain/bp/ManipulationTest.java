@@ -1,6 +1,8 @@
 package kspt.bank.domain.bp;
 
+import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.boundaries.NotificationGate;
+import kspt.bank.dao.DatabaseClientsRepository;
 import kspt.bank.domain.CellManipulationInteractor;
 import kspt.bank.domain.TestDataGenerator;
 import kspt.bank.domain.Vault;
@@ -24,6 +26,8 @@ class ManipulationTest extends TestUsingDatabase {
     private final ManipulationLog manipulationLog = mock(ManipulationLog.class);
 
     private final NotificationGate notificationGate = mock(NotificationGate.class);
+
+    private final ClientsRepository clientsRepository = new DatabaseClientsRepository();
 
     private final CellManipulationInteractor cmInteractor =
             new CellManipulationInteractor(manipulationLog, notificationGate);
@@ -141,6 +145,7 @@ class ManipulationTest extends TestUsingDatabase {
         smallCell = Vault.getInstance().requestCell(CellSize.SMALL);
         mediumCell = Vault.getInstance().requestCell(CellSize.MEDIUM);
         bigCell = Vault.getInstance().requestCell(CellSize.BIG);
+        clientsRepository.add(roleClient.client);
         Vault.getInstance().getLeasingController()
                 .startLeasing(smallCell, roleClient.client, Period.ofMonths(1));
         Vault.getInstance().getLeasingController()

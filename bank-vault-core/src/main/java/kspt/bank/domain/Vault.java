@@ -31,6 +31,10 @@ public final class Vault {
     @Getter
     private final LeasingController leasingController = new LeasingController(CLOCK);
 
+    private final Set<Cell> pendingCells = Collections.synchronizedSet(new HashSet<>());
+
+    private boolean useDatabase;
+
     private final ExecutorService pendingKeepersPool = Executors.newCachedThreadPool(
             new ThreadFactoryBuilder().setNameFormat("vault-pendingKeepersPool-%d").build());
 
@@ -50,16 +54,18 @@ public final class Vault {
 
     private Vault() {
         final CellDataMapper mapper = (CellDataMapper) DataMapperRegistry.getMapper(Cell.class);
-        if (mapper != null) {
+        if (mapper != null && !mapper.findAll().isEmpty()) {
             cells = mapper.findAll().stream().collect(Collectors.groupingBy(
                     Cell::getSize, () -> new EnumMap<>(CellSize.class), Collectors.toList()));
             vaultHardware = new VaultHardware(cells);
+            useDatabase = true;
         } else {
             vaultHardware = new VaultHardware();
             cells = new EnumMap<>(CellSize.class);
             cells.put(CellSize.SMALL, vaultHardware.getCellsOfSize(CellSize.SMALL));
             cells.put(CellSize.MEDIUM, vaultHardware.getCellsOfSize(CellSize.MEDIUM));
             cells.put(CellSize.BIG, vaultHardware.getCellsOfSize(CellSize.BIG));
+            useDatabase = false;
         }
     }
 
@@ -92,18 +98,25 @@ public final class Vault {
 
     public Set<Cell> getPendingCells() {
         final CellDataMapper mapper = (CellDataMapper) DataMapperRegistry.getMapper(Cell.class);
-        if (mapper != null) {
+        if (useDatabase && mapper != null) {
             return new HashSet<>(mapper.findAllPendingCells());
+        } else {
+            return pendingCells;
         }
-        return new HashSet<>();
     }
 
     void pend(final Cell cell, final Duration duration) {
         cell.setPending(true);
+        if (!useDatabase) {
+            pendingCells.add(cell);
+        }
         pendingKeepersPool.submit(() -> {
             try {
                 Thread.sleep(duration.toMillis());
                 cell.setPending(false);
+                if (!useDatabase) {
+                    pendingCells.remove(cell);
+                }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -112,10 +125,11 @@ public final class Vault {
 
     public boolean isPending(final Cell cell) {
         final CellDataMapper mapper = (CellDataMapper) DataMapperRegistry.getMapper(Cell.class);
-        if (mapper != null) {
+        if (useDatabase && mapper != null) {
             return mapper.isPending(cell);
+        } else {
+            return pendingCells.contains(cell);
         }
-        return false;
     }
 
     public void stop() {

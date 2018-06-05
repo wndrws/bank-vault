@@ -43,12 +43,12 @@ class ApplyForCellTest extends TestUsingDatabase {
 
     @ParameterizedTest
     @ArgumentsSource(LeaseVariantsProvider.class)
-    void testBusinessProcess(CellSize cellSize, int numOfMonths) {
+    void testBusinessProcess(CellSize cellSize, Integer numOfDays) {
         cellApplication = roleClient.initialApply();
         assertExistenceOfClientAndCellApplication();
 
-        roleClient.requestCell(cellSize, Period.ofMonths(numOfMonths));
-        assertThatRightCellIsReserved(cellSize, Period.ofMonths(numOfMonths));
+        roleClient.requestCell(cellSize, Period.ofDays(numOfDays));
+        assertThatRightCellIsReserved(cellSize, Period.ofDays(numOfDays));
 
         invoice = roleManager.approve();
         assertInvoiceAndApprovalOfCellApplication();

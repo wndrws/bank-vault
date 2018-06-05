@@ -78,7 +78,7 @@ public class LeasingControlInteractorTest {
         // given
         final Client client = TestDataGenerator.getSampleClient();
         final Cell cell = Vault.getInstance().requestCell(CellSize.SMALL);
-        final Period newLeasePeriod = Period.ofMonths(4);
+        final Period newLeasePeriod = Period.ofDays(120);
         // when
         final Invoice invoice = interactor.continueLeasing(client, cell, newLeasePeriod);
         // then

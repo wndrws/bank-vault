@@ -42,7 +42,7 @@ public class TestDataGenerator {
     public CellApplication getCellApplication(final CellApplicationStatus status) {
         final CellApplication application = new CellApplication(getSampleClient());
         application.setCell(Vault.getInstance().requestAnyCell());
-        application.setLeasePeriod(Period.ofMonths(1));
+        application.setLeasePeriod(Period.ofDays(30));
         application.setStatus(status);
         return application;
     }

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -93,9 +94,9 @@ public class BankVaultFacade {
         return applications.stream()
                 .map(app -> {
                     final Cell cell = app.getCell();
-                    return new CellDTO(getCodeName(cell), cell.getSize(), app.getStatus(),
+                    return cell == null ? null : new CellDTO(getCodeName(cell), cell.getSize(), app.getStatus(),
                             getLeaseBegin(cell), app.getLeasePeriod(), getContainedPreciousName(cell));
-                }).collect(Collectors.toList());
+                }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     public List<CellApplicationDTO> findAllCellApplications() {

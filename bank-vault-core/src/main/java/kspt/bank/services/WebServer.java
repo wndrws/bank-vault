@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import kspt.bank.dto.CellApplicationDTO;
+import kspt.bank.enums.CellApplicationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Value;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class WebServer {
     throws JsonProcessingException {
         final List<ApplicationInfo> data = bankVaultFacade.findAllCellApplications().stream()
                 .map(app -> new ApplicationInfo(app.getId(), app.getLeaseholder().firstName,
-                        app.getCell().getCodeName(), app.getLeasePeriod().getDays()))
+                        app.getCell().getCodeName(), app.getLeasePeriod().getDays(), app.getStatus()))
                 .collect(Collectors.toList());
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -50,5 +51,7 @@ public class WebServer {
         String cellName;
 
         Integer leasePeriodInDays;
+
+        CellApplicationStatus status;
     }
 }

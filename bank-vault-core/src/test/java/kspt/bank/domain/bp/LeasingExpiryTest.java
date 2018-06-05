@@ -158,7 +158,7 @@ class LeasingExpiryTest extends TestUsingDatabase {
 
         final Period initialLeasingPeriod = Period.ofDays(10);
 
-        final Period newLeasingPeriod = Period.ofMonths(2);
+        final Period newLeasingPeriod = Period.ofDays(60);
 
         Invoice continueLeasing() {
             return lcInteractor.continueLeasing(client, cell, newLeasingPeriod);
