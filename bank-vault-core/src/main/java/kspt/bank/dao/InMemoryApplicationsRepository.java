@@ -17,8 +17,10 @@ public class InMemoryApplicationsRepository implements ApplicationsRepository {
     public void save(CellApplication application) {
         final Set<CellApplication> clientsApplications =
                 repository.getOrDefault(application.getLeaseholder().getId(), new HashSet<>());
-        Preconditions.checkState(!clientsApplications.contains(application));
-        clientsApplications.add(application);
+        if(!clientsApplications.add(application)) {
+            clientsApplications.remove(application);
+            clientsApplications.add(application);
+        }
         repository.put(application.getLeaseholder().getId(), clientsApplications);
     }
 

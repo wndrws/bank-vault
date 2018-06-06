@@ -20,7 +20,9 @@ abstract class AbstractDataMapper {
     }
 
     DomainObject findOne(final Integer id) {
-        if (useLoadedObjectsCache && loadedObjects.containsKey(id)) {
+        if (id == null) {
+            return null;
+        } else if (useLoadedObjectsCache && loadedObjects.containsKey(id)) {
             return loadedObjects.get(id);
         } else try {
             return tryToFindOne(databaseConnection, id);

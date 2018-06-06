@@ -1,6 +1,5 @@
 package kspt.bank.domain;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.ClientsRepository;
@@ -10,11 +9,11 @@ import kspt.bank.external.Invoice;
 import kspt.bank.external.PaymentGate;
 import kspt.bank.domain.entities.*;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.time.Period;
-import java.util.HashMap;
-import java.util.Map;
 
+@RequiredArgsConstructor
 public class CellApplicationInteractor {
     private final ClientsRepository clientsRepository;
 
@@ -22,23 +21,6 @@ public class CellApplicationInteractor {
     private final ApplicationsRepository applicationsRepository;
 
     private final PaymentGate paymentGate;
-
-    private final Map<Invoice, CellApplication> invoiceToApplicationMap;
-
-    public CellApplicationInteractor(final ClientsRepository clientsRepository,
-            final ApplicationsRepository applicationsRepository, PaymentGate paymentGate) {
-        this(clientsRepository, applicationsRepository, paymentGate, new HashMap<>());
-    }
-
-    @VisibleForTesting
-    CellApplicationInteractor(final ClientsRepository clientsRepository,
-            final ApplicationsRepository applicationsRepository, PaymentGate paymentGate,
-            final Map<Invoice, CellApplication> invoiceToApplicationMap) {
-        this.clientsRepository = clientsRepository;
-        this.applicationsRepository = applicationsRepository;
-        this.paymentGate = paymentGate;
-        this.invoiceToApplicationMap = invoiceToApplicationMap;
-    }
 
     public CellApplication createApplication(final PassportInfo passportInfo, final String phone,
             final String email)
@@ -80,15 +62,15 @@ public class CellApplicationInteractor {
     public Invoice approveApplication(final CellApplication application) {
         Preconditions.checkState(application.getStatus() == CellApplicationStatus.CELL_CHOSEN);
         final long leaseCost = calculatePayment(application);
-        final Invoice invoice = paymentGate.issueInvoice(leaseCost);
-        invoiceToApplicationMap.put(invoice, application);
+        final Invoice invoice = paymentGate.issueInvoice(leaseCost, application.getId());
         application.setStatus(CellApplicationStatus.APPROVED);
         applicationsRepository.save(application);
         return invoice;
     }
 
     public void acceptPayment(final Invoice invoice) {
-        final CellApplication application = invoiceToApplicationMap.get(invoice);
+        final Integer applicationId = paymentGate.findGood(invoice);
+        final CellApplication application = applicationsRepository.find(applicationId);
         Preconditions.checkNotNull(application);
         Preconditions.checkState(application.getStatus() == CellApplicationStatus.APPROVED);
         Preconditions.checkState(invoice.isPaid());

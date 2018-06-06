@@ -3,6 +3,7 @@ package kspt.bank.domain;
 import com.statemachinesystems.mockclock.MockClock;
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.NotificationGate;
+import kspt.bank.dao.InMemoryApplicationsRepository;
 import kspt.bank.domain.entities.*;
 import kspt.bank.enums.CellApplicationStatus;
 import kspt.bank.enums.CellSize;
@@ -26,16 +27,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class LeasingControlInteractorTest {
     public final static long LEASING_TIMERS_CHECK_PERIOD_MS = 100;
 
     private final NotificationGate notificationGate = mock(NotificationGate.class);
 
-    private final ApplicationsRepository applicationsRepository = mock(ApplicationsRepository.class);
+    private final ApplicationsRepository applicationsRepository = new InMemoryApplicationsRepository();
 
     private final PaymentGate paymentGate = new SimplePaymentSystem();
 
@@ -82,7 +81,7 @@ public class LeasingControlInteractorTest {
         // when
         final Invoice invoice = interactor.continueLeasing(client, cell, newLeasePeriod);
         // then
-        final CellApplication application = interactor.getInvoiceToApplicationMap().get(invoice);
+        final CellApplication application = applicationsRepository.find(paymentGate.findGood(invoice));
         assertThat(application.getStatus()).isEqualTo(CellApplicationStatus.APPROVED);
         assertThat(application.getCell()).isEqualTo(cell);
         assertThat(application.getLeaseholder()).isEqualTo(client);
@@ -98,14 +97,15 @@ public class LeasingControlInteractorTest {
         // given
         final CellApplication cellApplication =
                 TestDataGenerator.getCellApplication(CellApplicationStatus.APPROVED);
+        applicationsRepository.save(cellApplication);
         Vault.getInstance().getLeasingController().startLeasing(cellApplication.getCell(),
                 cellApplication.getLeaseholder(), cellApplication.getLeasePeriod());
         mockedClock.advanceBy(Duration.ofDays(33));
         Thread.sleep(2*LEASING_TIMERS_CHECK_PERIOD_MS);
         Assumptions.assumeTrue(Vault.getInstance().getLeasingController()
                 .isLeasingExpired(cellApplication.getCell()));
-        final Invoice invoice = new Invoice(cellApplication.calculateLeaseCost());
-        interactor.getInvoiceToApplicationMap().put(invoice, cellApplication);
+        final Invoice invoice = paymentGate.issueInvoice(
+                cellApplication.calculateLeaseCost(), cellApplication.getId());
         paymentGate.pay(invoice, invoice.getSum(), paymentMethod);
         // when
         interactor.acceptPayment(invoice);

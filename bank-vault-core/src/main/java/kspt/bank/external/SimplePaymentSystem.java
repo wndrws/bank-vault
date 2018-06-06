@@ -1,11 +1,29 @@
 package kspt.bank.external;
 
 import kspt.bank.enums.PaymentMethod;
+import lombok.RequiredArgsConstructor;
 
+import java.util.HashMap;
+import java.util.Map;
+
+@RequiredArgsConstructor
 public class SimplePaymentSystem implements PaymentGate {
+    private final Map<Invoice, Integer> invoiceToGoodId;
+
+    public SimplePaymentSystem() {
+        invoiceToGoodId = new HashMap<>();
+    }
+
     @Override
-    public Invoice issueInvoice(long sum) {
-        return new Invoice(sum);
+    public Invoice issueInvoice(long sum, int goodId) {
+        final Invoice invoice = new Invoice(sum);
+        invoiceToGoodId.put(invoice, goodId);
+        return invoice;
+    }
+
+    @Override
+    public Integer findGood(Invoice invoice) {
+        return invoiceToGoodId.get(invoice);
     }
 
     @Override

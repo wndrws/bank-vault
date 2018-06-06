@@ -31,12 +31,12 @@ class CellApplicationInteractorTest {
 
     private final ApplicationsRepository applicationsRepository = mock(ApplicationsRepository.class);
 
-    private final PaymentGate paymentGate = new SimplePaymentSystem();
+    private final Map<Invoice, Integer> invoiceMap = mock(HashMap.class);
 
-    private final Map<Invoice, CellApplication> invoiceMap = mock(HashMap.class);
+    private final PaymentGate paymentGate = new SimplePaymentSystem(invoiceMap);
 
     private final CellApplicationInteractor interactor =
-            new CellApplicationInteractor(clientsRepository, applicationsRepository, paymentGate, invoiceMap);
+            new CellApplicationInteractor(clientsRepository, applicationsRepository, paymentGate);
 
     @Test
     void testCreateApplication_NewClient() {
@@ -125,7 +125,7 @@ class CellApplicationInteractorTest {
         // then
         assertThat(invoice.isPaid()).isFalse();
         assertThat(invoice.getSum()).isEqualTo(cellApplication.calculateLeaseCost());
-        assertThat(invoiceMap.get(invoice)).isEqualTo(cellApplication);
+        assertThat(invoiceMap.get(invoice)).isEqualTo(cellApplication.getId());
         assertThat(cellApplication.getStatus()).isEqualTo(CellApplicationStatus.APPROVED);
     }
 
@@ -136,7 +136,8 @@ class CellApplicationInteractorTest {
         final CellApplication cellApplication =
                 TestDataGenerator.getCellApplication(CellApplicationStatus.APPROVED);
         final Invoice invoice = new Invoice(cellApplication.calculateLeaseCost());
-        when(invoiceMap.get(invoice)).thenReturn(cellApplication);
+        when(invoiceMap.get(invoice)).thenReturn(cellApplication.getId());
+        when(applicationsRepository.find(cellApplication.getId())).thenReturn(cellApplication);
         paymentGate.pay(invoice, invoice.getSum(), paymentMethod);
         // when
         interactor.acceptPayment(invoice);

@@ -26,9 +26,6 @@ public class LeasingControlInteractor {
 
     private final PaymentGate paymentGate;
 
-    @Getter(AccessLevel.PACKAGE) @VisibleForTesting
-    private final Map<Invoice, CellApplication> invoiceToApplicationMap = new HashMap<>();
-
     public LeasingControlInteractor(final Clock clock, final NotificationGate notificationGate,
             final ApplicationsRepository applicationsRepository, final PaymentGate paymentGate) {
         Vault.CLOCK = clock;
@@ -52,14 +49,12 @@ public class LeasingControlInteractor {
         application.setCell(cell);
         application.setLeasePeriod(leasePeriod);
         applicationsRepository.save(application);
-        final long leaseCost = application.calculateLeaseCost();
-        final Invoice invoice = paymentGate.issueInvoice(leaseCost);
-        invoiceToApplicationMap.put(invoice, application);
-        return invoice;
+        return paymentGate.issueInvoice(application.calculateLeaseCost(), application.getId());
     }
 
     public void acceptPayment(final Invoice invoice) {
-        final CellApplication application = invoiceToApplicationMap.get(invoice);
+        final Integer applicationId = paymentGate.findGood(invoice);
+        final CellApplication application = applicationsRepository.find(applicationId);
         Preconditions.checkNotNull(application);
         Preconditions.checkState(application.getStatus() == CellApplicationStatus.APPROVED);
         Preconditions.checkState(invoice.isPaid());
