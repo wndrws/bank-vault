@@ -1,4 +1,4 @@
-package kspt.bank.views
+package kspt.bank.views.manager
 
 import javafx.collections.FXCollections
 import javafx.geometry.Insets

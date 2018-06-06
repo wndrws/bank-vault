@@ -9,18 +9,22 @@ import java.lang.Exception
 abstract class ErrorHandlingController : Controller() {
     protected val logger = logger()
 
-    protected fun errorAware(action: () -> Unit) = try {
+    protected fun errorAware(action: () -> Unit): Boolean = try {
         action()
+        true
     } catch (e: Exception) {
         displayError(e)
         logger.error("Error", e)
+        false
     }
 
-    protected fun errorAware(context: String, action: () -> Unit): Unit = try {
+    protected fun errorAware(context: String, action: () -> Unit): Boolean = try {
         action()
+        true
     } catch (e: Exception) {
         displayError(e)
         logger.error("Error in $context", e)
+        false
     }
 
     protected fun displayError(e: Exception) {

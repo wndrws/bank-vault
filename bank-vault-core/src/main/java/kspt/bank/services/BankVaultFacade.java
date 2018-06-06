@@ -11,6 +11,8 @@ import kspt.bank.dto.CellApplicationDTO;
 import kspt.bank.dto.CellDTO;
 import kspt.bank.dto.ClientDTO;
 import kspt.bank.enums.CellSize;
+import kspt.bank.external.Invoice;
+import kspt.bank.external.PaymentSystem;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,9 @@ public class BankVaultFacade {
 
     @Autowired
     private final ClientsRepository clientsRepository;
+
+    @Autowired
+    private final PaymentSystem paymentSystem;
 
     @Autowired
     private final TransactionManager transactionManager;
@@ -60,7 +65,8 @@ public class BankVaultFacade {
             return Optional.empty();
         } else {
             return Optional.of(new CellDTO(getCodeName(cell), cell.getSize(), app.getStatus(),
-                    getLeaseBegin(cell), app.getLeasePeriod(), getContainedPreciousName(cell)));
+                    getLeaseBegin(cell), app.getLeasePeriod(), getContainedPreciousName(cell),
+                    app.getId()));
         }
     }
 
@@ -94,8 +100,9 @@ public class BankVaultFacade {
         return applications.stream()
                 .map(app -> {
                     final Cell cell = app.getCell();
-                    return cell == null ? null : new CellDTO(getCodeName(cell), cell.getSize(), app.getStatus(),
-                            getLeaseBegin(cell), app.getLeasePeriod(), getContainedPreciousName(cell));
+                    return cell == null ? null : new CellDTO(getCodeName(cell), cell.getSize(),
+                            app.getStatus(), getLeaseBegin(cell), app.getLeasePeriod(),
+                            getContainedPreciousName(cell), app.getId());
                 }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
@@ -131,5 +138,11 @@ public class BankVaultFacade {
         transactionManager.runTransactional(() ->
                 applicationsRepository.deleteApplication(appId)
         );
+    }
+
+    public void acceptPayment(Invoice invoice) {
+        transactionManager.runTransactional(() -> {
+            cellApplicationInteractor.acceptPayment(invoice);
+        });
     }
 }

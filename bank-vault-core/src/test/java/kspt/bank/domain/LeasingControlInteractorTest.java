@@ -9,7 +9,7 @@ import kspt.bank.enums.CellApplicationStatus;
 import kspt.bank.enums.CellSize;
 import kspt.bank.enums.PaymentMethod;
 import kspt.bank.external.Invoice;
-import kspt.bank.external.PaymentGate;
+import kspt.bank.external.PaymentSystem;
 import kspt.bank.external.SimplePaymentSystem;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,13 +36,13 @@ public class LeasingControlInteractorTest {
 
     private final ApplicationsRepository applicationsRepository = new InMemoryApplicationsRepository();
 
-    private final PaymentGate paymentGate = new SimplePaymentSystem();
+    private final PaymentSystem paymentSystem = new SimplePaymentSystem();
 
     private final MockClock mockedClock =
             MockClock.at(2018, 4, 10, 19, 0, ZoneId.systemDefault());
 
     private final LeasingControlInteractor interactor = new LeasingControlInteractor(mockedClock,
-            notificationGate, applicationsRepository, paymentGate);
+            notificationGate, applicationsRepository, paymentSystem);
 
     private final Period shortPeriod = Period.ofDays(1);
 
@@ -81,7 +81,7 @@ public class LeasingControlInteractorTest {
         // when
         final Invoice invoice = interactor.continueLeasing(client, cell, newLeasePeriod);
         // then
-        final CellApplication application = applicationsRepository.find(paymentGate.findGood(invoice));
+        final CellApplication application = applicationsRepository.find(paymentSystem.findGood(invoice));
         assertThat(application.getStatus()).isEqualTo(CellApplicationStatus.APPROVED);
         assertThat(application.getCell()).isEqualTo(cell);
         assertThat(application.getLeaseholder()).isEqualTo(client);
@@ -104,9 +104,9 @@ public class LeasingControlInteractorTest {
         Thread.sleep(2*LEASING_TIMERS_CHECK_PERIOD_MS);
         Assumptions.assumeTrue(Vault.getInstance().getLeasingController()
                 .isLeasingExpired(cellApplication.getCell()));
-        final Invoice invoice = paymentGate.issueInvoice(
+        final Invoice invoice = paymentSystem.issueInvoice(
                 cellApplication.calculateLeaseCost(), cellApplication.getId());
-        paymentGate.pay(invoice, invoice.getSum(), paymentMethod);
+        paymentSystem.pay(invoice, invoice.getSum(), paymentMethod);
         // when
         interactor.acceptPayment(invoice);
         // then

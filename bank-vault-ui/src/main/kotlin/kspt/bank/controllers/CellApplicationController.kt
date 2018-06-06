@@ -4,22 +4,29 @@ import javafx.stage.StageStyle
 import kspt.bank.BankVaultCoreApplication
 import kspt.bank.CellStatus
 import kspt.bank.ChoosableCellSize
+import kspt.bank.ChoosablePaymentMethod
 import kspt.bank.dto.CellApplicationDTO
 import kspt.bank.dto.CellDTO
 import kspt.bank.enums.CellApplicationStatus
 import kspt.bank.enums.CellSize
+import kspt.bank.enums.PaymentMethod
+import kspt.bank.external.Invoice
 import kspt.bank.services.BankVaultFacade
-import kspt.bank.views.ClientCellChoiceView
-import kspt.bank.views.ClientMainView
+import kspt.bank.services.PaymentService
 import kspt.bank.views.ErrorModalView
-import kspt.bank.views.ManagerMainView
+import kspt.bank.views.client.CellChoiceView
+import kspt.bank.views.client.ClientMainView
+import kspt.bank.views.manager.ManagerMainView
 import tornadofx.runLater
-import java.lang.Exception
 import java.time.Period
 
 class CellApplicationController : ErrorHandlingController() {
     private val bankVaultFacade by lazy {
         BankVaultCoreApplication.getApplicationContext().getBean(BankVaultFacade::class.java)
+    }
+
+    private val paymentService by lazy {
+        BankVaultCoreApplication.getApplicationContext().getBean(PaymentService::class.java)
     }
 
     private val userModel: UserModel by inject()
@@ -34,7 +41,7 @@ class CellApplicationController : ErrorHandlingController() {
                 errorWindow.openModal(stageStyle = StageStyle.UTILITY)
             } else {
                 updateCellsTable(applicationId)
-                find(ClientCellChoiceView::class).replaceWith(ClientMainView::class, sizeToScene = true)
+                find(CellChoiceView::class).replaceWith(ClientMainView::class, sizeToScene = true)
             }
         }
     }
@@ -75,11 +82,12 @@ class CellApplicationController : ErrorHandlingController() {
     private fun CellDTO.toCellTableEntry() =
             ClientMainView.CellTableEntry(
                     this.codeName,
-                    this.status.asCellStatus().displayName,
+                    this.status.asCellStatus(),
                     this.size.asChoosableCellSize().displayName,
                     this.containedPreciousName,
                     this.leaseBegin?.toString() ?: "",
-                    this.leasePeriod.days)
+                    this.leasePeriod.days,
+                    this.applicationId)
 
     fun fillCellsTable() {
         var clientsCellsInfo: List<CellDTO> = emptyList()
@@ -111,14 +119,43 @@ class CellApplicationController : ErrorHandlingController() {
                     "${this.leaseholder.firstName} ${this.leaseholder.lastName}", this)
 
     fun approveApplication(applicationId: Int) {
-        errorAware {
+        errorAware("approveApplication") {
             bankVaultFacade.approveApplication(applicationId)
         }
     }
 
     fun declineApplication(applicationId: Int) {
-        errorAware {
+        errorAware("declineApplication") {
             bankVaultFacade.declineApplication(applicationId)
         }
+    }
+
+    fun getPaymentInfo(applicationId: Int): Invoice? {
+        val invoiceInfo = paymentService.getInvoiceForApplication(applicationId)
+        return invoiceInfo.orElseGet {
+            val errorWindow = find<ErrorModalView>(
+                    "message" to "Нет информации о счёте для заявки №$applicationId")
+            errorWindow.openModal(stageStyle = StageStyle.UTILITY)
+            null
+        }
+    }
+
+    fun payForCell(invoice: Invoice, sum: Long, method: ChoosablePaymentMethod): Long {
+        var change = 0L
+        errorAware {
+            change = paymentService.pay(invoice, sum, method.asPaymentMethod())
+        }
+        return change
+    }
+
+    private fun ChoosablePaymentMethod.asPaymentMethod(): PaymentMethod {
+        return when (this) {
+            ChoosablePaymentMethod.CARD -> PaymentMethod.CARD
+            ChoosablePaymentMethod.CASH -> PaymentMethod.CASH
+        }
+    }
+
+    fun acceptPayment(invoice: Invoice): Boolean = errorAware {
+        bankVaultFacade.acceptPayment(invoice)
     }
 }

@@ -5,9 +5,9 @@ import kspt.bank.BankVaultCoreApplication
 import kspt.bank.dto.ClientDTO
 import kspt.bank.recognition.Credentials
 import kspt.bank.services.LoginService
-import kspt.bank.views.ClientInfoView
-import kspt.bank.views.ClientMainView
-import kspt.bank.views.LoginView
+import kspt.bank.views.client.ClientInfoView
+import kspt.bank.views.client.ClientMainView
+import kspt.bank.views.client.LoginView
 import tornadofx.*
 
 class LoginController : ErrorHandlingController() {

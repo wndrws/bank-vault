@@ -6,7 +6,7 @@ import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.enums.CellApplicationStatus;
 import kspt.bank.enums.CellSize;
 import kspt.bank.external.Invoice;
-import kspt.bank.external.PaymentGate;
+import kspt.bank.external.PaymentSystem;
 import kspt.bank.domain.entities.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class CellApplicationInteractor {
     @Getter
     private final ApplicationsRepository applicationsRepository;
 
-    private final PaymentGate paymentGate;
+    private final PaymentSystem paymentSystem;
 
     public CellApplication createApplication(final PassportInfo passportInfo, final String phone,
             final String email)
@@ -62,14 +62,14 @@ public class CellApplicationInteractor {
     public Invoice approveApplication(final CellApplication application) {
         Preconditions.checkState(application.getStatus() == CellApplicationStatus.CELL_CHOSEN);
         final long leaseCost = calculatePayment(application);
-        final Invoice invoice = paymentGate.issueInvoice(leaseCost, application.getId());
+        final Invoice invoice = paymentSystem.issueInvoice(leaseCost, application.getId());
         application.setStatus(CellApplicationStatus.APPROVED);
         applicationsRepository.save(application);
         return invoice;
     }
 
     public void acceptPayment(final Invoice invoice) {
-        final Integer applicationId = paymentGate.findGood(invoice);
+        final Integer applicationId = paymentSystem.findGood(invoice);
         final CellApplication application = applicationsRepository.find(applicationId);
         Preconditions.checkNotNull(application);
         Preconditions.checkState(application.getStatus() == CellApplicationStatus.APPROVED);

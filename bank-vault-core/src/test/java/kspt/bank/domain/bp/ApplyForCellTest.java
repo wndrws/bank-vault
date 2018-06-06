@@ -8,7 +8,7 @@ import kspt.bank.enums.CellApplicationStatus;
 import kspt.bank.enums.CellSize;
 import kspt.bank.enums.PaymentMethod;
 import kspt.bank.external.Invoice;
-import kspt.bank.external.PaymentGate;
+import kspt.bank.external.PaymentSystem;
 import kspt.bank.domain.*;
 import kspt.bank.domain.entities.*;
 import kspt.bank.external.SimplePaymentSystem;
@@ -28,10 +28,10 @@ class ApplyForCellTest extends TestUsingDatabase {
 
     private final ApplicationsRepository applicationsRepository = new DatabaseApplicationsRepository();
 
-    private final PaymentGate paymentGate = new SimplePaymentSystem();
+    private final PaymentSystem paymentSystem = new SimplePaymentSystem();
 
     private final CellApplicationInteractor caInteractor =
-            new CellApplicationInteractor(clientsRepository, applicationsRepository, paymentGate);
+            new CellApplicationInteractor(clientsRepository, applicationsRepository, paymentSystem);
 
     private final RoleClient roleClient = new RoleClient();
 
@@ -100,7 +100,7 @@ class ApplyForCellTest extends TestUsingDatabase {
         }
 
         void pay(Invoice invoice) {
-            paymentGate.pay(invoice, invoice.getSum(), PaymentMethod.CASH);
+            paymentSystem.pay(invoice, invoice.getSum(), PaymentMethod.CASH);
             caInteractor.acceptPayment(invoice);
         }
     }

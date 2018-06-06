@@ -15,3 +15,11 @@ enum class CellStatus(val displayName: String) {
         return this.displayName
     }
 }
+
+enum class ChoosablePaymentMethod(val displayName: String) {
+    CARD ("Банковская карта"), CASH ("Наличные");
+
+    override fun toString(): String {
+        return this.displayName
+    }
+}

@@ -1,10 +1,11 @@
-package kspt.bank.views
+package kspt.bank.views.client
 
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.scene.control.Label
 import javafx.scene.control.TableView
 import javafx.scene.layout.AnchorPane
+import kspt.bank.CellStatus
 import kspt.bank.controllers.CellApplicationController
 import kspt.bank.controllers.LoginController
 import kspt.bank.controllers.WebTimeController
@@ -35,6 +36,8 @@ class ClientMainView: View("Bank Vault") {
 
     val cellTableItems = FXCollections.observableArrayList<CellTableEntry>()!!
 
+    val model = CellTableEntryModel()
+
     init {
         initCellsTable()
         timer.bind(timeProperty)
@@ -47,12 +50,23 @@ class ClientMainView: View("Bank Vault") {
         cellsTable.readonlyColumn("Содержимое", CellTableEntry::precious)
         cellsTable.readonlyColumn("Начало аренды", CellTableEntry::leaseBegin)
         cellsTable.readonlyColumn("Аренда (дней)", CellTableEntry::leaseDays)
+        cellsTable.bindSelected(model)
         cellsTable.items = cellTableItems
+        cellsTable.contextmenu {
+            item("Оплатить") {
+                enableWhen(model.isAwaitingPayment)
+                action {
+                    val paymentView = find<PaymentView>(
+                            "applicationId" to model.applicationId.value.toInt())
+                    paymentView.openModal()
+                }
+            }
+        }
     }
 
 
     fun lease() {
-        this.replaceWith(ClientCellChoiceView::class, sizeToScene = true)
+        this.replaceWith(CellChoiceView::class, sizeToScene = true)
     }
 
     fun putPrecious() {
@@ -88,6 +102,11 @@ class ClientMainView: View("Bank Vault") {
         cellTableItems.clear()
     }
 
-    class CellTableEntry(val id: String, val status: String, val size: String, val precious: String,
-                         val leaseBegin: String, val leaseDays: Int)
+    class CellTableEntry(val id: String, val status: CellStatus, val size: String, val precious: String,
+                         val leaseBegin: String, val leaseDays: Int, val applicationId: Int)
+
+    class CellTableEntryModel : ItemViewModel<CellTableEntry>() {
+        val applicationId = bind { item?.applicationId?.toProperty() }
+        val isAwaitingPayment = bind { item?.status?.let { it == CellStatus.AWAITING }?.toProperty() }
+    }
 }

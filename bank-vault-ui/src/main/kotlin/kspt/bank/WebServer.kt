@@ -7,7 +7,7 @@
 //import io.ktor.routing.routing
 //import io.ktor.server.engine.embeddedServer
 //import io.ktor.server.netty.Netty
-//import kspt.bank.views.ClientMainView
+//import kspt.bank.views.client.ClientMainView
 //import tornadofx.Controller
 //import tornadofx.JsonBuilder
 //import java.util.concurrent.TimeUnit

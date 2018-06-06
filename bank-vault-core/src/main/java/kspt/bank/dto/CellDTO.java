@@ -20,4 +20,6 @@ public final class CellDTO {
     public final Period leasePeriod;
 
     public final String containedPreciousName;
+
+    public final Integer applicationId;
 }

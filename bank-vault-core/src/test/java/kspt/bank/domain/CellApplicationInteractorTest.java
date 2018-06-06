@@ -6,7 +6,7 @@ import kspt.bank.enums.CellApplicationStatus;
 import kspt.bank.enums.CellSize;
 import kspt.bank.enums.PaymentMethod;
 import kspt.bank.external.Invoice;
-import kspt.bank.external.PaymentGate;
+import kspt.bank.external.PaymentSystem;
 import kspt.bank.domain.ClientPassportValidator.IncorrectPassportInfo;
 import kspt.bank.domain.entities.*;
 import kspt.bank.external.SimplePaymentSystem;
@@ -33,10 +33,10 @@ class CellApplicationInteractorTest {
 
     private final Map<Invoice, Integer> invoiceMap = mock(HashMap.class);
 
-    private final PaymentGate paymentGate = new SimplePaymentSystem(invoiceMap);
+    private final PaymentSystem paymentSystem = new SimplePaymentSystem(invoiceMap);
 
     private final CellApplicationInteractor interactor =
-            new CellApplicationInteractor(clientsRepository, applicationsRepository, paymentGate);
+            new CellApplicationInteractor(clientsRepository, applicationsRepository, paymentSystem);
 
     @Test
     void testCreateApplication_NewClient() {
@@ -138,7 +138,7 @@ class CellApplicationInteractorTest {
         final Invoice invoice = new Invoice(cellApplication.calculateLeaseCost());
         when(invoiceMap.get(invoice)).thenReturn(cellApplication.getId());
         when(applicationsRepository.find(cellApplication.getId())).thenReturn(cellApplication);
-        paymentGate.pay(invoice, invoice.getSum(), paymentMethod);
+        paymentSystem.pay(invoice, invoice.getSum(), paymentMethod);
         // when
         interactor.acceptPayment(invoice);
         // then

@@ -1,4 +1,4 @@
-package kspt.bank.views
+package kspt.bank.views.client
 
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Insets

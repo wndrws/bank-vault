@@ -1,4 +1,4 @@
-package kspt.bank.views
+package kspt.bank.views.client
 
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -6,11 +6,10 @@ import javafx.collections.FXCollections
 import javafx.geometry.Insets
 import kspt.bank.ChoosableCellSize
 import kspt.bank.controllers.CellApplicationController
-import kspt.bank.controllers.UserModel
 import tornadofx.*
 import java.time.Period
 
-class ClientCellChoiceView : View() {
+class CellChoiceView : View() {
     private val model = ViewModel()
 
     private val cellSizes = FXCollections.observableArrayList(*ChoosableCellSize.values())
@@ -44,7 +43,7 @@ class ClientCellChoiceView : View() {
             button("Отмена" ) {
                 anchorpaneConstraints { leftAnchor = 0 }
                 action {
-                    find(ClientCellChoiceView::class).replaceWith(ClientMainView::class, sizeToScene = true)
+                    find(CellChoiceView::class).replaceWith(ClientMainView::class, sizeToScene = true)
                 }
 
             }

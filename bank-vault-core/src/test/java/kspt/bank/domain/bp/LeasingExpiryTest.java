@@ -11,7 +11,7 @@ import kspt.bank.domain.entities.*;
 import kspt.bank.enums.CellSize;
 import kspt.bank.enums.PaymentMethod;
 import kspt.bank.external.Invoice;
-import kspt.bank.external.PaymentGate;
+import kspt.bank.external.PaymentSystem;
 import kspt.bank.external.SimplePaymentSystem;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +34,7 @@ class LeasingExpiryTest extends TestUsingDatabase {
 
     private final ApplicationsRepository applicationsRepository = new DatabaseApplicationsRepository();
 
-    private final PaymentGate paymentGate = new SimplePaymentSystem();
+    private final PaymentSystem paymentSystem = new SimplePaymentSystem();
 
     private final NotificationGate notificationGate = mock(NotificationGate.class);
 
@@ -42,7 +42,7 @@ class LeasingExpiryTest extends TestUsingDatabase {
             MockClock.at(2018, 4, 10, 19, 0, ZoneId.systemDefault());
 
     private final LeasingControlInteractor lcInteractor = new LeasingControlInteractor(mockedClock,
-            notificationGate, applicationsRepository, paymentGate);
+            notificationGate, applicationsRepository, paymentSystem);
 
     private final RoleClient roleClient = new RoleClient();
 
@@ -165,7 +165,7 @@ class LeasingExpiryTest extends TestUsingDatabase {
         }
 
         void pay(Invoice invoice) {
-            paymentGate.pay(invoice, invoice.getSum(), PaymentMethod.CASH);
+            paymentSystem.pay(invoice, invoice.getSum(), PaymentMethod.CASH);
             lcInteractor.acceptPayment(invoice);
         }
 

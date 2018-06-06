@@ -1,21 +1,13 @@
 package kspt.bank.external;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.json.UTF8JsonGenerator;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import kspt.bank.enums.PaymentMethod;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Map;
 
 @Slf4j
 public class FileBasedPaymentSystem extends SimplePaymentSystem {
@@ -26,6 +18,20 @@ public class FileBasedPaymentSystem extends SimplePaymentSystem {
     public FileBasedPaymentSystem() {
         super();
         updateInvoiceInfo();
+    }
+
+    private void updateInvoiceInfo() {
+        if (invoiceToGoodId.isEmpty() && !file.canRead()) return;
+        try {
+            final ArrayNode root = (ArrayNode) mapper.readTree(file);
+            root.forEach(node -> {
+                final Invoice invoice = mapper.convertValue(node.get("invoice"), Invoice.class);
+                final Integer goodId = node.get("goodId").asInt();
+                invoiceToGoodId.put(invoice, goodId);
+            });
+        } catch (IOException e) {
+            log.error("Cannot read invoices!", e);
+        }
     }
 
     @Override
@@ -56,18 +62,10 @@ public class FileBasedPaymentSystem extends SimplePaymentSystem {
         return super.findGood(invoice);
     }
 
-    private void updateInvoiceInfo() {
-        if (invoiceToGoodId.isEmpty() && !file.canRead()) return;
-        try {
-            final ArrayNode root = (ArrayNode) mapper.readTree(file);
-            root.forEach(node -> {
-                final Invoice invoice = mapper.convertValue(node.get("invoice"), Invoice.class);
-                final Integer goodId = node.get("goodId").asInt();
-                invoiceToGoodId.put(invoice, goodId);
-            });
-        } catch (IOException e) {
-            log.error("Cannot read invoices!", e);
-        }
+    @Override
+    public Invoice findInvoice(int goodId) {
+        updateInvoiceInfo();
+        return super.findInvoice(goodId);
     }
 
     @Override

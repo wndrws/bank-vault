@@ -1,17 +1,16 @@
 package kspt.bank.external;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import kspt.bank.enums.PaymentMethod;
 import lombok.RequiredArgsConstructor;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RequiredArgsConstructor
-public class SimplePaymentSystem implements PaymentGate {
-    protected final Map<Invoice, Integer> invoiceToGoodId;
+public class SimplePaymentSystem implements PaymentSystem {
+    protected final BiMap<Invoice, Integer> invoiceToGoodId;
 
     public SimplePaymentSystem() {
-        invoiceToGoodId = new HashMap<>();
+        invoiceToGoodId = HashBiMap.create();
     }
 
     @Override
@@ -24,6 +23,11 @@ public class SimplePaymentSystem implements PaymentGate {
     @Override
     public Integer findGood(Invoice invoice) {
         return invoiceToGoodId.get(invoice);
+    }
+
+    @Override
+    public Invoice findInvoice(int goodId) {
+        return invoiceToGoodId.inverse().get(goodId);
     }
 
     @Override

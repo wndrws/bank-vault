@@ -1,6 +1,5 @@
 package kspt.bank.domain;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.NotificationGate;
@@ -9,29 +8,25 @@ import kspt.bank.domain.entities.CellApplication;
 import kspt.bank.enums.CellApplicationStatus;
 import kspt.bank.domain.entities.Client;
 import kspt.bank.external.Invoice;
-import kspt.bank.external.PaymentGate;
-import lombok.AccessLevel;
-import lombok.Getter;
+import kspt.bank.external.PaymentSystem;
 
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.HashMap;
-import java.util.Map;
 
 public class LeasingControlInteractor {
     private final NotificationGate notificationGate;
 
     private final ApplicationsRepository applicationsRepository;
 
-    private final PaymentGate paymentGate;
+    private final PaymentSystem paymentSystem;
 
     public LeasingControlInteractor(final Clock clock, final NotificationGate notificationGate,
-            final ApplicationsRepository applicationsRepository, final PaymentGate paymentGate) {
+            final ApplicationsRepository applicationsRepository, final PaymentSystem paymentSystem) {
         Vault.CLOCK = clock;
         this.notificationGate = notificationGate;
         this.applicationsRepository = applicationsRepository;
-        this.paymentGate = paymentGate;
+        this.paymentSystem = paymentSystem;
     }
 
     public void sendNotifications() {
@@ -49,11 +44,11 @@ public class LeasingControlInteractor {
         application.setCell(cell);
         application.setLeasePeriod(leasePeriod);
         applicationsRepository.save(application);
-        return paymentGate.issueInvoice(application.calculateLeaseCost(), application.getId());
+        return paymentSystem.issueInvoice(application.calculateLeaseCost(), application.getId());
     }
 
     public void acceptPayment(final Invoice invoice) {
-        final Integer applicationId = paymentGate.findGood(invoice);
+        final Integer applicationId = paymentSystem.findGood(invoice);
         final CellApplication application = applicationsRepository.find(applicationId);
         Preconditions.checkNotNull(application);
         Preconditions.checkState(application.getStatus() == CellApplicationStatus.APPROVED);
