@@ -13,7 +13,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true, exclude = "cellLeaseRecord")
 @Data
 public class Cell extends ManualIdDomainObject {
-    public static boolean AUTOPERSIST = true;
+    private static boolean AUTOPERSIST = true;
 
     private final CellSize size;
 

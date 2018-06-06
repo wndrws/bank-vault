@@ -27,8 +27,7 @@ class CellApplicationController : ErrorHandlingController() {
     fun processCellRequest(size: ChoosableCellSize, period: Period) {
         errorAware("processCellRequest") {
             val applicationId = bankVaultFacade.acceptClientInfo(userModel.clientInfo.value)
-            val success = bankVaultFacade.requestCell(
-                    size.asCellSize(), period, applicationId)
+            val success = bankVaultFacade.requestCell(size.asCellSize(), period, applicationId)
             if (!success) {
                 val errorWindow = find<ErrorModalView>(
                         "message" to "Нет доступной ячейки запрошенного размера!")

@@ -1,6 +1,7 @@
 package kspt.bank.services;
 
 import kspt.bank.boundaries.ClientsRepository;
+import kspt.bank.domain.ClientPassportValidator;
 import kspt.bank.domain.entities.Client;
 import kspt.bank.domain.entities.PassportInfo;
 import kspt.bank.dto.ClientDTO;
@@ -31,6 +32,7 @@ public class LoginService {
         final PassportInfo passportInfo = new PassportInfo(
                 clientInfo.passportSerial, clientInfo.firstName, clientInfo.lastName,
                 clientInfo.patronymic, clientInfo.birthday);
+        ClientPassportValidator.checkValidity(passportInfo);
         final Client newClient = new Client(passportInfo, clientInfo.phone, clientInfo.email);
         transactionManager.runTransactional(() -> {
             clientsRepository.add(newClient);

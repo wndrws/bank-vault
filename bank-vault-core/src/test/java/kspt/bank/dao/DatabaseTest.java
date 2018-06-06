@@ -7,6 +7,7 @@ import kspt.bank.domain.entities.Client;
 import kspt.bank.domain.entities.Precious;
 import org.junit.jupiter.api.*;
 
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,8 +22,8 @@ class DatabaseTest {
 
     @BeforeAll
     static void openConnection()
-    throws SQLException {
-        Cell.AUTOPERSIST = false;
+    throws Exception {
+        setCellsAutopersist(false);
         conn = DatabaseConnection.getConnection();
         conn.setAutoCommit(false);
     }
@@ -178,8 +179,17 @@ class DatabaseTest {
     }
 
     @AfterAll
-    static void closeConnection() {
+    static void closeConnection()
+    throws Exception {
         DatabaseConnection.closeConnection();
         DataMapperRegistry.clear();
+        setCellsAutopersist(true);
+    }
+
+    private static void setCellsAutopersist(boolean val)
+    throws IllegalAccessException, NoSuchFieldException {
+        Field instance = Cell.class.getDeclaredField("AUTOPERSIST");
+        instance.setAccessible(true);
+        instance.set(null, val);
     }
 }

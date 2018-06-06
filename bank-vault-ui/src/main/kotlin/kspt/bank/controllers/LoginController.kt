@@ -10,7 +10,7 @@ import kspt.bank.views.ClientMainView
 import kspt.bank.views.LoginView
 import tornadofx.*
 
-class LoginController : Controller() {
+class LoginController : ErrorHandlingController() {
     private val loginService by lazy {
         BankVaultCoreApplication.getApplicationContext().getBean(LoginService::class.java)
     }
@@ -42,9 +42,11 @@ class LoginController : Controller() {
 
     fun register(username: String, password: String, clientInfo: ClientDTO) {
         runLater { status = "" }
-        val userId = loginService.registerUser(Credentials(username, password), clientInfo)
-        userModel.item = User(userId, clientInfo)
-        find(ClientInfoView::class).replaceWith(ClientMainView::class, sizeToScene = true)
+        errorAware("registerUser") {
+            val userId = loginService.registerUser(Credentials(username, password), clientInfo)
+            userModel.item = User(userId, clientInfo)
+            find(ClientInfoView::class).replaceWith(ClientMainView::class, sizeToScene = true)
+        }
     }
 
     fun logout() {

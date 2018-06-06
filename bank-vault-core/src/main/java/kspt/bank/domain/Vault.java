@@ -54,19 +54,26 @@ public final class Vault {
 
     private Vault() {
         final CellDataMapper mapper = (CellDataMapper) DataMapperRegistry.getMapper(Cell.class);
-        if (mapper != null && !mapper.findAll().isEmpty()) {
-            cells = mapper.findAll().stream().collect(Collectors.groupingBy(
-                    Cell::getSize, () -> new EnumMap<>(CellSize.class), Collectors.toList()));
-            vaultHardware = new VaultHardware(cells);
-            useDatabase = true;
-        } else {
-            vaultHardware = new VaultHardware();
-            cells = new EnumMap<>(CellSize.class);
-            cells.put(CellSize.SMALL, vaultHardware.getCellsOfSize(CellSize.SMALL));
-            cells.put(CellSize.MEDIUM, vaultHardware.getCellsOfSize(CellSize.MEDIUM));
-            cells.put(CellSize.BIG, vaultHardware.getCellsOfSize(CellSize.BIG));
+        if (mapper == null) {
+            cells = initializeVault();
             useDatabase = false;
+        } else {
+            if (!mapper.findAll().isEmpty()) {
+                cells = mapper.findAll().stream().collect(Collectors.groupingBy(
+                        Cell::getSize, () -> new EnumMap<>(CellSize.class), Collectors.toList()));
+                vaultHardware = new VaultHardware(cells);
+            } else cells = initializeVault();
+            useDatabase = true;
         }
+    }
+
+    private EnumMap<CellSize, List<Cell>> initializeVault() {
+        vaultHardware = new VaultHardware();
+        final EnumMap<CellSize, List<Cell>> cells = new EnumMap<>(CellSize.class);
+        cells.put(CellSize.SMALL, vaultHardware.getCellsOfSize(CellSize.SMALL));
+        cells.put(CellSize.MEDIUM, vaultHardware.getCellsOfSize(CellSize.MEDIUM));
+        cells.put(CellSize.BIG, vaultHardware.getCellsOfSize(CellSize.BIG));
+        return cells;
     }
 
     @Synchronized
