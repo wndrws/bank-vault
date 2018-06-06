@@ -8,7 +8,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 public class SimplePaymentSystem implements PaymentGate {
-    private final Map<Invoice, Integer> invoiceToGoodId;
+    protected final Map<Invoice, Integer> invoiceToGoodId;
 
     public SimplePaymentSystem() {
         invoiceToGoodId = new HashMap<>();

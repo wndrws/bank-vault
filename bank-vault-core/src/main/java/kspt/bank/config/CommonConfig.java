@@ -2,10 +2,9 @@ package kspt.bank.config;
 
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.ClientsRepository;
-import kspt.bank.boundaries.NotificationGate;
 import kspt.bank.domain.CellApplicationInteractor;
+import kspt.bank.external.FileBasedPaymentSystem;
 import kspt.bank.external.PaymentGate;
-import kspt.bank.external.SimplePaymentSystem;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 public class CommonConfig {
     @Bean
     public PaymentGate paymentGate() {
-        return new SimplePaymentSystem();
+        return new FileBasedPaymentSystem();
     }
 
     @Bean
