@@ -29,7 +29,7 @@ public final class Vault {
     private final EnumMap<CellSize, List<Cell>> cells;
 
     @Getter
-    private final LeasingController leasingController = new LeasingController(CLOCK);
+    private final LeasingController leasingController;
 
     private final Set<Cell> pendingCells = Collections.synchronizedSet(new HashSet<>());
 
@@ -56,15 +56,29 @@ public final class Vault {
         final CellDataMapper mapper = (CellDataMapper) DataMapperRegistry.getMapper(Cell.class);
         if (mapper == null) {
             cells = initializeVault();
+            leasingController = new LeasingController(CLOCK);
             useDatabase = false;
         } else {
             if (!mapper.findAll().isEmpty()) {
                 cells = mapper.findAll().stream().collect(Collectors.groupingBy(
                         Cell::getSize, () -> new EnumMap<>(CellSize.class), Collectors.toList()));
                 vaultHardware = new VaultHardware(cells);
-            } else cells = initializeVault();
+                leasingController = new LeasingController(CLOCK, collectLeasingInfo(cells));
+            } else {
+                cells = initializeVault();
+                leasingController = new LeasingController(CLOCK);
+            }
             useDatabase = true;
         }
+    }
+
+    private Map<Cell, LeasingController.CellLeaseRecord> collectLeasingInfo(
+            EnumMap<CellSize, List<Cell>> cells) {
+        return cells.entrySet().stream()
+                .flatMap(entry -> entry.getValue().stream())
+                .map(cell -> new AbstractMap.SimpleEntry<>(cell, cell.getCellLeaseRecord()))
+                .filter(entry -> entry.getValue() != null)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private EnumMap<CellSize, List<Cell>> initializeVault() {

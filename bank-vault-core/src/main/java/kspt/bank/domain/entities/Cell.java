@@ -57,6 +57,11 @@ public class Cell extends ManualIdDomainObject {
         if (AUTOPERSIST) persist();
     }
 
+    public void setCellLeaseRecord(final LeasingController.CellLeaseRecord cellLeaseRecord) {
+        this.cellLeaseRecord = cellLeaseRecord;
+        if (AUTOPERSIST) persist();
+    }
+
     private void persist() {
         final CellDataMapper mapper = (CellDataMapper) DataMapperRegistry.getMapper(Cell.class);
         if (mapper != null) {

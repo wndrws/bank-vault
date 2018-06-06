@@ -1,5 +1,7 @@
 package kspt.bank.domain;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.enums.CellApplicationStatus;
@@ -31,7 +33,7 @@ class CellApplicationInteractorTest {
 
     private final ApplicationsRepository applicationsRepository = mock(ApplicationsRepository.class);
 
-    private final Map<Invoice, Integer> invoiceMap = mock(HashMap.class);
+    private final BiMap<Invoice, Integer> invoiceMap = HashBiMap.create();
 
     private final PaymentSystem paymentSystem = new SimplePaymentSystem(invoiceMap);
 
@@ -118,8 +120,6 @@ class CellApplicationInteractorTest {
         // given
         final CellApplication cellApplication =
                 TestDataGenerator.getCellApplication(CellApplicationStatus.CELL_CHOSEN);
-        when(invoiceMap.put(any(), any())).thenCallRealMethod();
-        when(invoiceMap.get(any())).thenCallRealMethod();
         // when
         final Invoice invoice = interactor.approveApplication(cellApplication);
         // then
@@ -136,7 +136,7 @@ class CellApplicationInteractorTest {
         final CellApplication cellApplication =
                 TestDataGenerator.getCellApplication(CellApplicationStatus.APPROVED);
         final Invoice invoice = new Invoice(cellApplication.calculateLeaseCost());
-        when(invoiceMap.get(invoice)).thenReturn(cellApplication.getId());
+        invoiceMap.put(invoice, cellApplication.getId());
         when(applicationsRepository.find(cellApplication.getId())).thenReturn(cellApplication);
         paymentSystem.pay(invoice, invoice.getSum(), paymentMethod);
         // when

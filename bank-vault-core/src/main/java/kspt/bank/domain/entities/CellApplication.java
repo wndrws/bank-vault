@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 
 import java.time.Period;
 
-@EqualsAndHashCode(callSuper = false, of = "id")
+@EqualsAndHashCode(callSuper = true, exclude = "cell")
 @Data
 public class CellApplication extends AutoIdDomainObject {
 

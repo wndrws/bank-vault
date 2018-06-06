@@ -68,7 +68,7 @@ class DatabaseTest {
         final Cell retrievedCell = mapper.find(123);
         // then
         assertThat(retrievedCell).isNotNull();
-        assertThat(retrievedCell).isNotEqualTo(cell);
+        assertThat(retrievedCell == cell).isFalse();
         assertThat(retrievedCell).isEqualToComparingFieldByField(retrievedCell);
     }
 

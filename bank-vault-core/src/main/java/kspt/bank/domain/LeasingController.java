@@ -17,7 +17,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-@RequiredArgsConstructor
 public class LeasingController {
     private final static int TIMERS_POOL_SIZE = 1;
 
@@ -27,7 +26,17 @@ public class LeasingController {
     private long timersCheckPeriodMillis = 100;
 
     @Getter
-    private final Map<Cell, CellLeaseRecord> leasingInfo = new HashMap<>();
+    private final Map<Cell, CellLeaseRecord> leasingInfo;
+
+    LeasingController(final Clock clock) {
+        this.clock = clock;
+        this.leasingInfo = new HashMap<>();
+    }
+
+    LeasingController(final Clock clock, final Map<Cell, CellLeaseRecord> leasingInfo) {
+        this.clock = clock;
+        this.leasingInfo = leasingInfo;
+    }
 
     private final ScheduledExecutorService timersPool =
             Executors.newScheduledThreadPool(TIMERS_POOL_SIZE,
