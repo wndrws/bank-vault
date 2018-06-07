@@ -65,10 +65,7 @@ class ClientMainView: View("Bank Vault") {
                 }
             }
             item("Положить ценность") {
-                enableWhen {
-                    model.isLeased
-                    model.cellEmpty
-                }
+                enableWhen(model.isLeasedAndEmpty)
                 action {
                     val putPreciousView = find<PutPreciousView>(
                             "applicationId" to model.applicationId.value.toInt())
@@ -130,6 +127,10 @@ class ClientMainView: View("Bank Vault") {
         val isAwaitingPayment = bind { item?.status?.let { it == CellStatus.AWAITING }?.toProperty() }
         val isLeased = bind { item?.status?.let { it == CellStatus.PAID }?.toProperty() }
         val cellNotEmpty = bind { item?.precious?.isNotBlank()?.toProperty() }
-        val cellEmpty = bind { item?.precious?.isBlank()?.toProperty() }
+        val isLeasedAndEmpty = bind {
+            val status = item?.status
+            val blank = item?.precious?.isBlank()
+            (status == CellStatus.PAID && blank ?: false).toProperty()
+        }
     }
 }
