@@ -141,7 +141,7 @@ class CellApplicationController : ErrorHandlingController() {
     }
 
     fun payForCell(invoice: Invoice, sum: Long, method: ChoosablePaymentMethod): Long {
-        var change = 0L
+        var change = -1L
         errorAware {
             change = paymentService.pay(invoice, sum, method.asPaymentMethod())
         }

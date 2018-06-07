@@ -79,16 +79,22 @@ class PaymentView : View() {
         invoice?.let {
             val change = cellApplicationController.payForCell(
                     it, sum.value.toLong(), selectedMethod.value)
+            if (change == -1L) {
+                displayPaymentFailedMessage()
+                return
+            }
             val success = cellApplicationController.acceptPayment(it)
             if (success) {
                 find<PaymentResultView>("message" to "Оплата прошла успешно!\nСдача: $change руб.")
                         .openModal(stageStyle = StageStyle.UTILITY)
             } else {
-                find<ErrorModalView>("message" to "Оплата не прошла!")
-                        .openModal(stageStyle = StageStyle.UTILITY)
+                displayPaymentFailedMessage()
             }
         }
     }
+
+    private fun displayPaymentFailedMessage() = find<ErrorModalView>("message" to "Оплата не прошла!")
+            .openModal(stageStyle = StageStyle.UTILITY)
 
     override fun onDock() {
         super.onDock()

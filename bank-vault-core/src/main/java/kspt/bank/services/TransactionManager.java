@@ -64,7 +64,7 @@ class TransactionManager {
                 return result;
             } catch (Throwable t) {
                 rollbackTransaction();
-                return null;
+                throw new RuntimeException("Transaction rolled back due to exception", t);
             }
         } else {
             return action.get();
