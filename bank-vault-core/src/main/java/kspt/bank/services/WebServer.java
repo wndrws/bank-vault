@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import kspt.bank.domain.entities.ManipulationLog;
 import kspt.bank.dto.CellApplicationDTO;
 import kspt.bank.enums.CellApplicationStatus;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,9 @@ public class WebServer {
     @Autowired
     private final BankVaultFacade bankVaultFacade;
 
+    @Autowired
+    private final ManipulationLog manipulationLog;
+
     @GetMapping("/")
     String hello() {
         return "Bank Vault application - ON";
@@ -36,10 +40,15 @@ public class WebServer {
                 .map(app -> new ApplicationInfo(app.getId(), app.getLeaseholder().firstName,
                         app.getCell().getCodeName(), app.getLeasePeriod().getDays(), app.getStatus()))
                 .collect(Collectors.toList());
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        final ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(data);
+    }
+
+    @GetMapping("/log")
+    String log()
+    throws JsonProcessingException {
+        final ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(manipulationLog.getManipulations());
     }
 
     @Value

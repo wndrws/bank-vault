@@ -11,7 +11,7 @@ public class PutManipulationValidator {
         }
         if (!canBeFit(cell, precious)) {
            throw new ManipulationNotAllowed(
-                   "Precious " + precious + " is too big for cell " + cell);
+                   "Precious " + precious + " is too big for cell of size " + cell.getSize());
         }
     }
 

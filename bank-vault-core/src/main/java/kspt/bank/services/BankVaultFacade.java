@@ -5,11 +5,13 @@ import com.google.common.collect.Range;
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.domain.CellApplicationInteractor;
+import kspt.bank.domain.CellManipulationInteractor;
 import kspt.bank.domain.Vault;
 import kspt.bank.domain.entities.*;
 import kspt.bank.dto.CellApplicationDTO;
 import kspt.bank.dto.CellDTO;
 import kspt.bank.dto.ClientDTO;
+import kspt.bank.dto.PreciousDTO;
 import kspt.bank.enums.CellSize;
 import kspt.bank.external.Invoice;
 import kspt.bank.external.PaymentSystem;
@@ -31,13 +33,13 @@ public class BankVaultFacade {
     private final CellApplicationInteractor cellApplicationInteractor;
 
     @Autowired
+    private final CellManipulationInteractor cellManipulationInteractor;
+
+    @Autowired
     private final ApplicationsRepository applicationsRepository;
 
     @Autowired
     private final ClientsRepository clientsRepository;
-
-    @Autowired
-    private final PaymentSystem paymentSystem;
 
     @Autowired
     private final TransactionManager transactionManager;
@@ -144,5 +146,20 @@ public class BankVaultFacade {
         transactionManager.runTransactional(() -> {
             cellApplicationInteractor.acceptPayment(invoice);
         });
+    }
+
+    public void putPrecious(Integer appId, PreciousDTO preciousDTO) {
+        final Cell cell = applicationsRepository.find(appId).getCell();
+        final Client leaseholder = cell.getCellLeaseRecord().leaseholder;
+        transactionManager.runTransactional(() -> cellManipulationInteractor.putPrecious(
+                cell, new Precious(preciousDTO.volume, preciousDTO.name), leaseholder));
+    }
+
+    public PreciousDTO getPrecious(Integer appId) {
+        final Cell cell = applicationsRepository.find(appId).getCell();
+        final Client leaseholder = cell.getCellLeaseRecord().leaseholder;
+        final Precious precious = transactionManager.runTransactional(() ->
+                cellManipulationInteractor.getPrecious(cell, leaseholder));
+        return new PreciousDTO(precious.getVolume(), precious.getName());
     }
 }

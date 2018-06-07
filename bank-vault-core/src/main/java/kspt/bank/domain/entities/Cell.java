@@ -9,8 +9,10 @@ import kspt.bank.domain.Vault;
 import kspt.bank.enums.CellSize;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
-@EqualsAndHashCode(callSuper = true, exclude = "cellLeaseRecord")
+@EqualsAndHashCode(callSuper = true, exclude = {"cellLeaseRecord", "containedPrecious"})
+@ToString(exclude = "cellLeaseRecord")
 @Data
 public class Cell extends ManualIdDomainObject {
     private static boolean AUTOPERSIST = true;

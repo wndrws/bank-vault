@@ -16,20 +16,12 @@ import kspt.bank.services.PaymentService
 import kspt.bank.views.ErrorModalView
 import kspt.bank.views.client.CellChoiceView
 import kspt.bank.views.client.ClientMainView
-import kspt.bank.views.manager.ManagerMainView
-import tornadofx.runLater
 import java.time.Period
 
-class CellApplicationController : ErrorHandlingController() {
-    private val bankVaultFacade by lazy {
-        BankVaultCoreApplication.getApplicationContext().getBean(BankVaultFacade::class.java)
-    }
-
+class CellApplicationController : GeneralController() {
     private val paymentService by lazy {
         BankVaultCoreApplication.getApplicationContext().getBean(PaymentService::class.java)
     }
-
-    private val userModel: UserModel by inject()
 
     fun processCellRequest(size: ChoosableCellSize, period: Period) {
         errorAware("processCellRequest") {
@@ -46,31 +38,6 @@ class CellApplicationController : ErrorHandlingController() {
         }
     }
 
-    private fun ChoosableCellSize.asCellSize(): CellSize {
-        return when (this) {
-            ChoosableCellSize.SMALL -> CellSize.SMALL
-            ChoosableCellSize.MEDIUM -> CellSize.MEDIUM
-            ChoosableCellSize.BIG -> CellSize.BIG
-        }
-    }
-
-    private fun CellSize.asChoosableCellSize(): ChoosableCellSize {
-        return when (this) {
-            CellSize.SMALL -> ChoosableCellSize.SMALL
-            CellSize.MEDIUM -> ChoosableCellSize.MEDIUM
-            CellSize.BIG -> ChoosableCellSize.BIG
-        }
-    }
-
-    private fun CellApplicationStatus.asCellStatus(): CellStatus {
-        return when (this) {
-            CellApplicationStatus.CELL_CHOSEN -> CellStatus.BOOKED;
-            CellApplicationStatus.APPROVED -> CellStatus.AWAITING;
-            CellApplicationStatus.PAID -> CellStatus.PAID;
-            else -> throw IllegalStateException("Non-convertible cell application status!")
-        }
-    }
-
     private fun updateCellsTable(applicationId: Int) {
         val clientMainView = find(ClientMainView::class)
         val cellInfo = bankVaultFacade.findCellInfo(applicationId)
@@ -79,44 +46,14 @@ class CellApplicationController : ErrorHandlingController() {
         }
     }
 
-    private fun CellDTO.toCellTableEntry() =
-            ClientMainView.CellTableEntry(
-                    this.codeName,
-                    this.status.asCellStatus(),
-                    this.size.asChoosableCellSize().displayName,
-                    this.containedPreciousName,
-                    this.leaseBegin?.toString() ?: "",
-                    this.leasePeriod.days,
-                    this.applicationId)
-
-    fun fillCellsTable() {
-        var clientsCellsInfo: List<CellDTO> = emptyList()
-        errorAware("findCellsInfoByClient") {
-            clientsCellsInfo = bankVaultFacade.findCellsInfoByClient(userModel.id.value.toInt())
-        }
-        runLater {
-            find(ClientMainView::class).cellTableItems.setAll(
-                    clientsCellsInfo.map { it.toCellTableEntry() })
+    private fun ChoosableCellSize.asCellSize(): CellSize {
+        return when (this) {
+            ChoosableCellSize.SMALL -> CellSize.SMALL
+            ChoosableCellSize.MEDIUM -> CellSize.MEDIUM
+            ChoosableCellSize.BIG -> CellSize.BIG
         }
     }
 
-    fun fillCellApplicationList() {
-        var cellApplications: List<CellApplicationDTO> = emptyList()
-        errorAware("findAllCellApplications") {
-            cellApplications = bankVaultFacade.findAllCellApplications()
-                    .filter { it.status == CellApplicationStatus.CELL_CHOSEN }
-        }
-        runLater {
-            find(ManagerMainView::class).cellApplicationListItems.setAll(
-                    cellApplications.map { it.toCellApplicationListEntry() }
-            )
-        }
-
-    }
-
-    private fun CellApplicationDTO.toCellApplicationListEntry() =
-            ManagerMainView.CellApplicationListEntry(this.cell.codeName,
-                    "${this.leaseholder.firstName} ${this.leaseholder.lastName}", this)
 
     fun approveApplication(applicationId: Int) {
         errorAware("approveApplication") {

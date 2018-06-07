@@ -7,6 +7,7 @@ import javafx.scene.control.TableView
 import javafx.scene.layout.AnchorPane
 import kspt.bank.CellStatus
 import kspt.bank.controllers.CellApplicationController
+import kspt.bank.controllers.CellManipulationController
 import kspt.bank.controllers.LoginController
 import kspt.bank.controllers.WebTimeController
 import tornadofx.*
@@ -17,6 +18,8 @@ class ClientMainView: View("Bank Vault") {
     override val root : AnchorPane by fxml("/fxml/ClientMain.fxml")
 
     private val cellApplicationController: CellApplicationController by inject()
+
+    private val cellManipulationController: CellManipulationController by inject()
 
     private val loginController: LoginController by inject()
 
@@ -59,6 +62,23 @@ class ClientMainView: View("Bank Vault") {
                     val paymentView = find<PaymentView>(
                             "applicationId" to model.applicationId.value.toInt())
                     paymentView.openModal()
+                }
+            }
+            item("Положить ценность") {
+                enableWhen {
+                    model.isLeased
+                    model.cellEmpty
+                }
+                action {
+                    val putPreciousView = find<PutPreciousView>(
+                            "applicationId" to model.applicationId.value.toInt())
+                    putPreciousView.openModal()
+                }
+            }
+            item("Изъять ценность") {
+                enableWhen(model.cellNotEmpty)
+                action {
+                    cellManipulationController.getPrecious(model.applicationId.value.toInt())
                 }
             }
         }
@@ -108,5 +128,8 @@ class ClientMainView: View("Bank Vault") {
     class CellTableEntryModel : ItemViewModel<CellTableEntry>() {
         val applicationId = bind { item?.applicationId?.toProperty() }
         val isAwaitingPayment = bind { item?.status?.let { it == CellStatus.AWAITING }?.toProperty() }
+        val isLeased = bind { item?.status?.let { it == CellStatus.PAID }?.toProperty() }
+        val cellNotEmpty = bind { item?.precious?.isNotBlank()?.toProperty() }
+        val cellEmpty = bind { item?.precious?.isBlank()?.toProperty() }
     }
 }
