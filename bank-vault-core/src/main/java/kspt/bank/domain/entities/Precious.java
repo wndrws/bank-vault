@@ -1,24 +1,30 @@
 package kspt.bank.domain.entities;
 
-import kspt.bank.dao.AutoIdDomainObject;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Value;
+import lombok.NoArgsConstructor;
 
-@EqualsAndHashCode(callSuper = true)
-@Value
-public class Precious extends AutoIdDomainObject {
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+
+@EqualsAndHashCode
+@Data
+@NoArgsConstructor
+@Entity
+public class Precious {
+    @Id
+    @GeneratedValue
+    private int id;
+
     int volume;
 
-    String name;
+    @NotNull
+    String name = "";
 
     public Precious(int volume, String name) {
-        super();
-        this.volume = volume;
-        this.name = name;
-    }
-
-    public Precious(int id, int volume, String name) {
-        super(id);
         this.volume = volume;
         this.name = name;
     }

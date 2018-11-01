@@ -1,6 +1,5 @@
 package kspt.bank.domain.bp;
 
-import kspt.bank.dao.DataMapperRegistry;
 import kspt.bank.dao.DatabaseConnection;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -22,7 +21,6 @@ class TestUsingDatabase {
     throws SQLException {
         conn = DatabaseConnection.getConnection();
         conn.setAutoCommit(false);
-        DataMapperRegistry.initialize(conn, true);
     }
 
     @BeforeEach
@@ -40,6 +38,5 @@ class TestUsingDatabase {
     @AfterAll
     static void closeConnection() {
         DatabaseConnection.closeConnection();
-        DataMapperRegistry.clear();
     }
 }

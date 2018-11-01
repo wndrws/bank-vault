@@ -1,13 +1,22 @@
 package kspt.bank.domain.entities;
 
-import kspt.bank.dao.AutoIdDomainObject;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Value;
 
-@EqualsAndHashCode(callSuper = true)
-@Value
-public class Client extends AutoIdDomainObject {
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
+@EqualsAndHashCode
+@Data
+@Entity
+public class Client {
+    @Id
+    @GeneratedValue
+    private Integer id;
+
+    @Embedded
     PassportInfo passportInfo;
 
     String phone;
@@ -15,14 +24,6 @@ public class Client extends AutoIdDomainObject {
     String email;
 
     public Client(final PassportInfo passportInfo, final String phone, final String email) {
-        super();
-        this.passportInfo = passportInfo;
-        this.phone = phone;
-        this.email = email;
-    }
-
-    public Client(int id, final PassportInfo passportInfo, final String phone, final String email) {
-        super(id);
         this.passportInfo = passportInfo;
         this.phone = phone;
         this.email = email;

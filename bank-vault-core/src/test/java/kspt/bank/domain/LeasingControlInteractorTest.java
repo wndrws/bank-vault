@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Field;
 import java.time.Duration;
@@ -31,6 +32,9 @@ import static org.mockito.Mockito.*;
 
 public class LeasingControlInteractorTest {
     public final static long LEASING_TIMERS_CHECK_PERIOD_MS = 100;
+
+    @Autowired // TODO ?
+    private Vault vault;
 
     private final NotificationGate notificationGate = mock(NotificationGate.class);
 
@@ -55,8 +59,8 @@ public class LeasingControlInteractorTest {
     throws InterruptedException {
         // given
         final Client client = TestDataGenerator.getSampleClient();
-        final Cell cellOne = Vault.getInstance().requestCell(CellSize.SMALL);
-        final Cell cellTwo = Vault.getInstance().requestCell(CellSize.MEDIUM);
+        final Cell cellOne = vault.requestCell(CellSize.SMALL);
+        final Cell cellTwo = vault.requestCell(CellSize.MEDIUM);
         leaseTwoCellsWithDifferentPeriods(client, cellOne, cellTwo);
         mockedClock.advanceBy(durationMoreThanShortButLessThanLongPeriod);
         // when
@@ -68,15 +72,15 @@ public class LeasingControlInteractorTest {
     }
 
     private void leaseTwoCellsWithDifferentPeriods(Client client, Cell cellOne, Cell cellTwo) {
-        Vault.getInstance().getLeasingController().startLeasing(cellOne, client, shortPeriod);
-        Vault.getInstance().getLeasingController().startLeasing(cellTwo, client, longPeriod);
+        vault.getLeasingController().startLeasing(cellOne, client, shortPeriod);
+        vault.getLeasingController().startLeasing(cellTwo, client, longPeriod);
     }
 
     @Test
     void testContinueLeasing() {
         // given
         final Client client = TestDataGenerator.getSampleClient();
-        final Cell cell = Vault.getInstance().requestCell(CellSize.SMALL);
+        final Cell cell = vault.requestCell(CellSize.SMALL);
         final Period newLeasePeriod = Period.ofDays(120);
         // when
         final Invoice invoice = interactor.continueLeasing(client, cell, newLeasePeriod);
@@ -98,11 +102,11 @@ public class LeasingControlInteractorTest {
         final CellApplication cellApplication =
                 TestDataGenerator.getCellApplication(CellApplicationStatus.APPROVED);
         applicationsRepository.save(cellApplication);
-        Vault.getInstance().getLeasingController().startLeasing(cellApplication.getCell(),
+        vault.getLeasingController().startLeasing(cellApplication.getCell(),
                 cellApplication.getLeaseholder(), cellApplication.getLeasePeriod());
         mockedClock.advanceBy(Duration.ofDays(33));
         Thread.sleep(2*LEASING_TIMERS_CHECK_PERIOD_MS);
-        Assumptions.assumeTrue(Vault.getInstance().getLeasingController()
+        Assumptions.assumeTrue(vault.getLeasingController()
                 .isLeasingExpired(cellApplication.getCell()));
         final Invoice invoice = paymentSystem.issueInvoice(
                 cellApplication.calculateLeaseCost(), cellApplication.getId());
@@ -111,27 +115,27 @@ public class LeasingControlInteractorTest {
         interactor.acceptPayment(invoice);
         // then
         assertThat(cellApplication.getStatus()).isEqualTo(CellApplicationStatus.PAID);
-        assertFalse(Vault.getInstance().getLeasingController()
+        assertFalse(vault.getLeasingController()
                 .isLeasingExpired(cellApplication.getCell()));
     }
 
     @Test
     void testStopLeasing_EmptyCell() {
         // given
-        final Cell cell = Vault.getInstance().requestAnyCell();
+        final Cell cell = vault.requestAnyCell();
         final Client client = TestDataGenerator.getSampleClient();
-        Vault.getInstance().getLeasingController().startLeasing(cell, client, Period.ofMonths(1));
+        vault.getLeasingController().startLeasing(cell, client, Period.ofMonths(1));
         // when
         interactor.stopLeasing(client, cell);
         // then
-        assertFalse(Vault.getInstance().getLeasingController().isLeased(cell));
+        assertFalse(vault.getLeasingController().isLeased(cell));
         verify(notificationGate).notifyClient(eq(client), anyString());
     }
 
     @Test
     void testStopLeasing_NotEmptyCell() {
         // given
-        final Cell cell = Vault.getInstance().requestAnyCell();
+        final Cell cell = vault.requestAnyCell();
         final Client client = TestDataGenerator.getSampleClient();
         final Precious precious = new Precious(1, "");
         cell.setContainedPrecious(precious);
@@ -154,17 +158,7 @@ public class LeasingControlInteractorTest {
     }
 
     @BeforeEach
-    void setUp()
-    throws Exception {
-        resetSingleton();
-        Vault.getInstance().getLeasingController()
-                .setTimersCheckPeriodMillis(LEASING_TIMERS_CHECK_PERIOD_MS);
-    }
-
-    private void resetSingleton()
-    throws Exception {
-        Field instance = Vault.class.getDeclaredField("instance");
-        instance.setAccessible(true);
-        instance.set(null, null);
+    void setUp() {
+        vault.getLeasingController().setTimersCheckPeriodMillis(LEASING_TIMERS_CHECK_PERIOD_MS);
     }
 }

@@ -2,7 +2,7 @@ package kspt.bank.domain.bp;
 
 import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.boundaries.NotificationGate;
-import kspt.bank.dao.DatabaseClientsRepository;
+import kspt.bank.dao.InMemoryClientsRepository;
 import kspt.bank.domain.CellManipulationInteractor;
 import kspt.bank.domain.TestDataGenerator;
 import kspt.bank.domain.Vault;
@@ -11,6 +11,7 @@ import kspt.bank.enums.CellSize;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Field;
 import java.time.Period;
@@ -22,12 +23,15 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-class ManipulationTest extends TestUsingDatabase {
+class ManipulationTest /* extends TestUsingDatabase */ {
+    @Autowired
+    private Vault vault;
+
     private final ManipulationLog manipulationLog = mock(ManipulationLog.class);
 
     private final NotificationGate notificationGate = mock(NotificationGate.class);
 
-    private final ClientsRepository clientsRepository = new DatabaseClientsRepository();
+    private final ClientsRepository clientsRepository = new InMemoryClientsRepository();
 
     private final CellManipulationInteractor cmInteractor =
             new CellManipulationInteractor(manipulationLog, notificationGate);
@@ -139,25 +143,16 @@ class ManipulationTest extends TestUsingDatabase {
     }
 
     @BeforeEach
-    void setUp()
-    throws Exception {
-        resetSingleton();
-        smallCell = Vault.getInstance().requestCell(CellSize.SMALL);
-        mediumCell = Vault.getInstance().requestCell(CellSize.MEDIUM);
-        bigCell = Vault.getInstance().requestCell(CellSize.BIG);
+    void setUp() {
+        smallCell = vault.requestCell(CellSize.SMALL);
+        mediumCell = vault.requestCell(CellSize.MEDIUM);
+        bigCell = vault.requestCell(CellSize.BIG);
         clientsRepository.add(roleClient.client);
-        Vault.getInstance().getLeasingController()
+        vault.getLeasingController()
                 .startLeasing(smallCell, roleClient.client, Period.ofMonths(1));
-        Vault.getInstance().getLeasingController()
+        vault.getLeasingController()
                 .startLeasing(mediumCell, roleClient.client, Period.ofMonths(2));
-        Vault.getInstance().getLeasingController()
+        vault.getLeasingController()
                 .startLeasing(bigCell, roleClient.client, Period.ofMonths(3));
-    }
-
-    private void resetSingleton()
-    throws Exception {
-        Field instance = Vault.class.getDeclaredField("instance");
-        instance.setAccessible(true);
-        instance.set(null, null);
     }
 }

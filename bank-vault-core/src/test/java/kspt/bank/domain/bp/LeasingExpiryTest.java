@@ -4,8 +4,8 @@ import com.statemachinesystems.mockclock.MockClock;
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.boundaries.NotificationGate;
-import kspt.bank.dao.DatabaseApplicationsRepository;
-import kspt.bank.dao.DatabaseClientsRepository;
+import kspt.bank.dao.InMemoryApplicationsRepository;
+import kspt.bank.dao.InMemoryClientsRepository;
 import kspt.bank.domain.*;
 import kspt.bank.domain.entities.*;
 import kspt.bank.enums.CellSize;
@@ -16,6 +16,7 @@ import kspt.bank.external.SimplePaymentSystem;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
@@ -29,10 +30,13 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-class LeasingExpiryTest extends TestUsingDatabase {
-    private final ClientsRepository clientsRepository = new DatabaseClientsRepository();
+class LeasingExpiryTest  /* extends TestUsingDatabase */ {
+    @Autowired
+    private Vault vault;
 
-    private final ApplicationsRepository applicationsRepository = new DatabaseApplicationsRepository();
+    private final ClientsRepository clientsRepository = new InMemoryClientsRepository();
+
+    private final ApplicationsRepository applicationsRepository = new InMemoryApplicationsRepository();
 
     private final PaymentSystem paymentSystem = new SimplePaymentSystem();
 
@@ -98,19 +102,19 @@ class LeasingExpiryTest extends TestUsingDatabase {
     }
 
     private void assumeThatCellIsLeased() {
-        Vault.getInstance().getLeasingController().startLeasing(roleClient.cell, roleClient.client,
+        vault.getLeasingController().startLeasing(roleClient.cell, roleClient.client,
                 roleClient.initialLeasingPeriod);
-        Assumptions.assumeTrue(Vault.getInstance().getLeasingController().isLeased(roleClient.cell));
+        Assumptions.assumeTrue(vault.getLeasingController().isLeased(roleClient.cell));
     }
 
     private void waitForLeasingExpiry()
     throws InterruptedException {
         mockedClock.advanceByDays(roleClient.initialLeasingPeriod.getDays() + 1);
-        Thread.sleep(2 * Vault.getInstance().getLeasingController().getTimersCheckPeriodMillis());
+        Thread.sleep(2 * vault.getLeasingController().getTimersCheckPeriodMillis());
     }
 
     private void assertThatLeasingExpired() {
-        assertTrue(Vault.getInstance().getLeasingController().isLeasingExpired(roleClient.cell));
+        assertTrue(vault.getLeasingController().isLeasingExpired(roleClient.cell));
     }
 
     private void verifyThatClientIsNotifiedAboutExpiry() {
@@ -121,8 +125,8 @@ class LeasingExpiryTest extends TestUsingDatabase {
 
     private void assertContinuationOfLeasing() {
         assertTrue(invoice.isPaid());
-        assertTrue(Vault.getInstance().getLeasingController().isLeased(roleClient.cell));
-        assertFalse(Vault.getInstance().getLeasingController().isLeasingExpired(roleClient.cell));
+        assertTrue(vault.getLeasingController().isLeased(roleClient.cell));
+        assertFalse(vault.getLeasingController().isLeasingExpired(roleClient.cell));
     }
 
     private void verifyThatManagerIsNotified() {
@@ -145,7 +149,7 @@ class LeasingExpiryTest extends TestUsingDatabase {
     }
 
     private void assertThatLeasingIsStopped() {
-        assertFalse(Vault.getInstance().getLeasingController().isLeased(roleClient.cell));
+        assertFalse(vault.getLeasingController().isLeased(roleClient.cell));
         verify(notificationGate).notifyClient(eq(roleClient.client), anyString());
     }
 
@@ -154,7 +158,7 @@ class LeasingExpiryTest extends TestUsingDatabase {
 
         final Precious precious = new Precious(1, "The Ring Of Power");
 
-        final Cell cell = new Cell(1, CellSize.SMALL);
+        final Cell cell = new Cell(CellSize.SMALL);
 
         final Period initialLeasingPeriod = Period.ofDays(10);
 
@@ -186,7 +190,7 @@ class LeasingExpiryTest extends TestUsingDatabase {
     void setUp()
     throws Exception {
         resetSingleton();
-        Vault.getInstance().getLeasingController().setTimersCheckPeriodMillis(
+        vault.getLeasingController().setTimersCheckPeriodMillis(
                 LeasingControlInteractorTest.LEASING_TIMERS_CHECK_PERIOD_MS);
         clientsRepository.add(roleClient.client);
     }

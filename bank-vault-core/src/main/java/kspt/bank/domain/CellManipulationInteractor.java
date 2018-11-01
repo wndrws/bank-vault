@@ -7,6 +7,7 @@ import kspt.bank.domain.entities.Client;
 import kspt.bank.domain.entities.ManipulationLog;
 import kspt.bank.domain.entities.Precious;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Map;
@@ -18,8 +19,11 @@ public class CellManipulationInteractor {
 
     private final NotificationGate notificationGate;
 
+    @Autowired
+    private Vault vault;
+
     public List<Cell> getClientsCells(final Client client) {
-        return Vault.getInstance().getLeasingController().getCellsAndLeaseholders().entrySet().stream()
+        return vault.getLeasingController().getCellsAndLeaseholders().entrySet().stream()
                 .filter(cellToClient -> cellToClient.getValue().equals(client))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());

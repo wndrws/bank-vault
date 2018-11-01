@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Field;
 import java.time.Period;
@@ -22,6 +23,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 class CellManipulationInteractorTest {
+    @Autowired // TODO ?
+    private Vault vault;
+
     private final ManipulationLog manipulationLog = mock(ManipulationLog.class);
 
     private final NotificationGate notificationGate = mock(NotificationGate.class);
@@ -44,9 +48,9 @@ class CellManipulationInteractorTest {
     @Test
     void testGetClientsCells() {
         // given
-        Vault.getInstance().getLeasingController().startLeasing(cellOne, client, Period.ofMonths(1));
-        Vault.getInstance().getLeasingController().startLeasing(cellTwo, client, Period.ofMonths(2));
-        Vault.getInstance().getLeasingController().startLeasing(cellThree, client, Period.ofMonths(3));
+        vault.getLeasingController().startLeasing(cellOne, client, Period.ofMonths(1));
+        vault.getLeasingController().startLeasing(cellTwo, client, Period.ofMonths(2));
+        vault.getLeasingController().startLeasing(cellThree, client, Period.ofMonths(3));
         // when
         final List<Cell> clientsCells = interactor.getClientsCells(client);
         // then
@@ -56,7 +60,7 @@ class CellManipulationInteractorTest {
     @Test
     void testPutPrecious() {
         // given
-        Vault.getInstance().getLeasingController().startLeasing(cellOne, client, Period.ofMonths(1));
+        vault.getLeasingController().startLeasing(cellOne, client, Period.ofMonths(1));
         // when
         interactor.putPrecious(cellOne, myPrecious, client);
         // then
@@ -67,7 +71,7 @@ class CellManipulationInteractorTest {
     @Test
     void testPutPrecious_TooBigPrecious() {
         // given
-        Vault.getInstance().getLeasingController().startLeasing(cellThree, client, Period.ofMonths(3));
+        vault.getLeasingController().startLeasing(cellThree, client, Period.ofMonths(3));
         // then
         assertThrows(PutManipulationValidator.ManipulationNotAllowed.class, // when
                 () -> interactor.putPrecious(cellThree, tooBigPrecious, client));
@@ -76,7 +80,7 @@ class CellManipulationInteractorTest {
     @Test
     void testPutPrecious_NotEmptyCell() {
         // given
-        Vault.getInstance().getLeasingController().startLeasing(cellTwo, client, Period.ofMonths(2));
+        vault.getLeasingController().startLeasing(cellTwo, client, Period.ofMonths(2));
         cellThree.setContainedPrecious(myPrecious);
         // then
         assertThrows(PutManipulationValidator.ManipulationNotAllowed.class, // when
@@ -126,18 +130,9 @@ class CellManipulationInteractorTest {
     }
 
     @BeforeEach
-    void setUp()
-    throws Exception {
-        resetSingleton();
-        cellOne = Vault.getInstance().requestCell(CellSize.SMALL);
-        cellTwo = Vault.getInstance().requestCell(CellSize.MEDIUM);
-        cellThree = Vault.getInstance().requestCell(CellSize.BIG);
-    }
-
-    private void resetSingleton()
-    throws Exception {
-        Field instance = Vault.class.getDeclaredField("instance");
-        instance.setAccessible(true);
-        instance.set(null, null);
+    void setUp() {
+        cellOne = vault.requestCell(CellSize.SMALL);
+        cellTwo = vault.requestCell(CellSize.MEDIUM);
+        cellThree = vault.requestCell(CellSize.BIG);
     }
 }

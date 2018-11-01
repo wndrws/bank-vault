@@ -18,6 +18,7 @@ import kspt.bank.external.PaymentSystem;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -42,22 +43,22 @@ public class BankVaultFacade {
     private final ClientsRepository clientsRepository;
 
     @Autowired
-    private final TransactionManager transactionManager;
+    private final Vault vault;
 
+    @Transactional
     public Integer acceptClientInfo(ClientDTO clientInfo) {
         final PassportInfo passportInfo = new PassportInfo(
                 clientInfo.passportSerial, clientInfo.firstName, clientInfo.lastName,
                 clientInfo.patronymic, clientInfo.birthday);
-        final CellApplication cellApplication = transactionManager.runTransactional(() ->
-                cellApplicationInteractor.createApplication(
-                        passportInfo, clientInfo.phone, clientInfo.email));
+        final CellApplication cellApplication = cellApplicationInteractor.createApplication(
+                passportInfo, clientInfo.phone, clientInfo.email);
         return cellApplication.getId();
     }
 
+    @Transactional
     public Boolean requestCell(CellSize size, Period leasePeriod, Integer cellApplicationId) {
-        return transactionManager.runTransactional(() ->
-                cellApplicationInteractor.requestCell(size, leasePeriod,
-                cellApplicationInteractor.getApplicationsRepository().find(cellApplicationId)));
+        return cellApplicationInteractor.requestCell(size, leasePeriod,
+                cellApplicationInteractor.getApplicationsRepository().find(cellApplicationId));
     }
 
     public Optional<CellDTO> findCellInfo(Integer cellApplicationId) {
@@ -77,11 +78,11 @@ public class BankVaultFacade {
         return containedPrecious == null ? "" : containedPrecious.getName();
     }
 
-    private static LocalDate getLeaseBegin(final Cell cell) {
-        Preconditions.checkState(Vault.getInstance().isPending(cell) ||
-                        Vault.getInstance().getLeasingController().isLeased(cell),
+    private LocalDate getLeaseBegin(final Cell cell) {
+        Preconditions.checkState(vault.isPending(cell) ||
+                        vault.getLeasingController().isLeased(cell),
                 "Attempt to getLeaseBegin for not leased nor pending cell!");
-        final Range<LocalDate> leasing = Vault.getInstance().getLeasingController().getInfo(cell);
+        final Range<LocalDate> leasing = vault.getLeasingController().getInfo(cell);
         return leasing == null ? null : leasing.lowerEndpoint();
     }
 
@@ -130,36 +131,34 @@ public class BankVaultFacade {
         }
     }
 
+    @Transactional
     public void approveApplication(Integer appId) {
-        transactionManager.runTransactional(() ->
-                cellApplicationInteractor.approveApplication(applicationsRepository.find(appId))
-        );
+        cellApplicationInteractor.approveApplication(applicationsRepository.find(appId));
     }
 
+    @Transactional
     public void declineApplication(Integer appId) {
-        transactionManager.runTransactional(() ->
-                applicationsRepository.deleteApplication(appId)
-        );
+        applicationsRepository.deleteApplication(appId);
     }
 
+    @Transactional
     public void acceptPayment(Invoice invoice) {
-        transactionManager.runTransactional(() -> {
-            cellApplicationInteractor.acceptPayment(invoice);
-        });
+        cellApplicationInteractor.acceptPayment(invoice);;
     }
 
+    @Transactional
     public void putPrecious(Integer appId, PreciousDTO preciousDTO) {
         final Cell cell = applicationsRepository.find(appId).getCell();
         final Client leaseholder = cell.getCellLeaseRecord().leaseholder;
-        transactionManager.runTransactional(() -> cellManipulationInteractor.putPrecious(
-                cell, new Precious(preciousDTO.volume, preciousDTO.name), leaseholder));
+        cellManipulationInteractor.putPrecious(
+                cell, new Precious(preciousDTO.volume, preciousDTO.name), leaseholder);
     }
 
+    @Transactional
     public PreciousDTO getPrecious(Integer appId) {
         final Cell cell = applicationsRepository.find(appId).getCell();
         final Client leaseholder = cell.getCellLeaseRecord().leaseholder;
-        final Precious precious = transactionManager.runTransactional(() ->
-                cellManipulationInteractor.getPrecious(cell, leaseholder));
+        final Precious precious = cellManipulationInteractor.getPrecious(cell, leaseholder);
         return new PreciousDTO(precious.getVolume(), precious.getName());
     }
 }

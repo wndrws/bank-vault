@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Range;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import kspt.bank.domain.entities.Cell;
+import kspt.bank.domain.entities.CellLeaseRecord;
 import kspt.bank.domain.entities.Client;
 import lombok.*;
 
@@ -93,17 +94,5 @@ public class LeasingController {
         } else {
             return null;
         }
-    }
-
-    @AllArgsConstructor
-    @EqualsAndHashCode
-    public static class CellLeaseRecord {
-        public final Client leaseholder;
-
-        public final LocalDate leaseBegin;
-
-        public final LocalDate leaseEnd;
-
-        public boolean expired = false;
     }
 }

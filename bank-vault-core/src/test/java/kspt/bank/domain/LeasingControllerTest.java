@@ -5,6 +5,7 @@ import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.Client;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Period;
 import java.time.ZoneId;
@@ -12,6 +13,9 @@ import java.time.ZoneId;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class LeasingControllerTest {
+    @Autowired // TODO ?
+    private Vault vault;
+
     private final MockClock mockedClock =
             MockClock.at(2018, 3, 16, 17, 0, ZoneId.systemDefault());
 
@@ -23,7 +27,7 @@ public class LeasingControllerTest {
         Assumptions.assumeTrue(leasingController.getTimersCheckPeriodMillis() <= 1000L,
                 "LeasingController's timers check period is inappropriate for unit-testing");
         // given
-        final Cell cell = Vault.getInstance().requestAnyCell();
+        final Cell cell = vault.requestAnyCell();
         final Client client = TestDataGenerator.getSampleClient();
         final Period leasingPeriod = Period.ofMonths(2);
         Assumptions.assumeFalse(leasingController.isLeased(cell));

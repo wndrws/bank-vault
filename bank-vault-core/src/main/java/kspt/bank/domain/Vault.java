@@ -2,12 +2,14 @@ package kspt.bank.domain;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import kspt.bank.dao.CellDataMapper;
-import kspt.bank.dao.DataMapperRegistry;
+import kspt.bank.boundaries.CellsRepository;
 import kspt.bank.domain.entities.Cell;
+import kspt.bank.domain.entities.CellLeaseRecord;
 import kspt.bank.enums.CellSize;
 import lombok.Getter;
 import lombok.Synchronized;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -17,6 +19,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Component
 public final class Vault {
     final static Duration DEFAULT_PENDING_DURATION = Duration.ofMinutes(5);
 
@@ -26,53 +29,30 @@ public final class Vault {
     @Getter
     private static VaultHardware vaultHardware;
 
+    @Autowired
+    private CellsRepository cellsRepository;
+
     private final EnumMap<CellSize, List<Cell>> cells;
 
     @Getter
-    private final LeasingController leasingController;
-
-    private final Set<Cell> pendingCells = Collections.synchronizedSet(new HashSet<>());
-
-    private boolean useDatabase;
+    private final LeasingController leasingController; // TODO extract it to separate class?
 
     private final ExecutorService pendingKeepersPool = Executors.newCachedThreadPool(
             new ThreadFactoryBuilder().setNameFormat("vault-pendingKeepersPool-%d").build());
 
-    private static volatile Vault instance = null;
-
-    public static Vault getInstance() {
-        // Thread-safe lazy singleton implementation
-        if (instance == null) {
-            synchronized(Vault.class) {
-                if (instance == null) {
-                    instance = new Vault();
-                }
-            }
-        }
-        return instance;
-    }
-
     private Vault() {
-        final CellDataMapper mapper = (CellDataMapper) DataMapperRegistry.getMapper(Cell.class);
-        if (mapper == null) {
+        if (cellsRepository.findAll().isEmpty()) {
             cells = initializeVault();
             leasingController = new LeasingController(CLOCK);
-            useDatabase = false;
         } else {
-            if (!mapper.findAll().isEmpty()) {
-                cells = mapper.findAll().stream().collect(Collectors.groupingBy(
-                        Cell::getSize, () -> new EnumMap<>(CellSize.class), Collectors.toList()));
-                vaultHardware = new VaultHardware(cells);
-                leasingController = new LeasingController(CLOCK, collectLeasingInfo(cells));
-            } else {
-                cells = initializeVault();
-                leasingController = new LeasingController(CLOCK);
-            }
-            useDatabase = true;
+            cells = cellsRepository.findAll().stream().collect(Collectors.groupingBy(
+                    Cell::getSize, () -> new EnumMap<>(CellSize.class), Collectors.toList()));
+            vaultHardware = new VaultHardware(cells);
+            leasingController = new LeasingController(CLOCK, collectLeasingInfo(cells));
         }
     }
 
-    private Map<Cell, LeasingController.CellLeaseRecord> collectLeasingInfo(
+    private Map<Cell, CellLeaseRecord> collectLeasingInfo(
             EnumMap<CellSize, List<Cell>> cells) {
         return cells.entrySet().stream()
                 .flatMap(entry -> entry.getValue().stream())
@@ -118,26 +98,17 @@ public final class Vault {
     }
 
     public Set<Cell> getPendingCells() {
-        final CellDataMapper mapper = (CellDataMapper) DataMapperRegistry.getMapper(Cell.class);
-        if (useDatabase && mapper != null) {
-            return new HashSet<>(mapper.findAllPendingCells());
-        } else {
-            return pendingCells;
-        }
+        return new HashSet<>(cellsRepository.findAllPendingCells());
     }
 
     void pend(final Cell cell, final Duration duration) {
         cell.setPending(true);
-        if (!useDatabase) {
-            pendingCells.add(cell);
-        }
+        cellsRepository.save(cell);
         pendingKeepersPool.submit(() -> {
             try {
                 Thread.sleep(duration.toMillis());
                 cell.setPending(false);
-                if (!useDatabase) {
-                    pendingCells.remove(cell);
-                }
+                cellsRepository.save(cell);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -145,12 +116,7 @@ public final class Vault {
     }
 
     public boolean isPending(final Cell cell) {
-        final CellDataMapper mapper = (CellDataMapper) DataMapperRegistry.getMapper(Cell.class);
-        if (useDatabase && mapper != null) {
-            return mapper.isPending(cell);
-        } else {
-            return pendingCells.contains(cell);
-        }
+        return cellsRepository.isPending(cell);
     }
 
     public void stop() {

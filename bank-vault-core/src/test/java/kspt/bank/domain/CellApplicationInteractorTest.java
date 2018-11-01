@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Period;
 import java.util.HashMap;
@@ -29,6 +30,9 @@ import static org.mockito.Mockito.*;
 
 @SuppressWarnings("ConstantConditions")
 class CellApplicationInteractorTest {
+    @Autowired // TODO ?
+    private Vault vault;
+
     private final ClientsRepository clientsRepository = mock(ClientsRepository.class);
 
     private final ApplicationsRepository applicationsRepository = mock(ApplicationsRepository.class);
@@ -143,6 +147,6 @@ class CellApplicationInteractorTest {
         interactor.acceptPayment(invoice);
         // then
         assertThat(cellApplication.getStatus()).isEqualTo(CellApplicationStatus.PAID);
-        assertTrue(Vault.getInstance().getLeasingController().isLeased(cellApplication.getCell()));
+        assertTrue(vault.getLeasingController().isLeased(cellApplication.getCell()));
     }
 }

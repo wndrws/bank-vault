@@ -10,6 +10,7 @@ import kspt.bank.recognition.UserStorage;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -25,19 +26,15 @@ public class LoginService {
     @Autowired
     private final UserStorage userStorage;
 
-    @Autowired
-    private final TransactionManager transactionManager;
-
+    @Transactional
     public Integer registerUser(Credentials userCredentials, ClientDTO clientInfo) {
         final PassportInfo passportInfo = new PassportInfo(
                 clientInfo.passportSerial, clientInfo.firstName, clientInfo.lastName,
                 clientInfo.patronymic, clientInfo.birthday);
         ClientPassportValidator.checkValidity(passportInfo);
         final Client newClient = new Client(passportInfo, clientInfo.phone, clientInfo.email);
-        transactionManager.runTransactional(() -> {
-            clientsRepository.add(newClient);
-            userStorage.createUser(userCredentials, newClient.getId());
-        });
+        clientsRepository.add(newClient);
+        userStorage.createUser(userCredentials, newClient.getId());
         return newClient.getId();
     }
 

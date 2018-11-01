@@ -9,17 +9,23 @@ import kspt.bank.enums.CellApplicationStatus;
 import kspt.bank.domain.entities.Client;
 import kspt.bank.external.Invoice;
 import kspt.bank.external.PaymentSystem;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Period;
 
+@Component
 public class LeasingControlInteractor {
     private final NotificationGate notificationGate;
 
     private final ApplicationsRepository applicationsRepository;
 
     private final PaymentSystem paymentSystem;
+
+    @Autowired
+    private Vault vault;
 
     public LeasingControlInteractor(final Clock clock, final NotificationGate notificationGate,
             final ApplicationsRepository applicationsRepository, final PaymentSystem paymentSystem) {
@@ -30,9 +36,9 @@ public class LeasingControlInteractor {
     }
 
     public void sendNotifications() {
-        Vault.getInstance().getLeasingController().getCellsAndLeaseholders()
+        vault.getLeasingController().getCellsAndLeaseholders()
                 .forEach((cell, leaseholder) -> {
-                    if (Vault.getInstance().getLeasingController().isLeasingExpired(cell)) {
+                    if (vault.getLeasingController().isLeasingExpired(cell)) {
                         notificationGate.notifyClientAboutLeasingExpiration(leaseholder, cell);
                     }
                 });
@@ -55,7 +61,7 @@ public class LeasingControlInteractor {
         Preconditions.checkState(invoice.isPaid());
         application.setStatus(CellApplicationStatus.PAID);
         applicationsRepository.save(application);
-        Vault.getInstance().getLeasingController().startLeasing(
+        vault.getLeasingController().startLeasing(
                 application.getCell(), application.getLeaseholder(), application.getLeasePeriod());
     }
 
@@ -63,7 +69,7 @@ public class LeasingControlInteractor {
         if (!cell.isEmpty()) {
             notificationGate.notifyManagerAboutLeasingEnd(cell);
         } else {
-            Vault.getInstance().getLeasingController().endLeasing(cell);
+            vault.getLeasingController().endLeasing(cell);
             notificationGate.notifyClient(client, "Your leasing for cell " + cell + " has ended");
         }
     }

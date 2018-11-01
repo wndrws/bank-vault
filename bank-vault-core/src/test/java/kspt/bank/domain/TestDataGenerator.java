@@ -1,9 +1,11 @@
 package kspt.bank.domain;
 
+import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.CellApplication;
 import kspt.bank.enums.CellApplicationStatus;
 import kspt.bank.domain.entities.Client;
 import kspt.bank.domain.entities.PassportInfo;
+import kspt.bank.enums.CellSize;
 import lombok.experimental.UtilityClass;
 
 import java.time.LocalDate;
@@ -41,7 +43,7 @@ public class TestDataGenerator {
 
     public CellApplication getCellApplication(final CellApplicationStatus status) {
         final CellApplication application = new CellApplication(getSampleClient());
-        application.setCell(Vault.getInstance().requestAnyCell());
+        application.setCell(new Cell(CellSize.SMALL)); // TODO check against Vault.requestAntCell()
         application.setLeasePeriod(Period.ofDays(30));
         application.setStatus(status);
         return application;

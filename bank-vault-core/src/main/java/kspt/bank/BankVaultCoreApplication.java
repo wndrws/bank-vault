@@ -32,7 +32,7 @@ public class BankVaultCoreApplication {
 
     public static void shutdown() {
         log.warn("System shutdown was requested...");
-        Vault.getInstance().stop();
+        applicationContext.getBean(Vault.class).stop();
         log.warn("The system is shut down.");
         applicationContext.close();
     }

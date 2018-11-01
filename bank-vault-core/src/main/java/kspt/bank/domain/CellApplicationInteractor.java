@@ -10,6 +10,7 @@ import kspt.bank.external.PaymentSystem;
 import kspt.bank.domain.entities.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Period;
 
@@ -21,6 +22,9 @@ public class CellApplicationInteractor {
     private final ApplicationsRepository applicationsRepository;
 
     private final PaymentSystem paymentSystem;
+
+    @Autowired
+    private Vault vault;
 
     public CellApplication createApplication(final PassportInfo passportInfo, final String phone,
             final String email)
@@ -46,7 +50,7 @@ public class CellApplicationInteractor {
     public boolean requestCell(final CellSize size, final Period period,
             final CellApplication application) {
         Preconditions.checkState(application.getStatus() == CellApplicationStatus.CREATED);
-        final Cell cell = Vault.getInstance().requestCell(size);
+        final Cell cell = vault.requestCell(size);
         if (cell == null) {
             return false;
         } else {
@@ -54,7 +58,7 @@ public class CellApplicationInteractor {
             application.setLeasePeriod(period);
             application.setStatus(CellApplicationStatus.CELL_CHOSEN);
             applicationsRepository.save(application);
-            Vault.getInstance().pend(cell, Vault.DEFAULT_PENDING_DURATION);
+            vault.pend(cell, Vault.DEFAULT_PENDING_DURATION);
             return true;
         }
     }
@@ -76,7 +80,7 @@ public class CellApplicationInteractor {
         Preconditions.checkState(invoice.isPaid());
         application.setStatus(CellApplicationStatus.PAID);
         applicationsRepository.save(application);
-        Vault.getInstance().getLeasingController().startLeasing(
+        vault.getLeasingController().startLeasing(
                 application.getCell(), application.getLeaseholder(), application.getLeasePeriod());
     }
 

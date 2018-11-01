@@ -17,7 +17,8 @@ def junit5 = ["org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}",
 def jdbcDriver = "org.postgresql:postgresql:42.2.0"
 
 def springBootVersion = '2.0.2.RELEASE'
-def springBoot = ["org.springframework.boot:spring-boot-starter-web:${springBootVersion}"]
+def springBoot = ["org.springframework.boot:spring-boot-starter-web:${springBootVersion}",
+                  "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"]
 
 dependencies {
     compile jdbcDriver
