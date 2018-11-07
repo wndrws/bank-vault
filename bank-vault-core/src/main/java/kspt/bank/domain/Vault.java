@@ -30,7 +30,7 @@ public final class Vault {
     private static VaultHardware vaultHardware;
 
     @Autowired
-    private CellsRepository cellsRepository;
+    private final CellsRepository cellsRepository;
 
     private final EnumMap<CellSize, List<Cell>> cells;
 
@@ -40,15 +40,16 @@ public final class Vault {
     private final ExecutorService pendingKeepersPool = Executors.newCachedThreadPool(
             new ThreadFactoryBuilder().setNameFormat("vault-pendingKeepersPool-%d").build());
 
-    private Vault() {
+    Vault(final CellsRepository cellsRepository) {
+        this.cellsRepository = cellsRepository;
         if (cellsRepository.findAll().isEmpty()) {
             cells = initializeVault();
-            leasingController = new LeasingController(CLOCK);
+            leasingController = new LeasingController(CLOCK, cellsRepository);
         } else {
             cells = cellsRepository.findAll().stream().collect(Collectors.groupingBy(
                     Cell::getSize, () -> new EnumMap<>(CellSize.class), Collectors.toList()));
             vaultHardware = new VaultHardware(cells);
-            leasingController = new LeasingController(CLOCK, collectLeasingInfo(cells));
+            leasingController = new LeasingController(CLOCK, collectLeasingInfo(cells), cellsRepository);
         }
     }
 
@@ -67,6 +68,7 @@ public final class Vault {
         cells.put(CellSize.SMALL, vaultHardware.getCellsOfSize(CellSize.SMALL));
         cells.put(CellSize.MEDIUM, vaultHardware.getCellsOfSize(CellSize.MEDIUM));
         cells.put(CellSize.BIG, vaultHardware.getCellsOfSize(CellSize.BIG));
+        cells.values().stream().flatMap(Collection::stream).forEach(cellsRepository::save);
         return cells;
     }
 

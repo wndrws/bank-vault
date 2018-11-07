@@ -1,11 +1,13 @@
 package kspt.bank.domain;
 
 import com.statemachinesystems.mockclock.MockClock;
+import kspt.bank.boundaries.CellsRepository;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.Client;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.Period;
 import java.time.ZoneId;
@@ -16,10 +18,13 @@ public class LeasingControllerTest {
     @Autowired // TODO ?
     private Vault vault;
 
+    @MockBean
+    private CellsRepository cellsRepository;
+
     private final MockClock mockedClock =
             MockClock.at(2018, 3, 16, 17, 0, ZoneId.systemDefault());
 
-    private final LeasingController leasingController = new LeasingController(mockedClock);
+    private final LeasingController leasingController = new LeasingController(mockedClock, cellsRepository);
 
     @Test
     void testLeasingExpiration()

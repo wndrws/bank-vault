@@ -3,10 +3,12 @@ package kspt.bank.domain;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Range;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import kspt.bank.boundaries.CellsRepository;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.CellLeaseRecord;
 import kspt.bank.domain.entities.Client;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -29,14 +31,19 @@ public class LeasingController {
     @Getter
     private final Map<Cell, CellLeaseRecord> leasingInfo;
 
-    LeasingController(final Clock clock) {
+    private final CellsRepository cellsRepository;
+
+    LeasingController(final Clock clock,final CellsRepository cellsRepository) {
         this.clock = clock;
         this.leasingInfo = new HashMap<>();
+        this.cellsRepository = cellsRepository;
     }
 
-    LeasingController(final Clock clock, final Map<Cell, CellLeaseRecord> leasingInfo) {
+    LeasingController(final Clock clock, final Map<Cell, CellLeaseRecord> leasingInfo,
+            final CellsRepository cellsRepository) {
         this.clock = clock;
         this.leasingInfo = leasingInfo;
+        this.cellsRepository = cellsRepository;
     }
 
     private final ScheduledExecutorService timersPool =
@@ -47,6 +54,7 @@ public class LeasingController {
         final LocalDate today = LocalDate.now(clock);
         leasingInfo.put(cell, new CellLeaseRecord(leaseholder, today, today.plus(period), false));
         cell.setCellLeaseRecord(leasingInfo.get(cell));
+        cellsRepository.save(cell);
         timersPool.scheduleAtFixedRate(this::checkLeasingPeriods,
                 timersCheckPeriodMillis, timersCheckPeriodMillis, TimeUnit.MILLISECONDS);
     }
@@ -63,6 +71,7 @@ public class LeasingController {
     public void endLeasing(final Cell cell) {
         leasingInfo.remove(cell);
         cell.setCellLeaseRecord(null);
+        cellsRepository.save(cell);
     }
 
     public boolean isLeased(final Cell cell) {

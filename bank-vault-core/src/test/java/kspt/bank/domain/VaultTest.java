@@ -1,26 +1,43 @@
 package kspt.bank.domain;
 
+import kspt.bank.boundaries.CellsRepository;
+import kspt.bank.dao.InMemoryCellRepository;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.enums.CellSize;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.lang.reflect.Field;
 import java.time.Period;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 
-@SuppressWarnings("ConstantConditions")
+@ExtendWith(SpringExtension.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 class VaultTest {
     @Autowired
     private Vault vault;
+
+    @Autowired
+    private CellsRepository cellsRepository;
+
+    @AfterEach
+    void tearDown() {
+        vault.stop();
+    }
 
     @ParameterizedTest
     @EnumSource(CellSize.class)
@@ -59,6 +76,7 @@ class VaultTest {
         // when
         final Cell cell2 = vault.requestCell(CellSize.MEDIUM);
         // then
+        assertThat(cell1).isSameAs(cell2);
         assertThat(cell1).isEqualTo(cell2);
     }
 
@@ -92,5 +110,18 @@ class VaultTest {
         final int cellsNumber = vault.getNumberOfAvailableCells(size);
         // then
         assertThat(cellsNumber).isEqualTo(totalCellsOfThatSize - 1);
+    }
+
+    @Configuration
+    static class VaultTestConfiguration {
+        @Bean
+        public Vault vault(final CellsRepository cellsRepository) {
+            return new Vault(cellsRepository);
+        }
+
+        @Bean
+        public CellsRepository cellsRepository() {
+            return new InMemoryCellRepository();
+        }
     }
 }

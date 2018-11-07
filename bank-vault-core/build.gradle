@@ -16,7 +16,7 @@ def junit5 = ["org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}",
 
 def jdbcDriver = "org.postgresql:postgresql:42.2.0"
 
-def springBootVersion = '2.0.2.RELEASE'
+def springBootVersion = '2.0.4.RELEASE'
 def springBoot = ["org.springframework.boot:spring-boot-starter-web:${springBootVersion}",
                   "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"]
 
@@ -27,5 +27,7 @@ dependencies {
     compile group: 'com.statemachinesystems', name: 'mock-clock', version: '1.0'
     testCompile group: 'org.assertj', name: 'assertj-core', version: '3.8.0'
     testCompile group: 'org.mockito', name: 'mockito-core', version: '2.11.0'
+    testRuntime group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
+    testRuntime group: 'com.h2database', name: 'h2', version: '1.4.197'
     testRuntime junit5
 }

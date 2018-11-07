@@ -9,7 +9,7 @@ import lombok.ToString;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-@EqualsAndHashCode(exclude = {"id", "cellLeaseRecord", "containedPrecious"})
+@EqualsAndHashCode(exclude = {"cellLeaseRecord", "containedPrecious"}) // "id",
 @ToString(exclude = "cellLeaseRecord")
 @Data
 @NoArgsConstructor
