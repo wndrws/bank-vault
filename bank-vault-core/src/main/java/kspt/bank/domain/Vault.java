@@ -6,20 +6,26 @@ import kspt.bank.domain.entities.Cell;
 import kspt.bank.enums.CellSize;
 import lombok.RequiredArgsConstructor;
 import lombok.Synchronized;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.io.Closeable;
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
-public final class Vault {
+public final class Vault implements Closeable {
     final static Duration DEFAULT_PENDING_DURATION = Duration.ofMinutes(5);
 
     @Autowired
@@ -48,32 +54,24 @@ public final class Vault {
     @Synchronized
     public Cell requestCell(final CellSize size) {
         final List<Cell> cellsOfRequestedSize = cells.getOrDefault(size, new ArrayList<>());
-        if (cellsOfRequestedSize.size() > 0) {
-            return findAvailableCell(cellsOfRequestedSize);
-        } else {
-            return null;
-        }
-    }
-
-    Cell requestAnyCell() {
-        return Stream.of(CellSize.values()).map(this::requestCell).findFirst().orElse(null);
+        return cellsOfRequestedSize.isEmpty() ? null : findAvailableCell(cellsOfRequestedSize);
     }
 
     private Cell findAvailableCell(List<Cell> cellsOfRequestedSize) {
         return cellsOfRequestedSize.stream().filter(this::isAvailable).findAny().orElse(null);
     }
 
-    int getNumberOfAvailableCells(final CellSize size) {
-        final List<Cell> cellsOfRequestedSize = cells.getOrDefault(size, new ArrayList<>());
-        return (int) cellsOfRequestedSize.stream().filter(this::isAvailable).count();
-    }
-
     public boolean isAvailable(final Cell cell) {
         return !leasingController.isLeased(cell) && !isPending(cell);
     }
 
-    public Set<Cell> getPendingCells() {
-        return new HashSet<>(cellsRepository.findAllPendingCells());
+    Cell requestAnyCell() {
+        return Stream.of(CellSize.values()).map(this::requestCell).findFirst().orElse(null);
+    }
+
+    int getNumberOfAvailableCells(final CellSize size) {
+        final List<Cell> cellsOfRequestedSize = cells.getOrDefault(size, new ArrayList<>());
+        return (int) cellsOfRequestedSize.stream().filter(this::isAvailable).count();
     }
 
     void pend(final Cell cell, final Duration duration) {
@@ -95,7 +93,9 @@ public final class Vault {
     }
 
     @PreDestroy
-    public void stop() {
+    @Override
+    public void close() {
+        log.info("Closing the Vault...");
         pendingKeepersPool.shutdownNow();
         leasingController.stop();
     }

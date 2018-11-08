@@ -5,7 +5,6 @@ import kspt.bank.config.VaultConfig;
 import kspt.bank.dao.InMemoryCellRepository;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.enums.CellSize;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,11 +38,6 @@ class VaultTest {
 
     @Autowired
     private CellsRepository cellsRepository;
-
-    @AfterEach
-    void tearDown() {
-        vault.stop();
-    }
 
     @ParameterizedTest
     @EnumSource(CellSize.class)

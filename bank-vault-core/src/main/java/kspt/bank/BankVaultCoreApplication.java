@@ -1,13 +1,11 @@
 package kspt.bank;
 
 import kspt.bank.boundaries.NotificationGate;
-import kspt.bank.domain.Vault;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 
@@ -32,8 +30,6 @@ public class BankVaultCoreApplication {
 
     public static void shutdown() {
         log.warn("System shutdown was requested...");
-        applicationContext.getBean(Vault.class).stop();
-        log.warn("The system is shut down.");
         applicationContext.close();
     }
 }
