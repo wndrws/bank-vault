@@ -6,49 +6,56 @@ import kspt.bank.domain.entities.CellApplication;
 import kspt.bank.domain.entities.Client;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class InMemoryApplicationsRepository implements ApplicationsRepository {
-    private final Map<Integer, Set<CellApplication>> repository = new TreeMap<>();
+    private static AtomicInteger ID_COUNTER = new AtomicInteger(0);
+
+    private final Map<Integer, Set<CellApplication>> clientIdToApplications =
+            Collections.synchronizedNavigableMap(new TreeMap<>());
 
     @Override
     public CellApplication save(CellApplication application) {
-        final Set<CellApplication> clientsApplications =
-                repository.getOrDefault(application.getLeaseholder().getId(), new HashSet<>());
+        final Set<CellApplication> clientsApplications = clientIdToApplications.getOrDefault(
+                application.getLeaseholder().getId(), new HashSet<>());
+        if (application.getId() == 0) {
+            application.setId(ID_COUNTER.getAndIncrement());
+        }
         if(!clientsApplications.add(application)) {
             clientsApplications.remove(application);
             clientsApplications.add(application);
         }
-        repository.put(application.getLeaseholder().getId(), clientsApplications);
+        clientIdToApplications.put(application.getLeaseholder().getId(), clientsApplications);
         return application;
     }
 
     @Override
     public Collection<CellApplication> findAllByClient(Client client) {
-        return repository.getOrDefault(client.getId(), new HashSet<>());
+        return clientIdToApplications.getOrDefault(client.getId(), new HashSet<>());
     }
 
     @Override
     public CellApplication find(Integer id) {
-        return repository.entrySet().stream()
+        return clientIdToApplications.entrySet().stream()
                 .flatMap(entry -> entry.getValue().stream())
-                .filter(app -> app.getId().equals(id))
+                .filter(app -> app.getId() == id)
                 .findFirst().orElse(null);
     }
 
     @Override
     public Collection<CellApplication> findAll() {
-        return repository.values().stream()
+        return clientIdToApplications.values().stream()
                 .flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     @Override
     public void deleteApplication(Integer id) {
-        final Optional<CellApplication> application = repository.values().stream()
+        final Optional<CellApplication> application = clientIdToApplications.values().stream()
                 .flatMap(Collection::stream)
-                .filter(app -> app.getId().equals(id)).findFirst();
-        if (application.isPresent()) {
-            repository.get(application.get().getLeaseholder().getId()).remove(application.get());
-        }
+                .filter(app -> app.getId() == id).findFirst();
+        application.ifPresent(cellApplication -> clientIdToApplications
+                .get(cellApplication.getLeaseholder().getId())
+                .remove(cellApplication));
     }
 }

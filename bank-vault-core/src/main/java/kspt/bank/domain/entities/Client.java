@@ -14,7 +14,7 @@ import javax.persistence.Id;
 public class Client {
     @Id
     @GeneratedValue
-    private Integer id;
+    private int id;
 
     @Embedded
     PassportInfo passportInfo;

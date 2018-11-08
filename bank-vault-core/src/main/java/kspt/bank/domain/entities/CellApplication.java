@@ -14,7 +14,7 @@ import java.time.Period;
 public class CellApplication {
     @Id
     @GeneratedValue
-    private Integer id;
+    private int id;
 
     @OneToOne(optional = false)
     @JoinColumn(name = "client_id")

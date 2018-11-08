@@ -4,11 +4,15 @@ import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.domain.entities.Client;
 import kspt.bank.domain.entities.PassportInfo;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class InMemoryClientsRepository implements ClientsRepository {
-    private final Set<Client> clients = new HashSet<>();
+    private static AtomicInteger ID_COUNTER = new AtomicInteger(0);
+
+    private final Set<Client> clients = Collections.synchronizedSet(new HashSet<>());
 
     @Override
     public boolean containsClientWith(PassportInfo passportInfo) {
@@ -27,12 +31,16 @@ public class InMemoryClientsRepository implements ClientsRepository {
     @Override
     public Client find(Integer id) {
         return clients.stream()
-                .filter(client -> client.getId().equals(id))
+                .filter(client -> client.getId() == id)
                 .findFirst().orElse(null);
     }
 
     @Override
     public void add(Client client) {
+        clients.removeIf(c -> c.getId() == client.getId());
+        if (client.getId() == 0) {
+            client.setId(ID_COUNTER.getAndIncrement());
+        }
         clients.add(client);
     }
 }
