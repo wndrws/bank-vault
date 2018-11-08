@@ -1,15 +1,15 @@
-package kspt.bank.config;
+package kspt.bank;
 
 import kspt.bank.boundaries.ApplicationsRepository;
+import kspt.bank.boundaries.CellsRepository;
 import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.dao.InMemoryApplicationsRepository;
+import kspt.bank.dao.InMemoryCellsRepository;
 import kspt.bank.dao.InMemoryClientsRepository;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConditionalOnProperty(name = "database.enabled", havingValue = "false", matchIfMissing = true)
 public class InMemoryConfig {
     @Bean
     public ApplicationsRepository applicationsRepository() {
@@ -19,5 +19,10 @@ public class InMemoryConfig {
     @Bean
     public ClientsRepository clientsRepository() {
         return new InMemoryClientsRepository();
+    }
+
+    @Bean
+    public CellsRepository cellsRepository() {
+        return new InMemoryCellsRepository();
     }
 }

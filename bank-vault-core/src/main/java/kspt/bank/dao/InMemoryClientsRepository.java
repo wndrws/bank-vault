@@ -37,9 +37,10 @@ public class InMemoryClientsRepository implements ClientsRepository {
 
     @Override
     public void add(Client client) {
-        clients.removeIf(c -> c.getId() == client.getId());
-        if (client.getId() == 0) {
+        if (client.getId() == null) {
             client.setId(ID_COUNTER.getAndIncrement());
+        } else {
+            clients.removeIf(c -> c.getId().equals(client.getId()));
         }
         clients.add(client);
     }

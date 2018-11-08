@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-public class InMemoryCellRepository implements CellsRepository {
+public class InMemoryCellsRepository implements CellsRepository {
     private static AtomicInteger ID_COUNTER = new AtomicInteger(0);
 
     private final List<Cell> cells = Collections.synchronizedList(new ArrayList<>());
@@ -45,9 +45,10 @@ public class InMemoryCellRepository implements CellsRepository {
 
     @Override
     public Cell save(final Cell cell) {
-        cells.removeIf(c -> c.getId() == cell.getId());
-        if (cell.getId() == 0) {
+        if (cell.getId() == null) {
             cell.setId(ID_COUNTER.getAndIncrement());
+        } else {
+            cells.removeIf(c -> c.getId().equals(cell.getId()));
         }
         cells.add(cell);
         return cell;

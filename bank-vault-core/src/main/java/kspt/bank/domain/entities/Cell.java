@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
 public class Cell {
     @Id
     @GeneratedValue
-    private int id;
+    private Integer id;
 
     @Enumerated(EnumType.STRING)
     @NotNull

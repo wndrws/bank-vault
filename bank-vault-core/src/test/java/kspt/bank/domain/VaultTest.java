@@ -1,8 +1,8 @@
 package kspt.bank.domain;
 
+import kspt.bank.InMemoryConfig;
 import kspt.bank.boundaries.CellsRepository;
 import kspt.bank.config.VaultConfig;
-import kspt.bank.dao.InMemoryCellRepository;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.enums.CellSize;
 import org.junit.jupiter.api.Assumptions;
@@ -14,8 +14,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -27,7 +25,7 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = WebEnvironment.NONE,
-        classes = { Vault.class, VaultConfig.class, VaultTest.TestConfiguration.class })
+        classes = { Vault.class, VaultConfig.class, InMemoryConfig.class })
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 class VaultTest {
     @Autowired
@@ -110,13 +108,5 @@ class VaultTest {
         final int cellsNumber = vault.getNumberOfAvailableCells(size);
         // then
         assertThat(cellsNumber).isEqualTo(totalCellsOfThatSize - 1);
-    }
-
-    @Configuration
-    static class TestConfiguration {
-        @Bean
-        public CellsRepository cellsRepository() {
-            return new InMemoryCellRepository();
-        }
     }
 }

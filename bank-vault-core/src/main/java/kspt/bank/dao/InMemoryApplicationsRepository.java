@@ -19,13 +19,12 @@ public class InMemoryApplicationsRepository implements ApplicationsRepository {
     public CellApplication save(CellApplication application) {
         final Set<CellApplication> clientsApplications = clientIdToApplications.getOrDefault(
                 application.getLeaseholder().getId(), new HashSet<>());
-        if (application.getId() == 0) {
+        if (application.getId() == null) {
             application.setId(ID_COUNTER.getAndIncrement());
-        }
-        if(!clientsApplications.add(application)) {
+        } else {
             clientsApplications.remove(application);
-            clientsApplications.add(application);
         }
+        clientsApplications.add(application);
         clientIdToApplications.put(application.getLeaseholder().getId(), clientsApplications);
         return application;
     }
@@ -39,7 +38,7 @@ public class InMemoryApplicationsRepository implements ApplicationsRepository {
     public CellApplication find(Integer id) {
         return clientIdToApplications.entrySet().stream()
                 .flatMap(entry -> entry.getValue().stream())
-                .filter(app -> app.getId() == id)
+                .filter(app -> app.getId().equals(id))
                 .findFirst().orElse(null);
     }
 
@@ -53,7 +52,7 @@ public class InMemoryApplicationsRepository implements ApplicationsRepository {
     public void deleteApplication(Integer id) {
         final Optional<CellApplication> application = clientIdToApplications.values().stream()
                 .flatMap(Collection::stream)
-                .filter(app -> app.getId() == id).findFirst();
+                .filter(app -> app.getId().equals(id)).findFirst();
         application.ifPresent(cellApplication -> clientIdToApplications
                 .get(cellApplication.getLeaseholder().getId())
                 .remove(cellApplication));
