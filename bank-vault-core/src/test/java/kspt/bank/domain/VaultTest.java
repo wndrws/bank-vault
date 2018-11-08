@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
@@ -25,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE, classes = VaultTest.TestConfiguration.class)
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 class VaultTest {
     @Autowired
@@ -113,7 +114,7 @@ class VaultTest {
     }
 
     @Configuration
-    static class VaultTestConfiguration {
+    static class TestConfiguration {
         @Bean
         public Vault vault(final CellsRepository cellsRepository) {
             return new Vault(cellsRepository);
