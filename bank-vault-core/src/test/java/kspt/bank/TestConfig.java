@@ -37,8 +37,8 @@ public class TestConfig {
     }
 
     @MockBean
-    private NotificationGate notificationGate;
+    public NotificationGate notificationGate;
 
     @MockBean
-    private ManipulationLog manipulationLog;
+    public ManipulationLog manipulationLog;
 }

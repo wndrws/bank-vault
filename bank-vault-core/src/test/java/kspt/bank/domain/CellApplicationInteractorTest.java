@@ -2,8 +2,11 @@ package kspt.bank.domain;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import kspt.bank.TestConfig;
 import kspt.bank.boundaries.ApplicationsRepository;
+import kspt.bank.boundaries.CellsRepository;
 import kspt.bank.boundaries.ClientsRepository;
+import kspt.bank.config.VaultConfig;
 import kspt.bank.domain.ClientPassportValidator.IncorrectPassportInfo;
 import kspt.bank.domain.entities.CellApplication;
 import kspt.bank.domain.entities.Client;
@@ -14,13 +17,22 @@ import kspt.bank.enums.PaymentMethod;
 import kspt.bank.external.Invoice;
 import kspt.bank.external.PaymentSystem;
 import kspt.bank.external.SimplePaymentSystem;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.Clock;
 import java.time.Period;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,21 +40,37 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
-@SuppressWarnings("ConstantConditions")
+@ExtendWith(SpringExtension.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = {
+        CellApplicationInteractor.class, Vault.class, VaultConfig.class, TestConfig.class,
+        CellApplicationInteractorTest.Config.class })
 class CellApplicationInteractorTest {
+    private static final BiMap<Invoice, Integer> INVOICE_MAP = HashBiMap.create();
+
+    @Autowired
+    private ClientsRepository clientsRepository;
+
+    @Autowired
+    private ApplicationsRepository applicationsRepository;
+
     @Autowired
     private LeasingController leasingController;
 
-    private final ClientsRepository clientsRepository = mock(ClientsRepository.class);
+    @Autowired
+    private PaymentSystem paymentSystem;
 
-    private final ApplicationsRepository applicationsRepository = mock(ApplicationsRepository.class);
-
-    private final BiMap<Invoice, Integer> invoiceMap = HashBiMap.create();
-
-    private final PaymentSystem paymentSystem = new SimplePaymentSystem(invoiceMap);
+    @Autowired
+    private CellsRepository cellsRepository;
 
     @Autowired
     private CellApplicationInteractor interactor;
+
+    @AfterEach
+    void clearMocks() {
+        Mockito.clearInvocations(clientsRepository);
+        Mockito.clearInvocations(applicationsRepository);
+        INVOICE_MAP.clear();
+    }
 
     @Test
     void testCreateApplication_NewClient() {
@@ -118,18 +146,26 @@ class CellApplicationInteractorTest {
         assertThat(cellApplication.getLeasePeriod()).isEqualTo(leasePeriod);
         assertThat(cellApplication.getStatus()).isEqualTo(CellApplicationStatus.CELL_CHOSEN);
     }
+//
+//    private CellApplication saveCellApplication(final CellApplication cellApplication) {
+//        cellsRepository.save(cellApplication.getCell());
+//        clientsRepository.add(cellApplication.getLeaseholder());
+//        applicationsRepository.save(cellApplication);
+//        return cellApplication;
+//    }
 
     @Test
     void testApproveApplication() {
         // given
         final CellApplication cellApplication =
                 TestDataGenerator.getCellApplication(CellApplicationStatus.CELL_CHOSEN);
+        cellApplication.setId(123);
         // when
         final Invoice invoice = interactor.approveApplication(cellApplication);
         // then
         assertThat(invoice.isPaid()).isFalse();
         assertThat(invoice.getSum()).isEqualTo(cellApplication.calculateLeaseCost());
-        assertThat(invoiceMap.get(invoice)).isEqualTo(cellApplication.getId());
+        assertThat(INVOICE_MAP.get(invoice)).isEqualTo(cellApplication.getId());
         assertThat(cellApplication.getStatus()).isEqualTo(CellApplicationStatus.APPROVED);
     }
 
@@ -139,8 +175,9 @@ class CellApplicationInteractorTest {
         // given
         final CellApplication cellApplication =
                 TestDataGenerator.getCellApplication(CellApplicationStatus.APPROVED);
+        cellsRepository.save(cellApplication.getCell());
         final Invoice invoice = new Invoice(cellApplication.calculateLeaseCost());
-        invoiceMap.put(invoice, cellApplication.getId());
+        INVOICE_MAP.put(invoice, cellApplication.getId());
         when(applicationsRepository.find(cellApplication.getId())).thenReturn(cellApplication);
         paymentSystem.pay(invoice, invoice.getSum(), paymentMethod);
         // when
@@ -148,5 +185,31 @@ class CellApplicationInteractorTest {
         // then
         assertThat(cellApplication.getStatus()).isEqualTo(CellApplicationStatus.PAID);
         assertTrue(leasingController.isLeased(cellApplication.getCell()));
+    }
+
+    @Configuration
+    static class Config {
+        @Bean
+        LeasingController leasingController(final Clock clock, final CellsRepository cellsRepository) {
+            return new LeasingController(clock, cellsRepository);
+        }
+
+        @Bean
+        @Primary
+        PaymentSystem paymentSystem() {
+            return new SimplePaymentSystem(INVOICE_MAP);
+        }
+
+        @Bean
+        @Primary
+        ClientsRepository clientsRepository() {
+            return mock(ClientsRepository.class);
+        }
+
+        @Bean
+        @Primary
+        ApplicationsRepository applicationsRepository() {
+            return mock(ApplicationsRepository.class);
+        }
     }
 }
