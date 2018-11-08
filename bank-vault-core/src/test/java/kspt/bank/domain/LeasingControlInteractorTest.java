@@ -4,7 +4,10 @@ import com.statemachinesystems.mockclock.MockClock;
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.NotificationGate;
 import kspt.bank.dao.InMemoryApplicationsRepository;
-import kspt.bank.domain.entities.*;
+import kspt.bank.domain.entities.Cell;
+import kspt.bank.domain.entities.CellApplication;
+import kspt.bank.domain.entities.Client;
+import kspt.bank.domain.entities.Precious;
 import kspt.bank.enums.CellApplicationStatus;
 import kspt.bank.enums.CellSize;
 import kspt.bank.enums.PaymentMethod;
@@ -18,7 +21,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Period;
@@ -45,8 +47,11 @@ public class LeasingControlInteractorTest {
     private final MockClock mockedClock =
             MockClock.at(2018, 4, 10, 19, 0, ZoneId.systemDefault());
 
-    private final LeasingControlInteractor interactor = new LeasingControlInteractor(mockedClock,
-            notificationGate, applicationsRepository, paymentSystem);
+    @Autowired
+    private LeasingControlInteractor interactor;
+
+    @Autowired
+    private LeasingController leasingController;
 
     private final Period shortPeriod = Period.ofDays(1);
 
@@ -72,8 +77,8 @@ public class LeasingControlInteractorTest {
     }
 
     private void leaseTwoCellsWithDifferentPeriods(Client client, Cell cellOne, Cell cellTwo) {
-        vault.getLeasingController().startLeasing(cellOne, client, shortPeriod);
-        vault.getLeasingController().startLeasing(cellTwo, client, longPeriod);
+        leasingController.startLeasing(cellOne, client, shortPeriod);
+        leasingController.startLeasing(cellTwo, client, longPeriod);
     }
 
     @Test
@@ -102,12 +107,11 @@ public class LeasingControlInteractorTest {
         final CellApplication cellApplication =
                 TestDataGenerator.getCellApplication(CellApplicationStatus.APPROVED);
         applicationsRepository.save(cellApplication);
-        vault.getLeasingController().startLeasing(cellApplication.getCell(),
+        leasingController.startLeasing(cellApplication.getCell(),
                 cellApplication.getLeaseholder(), cellApplication.getLeasePeriod());
         mockedClock.advanceBy(Duration.ofDays(33));
         Thread.sleep(2*LEASING_TIMERS_CHECK_PERIOD_MS);
-        Assumptions.assumeTrue(vault.getLeasingController()
-                .isLeasingExpired(cellApplication.getCell()));
+        Assumptions.assumeTrue(leasingController.isLeasingExpired(cellApplication.getCell()));
         final Invoice invoice = paymentSystem.issueInvoice(
                 cellApplication.calculateLeaseCost(), cellApplication.getId());
         paymentSystem.pay(invoice, invoice.getSum(), paymentMethod);
@@ -115,8 +119,7 @@ public class LeasingControlInteractorTest {
         interactor.acceptPayment(invoice);
         // then
         assertThat(cellApplication.getStatus()).isEqualTo(CellApplicationStatus.PAID);
-        assertFalse(vault.getLeasingController()
-                .isLeasingExpired(cellApplication.getCell()));
+        assertFalse(leasingController.isLeasingExpired(cellApplication.getCell()));
     }
 
     @Test
@@ -124,11 +127,11 @@ public class LeasingControlInteractorTest {
         // given
         final Cell cell = vault.requestAnyCell();
         final Client client = TestDataGenerator.getSampleClient();
-        vault.getLeasingController().startLeasing(cell, client, Period.ofMonths(1));
+        leasingController.startLeasing(cell, client, Period.ofMonths(1));
         // when
         interactor.stopLeasing(client, cell);
         // then
-        assertFalse(vault.getLeasingController().isLeased(cell));
+        assertFalse(leasingController.isLeased(cell));
         verify(notificationGate).notifyClient(eq(client), anyString());
     }
 
@@ -159,6 +162,6 @@ public class LeasingControlInteractorTest {
 
     @BeforeEach
     void setUp() {
-        vault.getLeasingController().setTimersCheckPeriodMillis(LEASING_TIMERS_CHECK_PERIOD_MS);
+        leasingController.setTimersCheckPeriodMillis(LEASING_TIMERS_CHECK_PERIOD_MS);
     }
 }

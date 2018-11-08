@@ -6,6 +6,7 @@ import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.domain.CellApplicationInteractor;
 import kspt.bank.domain.CellManipulationInteractor;
+import kspt.bank.domain.LeasingController;
 import kspt.bank.domain.Vault;
 import kspt.bank.domain.entities.*;
 import kspt.bank.dto.CellApplicationDTO;
@@ -44,6 +45,9 @@ public class BankVaultFacade {
     @Autowired
     private final Vault vault;
 
+    @Autowired
+    private final LeasingController leasingController;
+
     @Transactional
     public Integer acceptClientInfo(ClientDTO clientInfo) {
         final PassportInfo passportInfo = new PassportInfo(
@@ -79,9 +83,9 @@ public class BankVaultFacade {
 
     private LocalDate getLeaseBegin(final Cell cell) {
         Preconditions.checkState(vault.isPending(cell) ||
-                        vault.getLeasingController().isLeased(cell),
+                        leasingController.isLeased(cell),
                 "Attempt to getLeaseBegin for not leased nor pending cell!");
-        final Range<LocalDate> leasing = vault.getLeasingController().getInfo(cell);
+        final Range<LocalDate> leasing = leasingController.getInfo(cell);
         return leasing == null ? null : leasing.lowerEndpoint();
     }
 

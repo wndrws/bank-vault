@@ -3,17 +3,17 @@ package kspt.bank.domain.bp;
 import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.boundaries.NotificationGate;
 import kspt.bank.dao.InMemoryClientsRepository;
-import kspt.bank.domain.CellManipulationInteractor;
-import kspt.bank.domain.TestDataGenerator;
-import kspt.bank.domain.Vault;
-import kspt.bank.domain.entities.*;
+import kspt.bank.domain.*;
+import kspt.bank.domain.entities.Cell;
+import kspt.bank.domain.entities.Client;
+import kspt.bank.domain.entities.ManipulationLog;
+import kspt.bank.domain.entities.Precious;
 import kspt.bank.enums.CellSize;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.lang.reflect.Field;
 import java.time.Period;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,14 +27,20 @@ class ManipulationTest /* extends TestUsingDatabase */ {
     @Autowired
     private Vault vault;
 
+    @Autowired
+    private VaultHardware vaultHardware;
+
+    @Autowired
+    private LeasingController leasingController;
+
     private final ManipulationLog manipulationLog = mock(ManipulationLog.class);
 
     private final NotificationGate notificationGate = mock(NotificationGate.class);
 
     private final ClientsRepository clientsRepository = new InMemoryClientsRepository();
 
-    private final CellManipulationInteractor cmInteractor =
-            new CellManipulationInteractor(manipulationLog, notificationGate);
+    @Autowired
+    private CellManipulationInteractor cmInteractor;
 
     private final RoleClient roleClient = new RoleClient();
 
@@ -91,11 +97,11 @@ class ManipulationTest /* extends TestUsingDatabase */ {
     }
 
     private void assertThatCellIsOpened() {
-        assertTrue(Vault.getVaultHardware().isOpened(cell));
+        assertTrue(vaultHardware.isOpened(cell));
     }
 
     private void assertThatCellIsClosed() {
-        assertFalse(Vault.getVaultHardware().isOpened(cell));
+        assertFalse(vaultHardware.isOpened(cell));
     }
 
     private void assertThatCorrectCellIsReturned(final CellSize selectedCellNum) {
@@ -148,11 +154,8 @@ class ManipulationTest /* extends TestUsingDatabase */ {
         mediumCell = vault.requestCell(CellSize.MEDIUM);
         bigCell = vault.requestCell(CellSize.BIG);
         clientsRepository.add(roleClient.client);
-        vault.getLeasingController()
-                .startLeasing(smallCell, roleClient.client, Period.ofMonths(1));
-        vault.getLeasingController()
-                .startLeasing(mediumCell, roleClient.client, Period.ofMonths(2));
-        vault.getLeasingController()
-                .startLeasing(bigCell, roleClient.client, Period.ofMonths(3));
+        leasingController.startLeasing(smallCell, roleClient.client, Period.ofMonths(1));
+        leasingController.startLeasing(mediumCell, roleClient.client, Period.ofMonths(2));
+        leasingController.startLeasing(bigCell, roleClient.client, Period.ofMonths(3));
     }
 }

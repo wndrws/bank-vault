@@ -5,7 +5,9 @@ import kspt.bank.domain.entities.Cell;
 import kspt.bank.enums.CellSize;
 import lombok.Getter;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -19,7 +21,7 @@ public class VaultHardware {
 
     private final ImmutableSet<CellHardware> cells;
 
-    VaultHardware() {
+    public VaultHardware() {
         final List<CellHardware> smallCells = createCellsOfSize(NUMBER_OF_SMALL_CELLS, CellSize.SMALL);
         final List<CellHardware> mediumCells = createCellsOfSize(NUMBER_OF_MEDIUM_CELLS, CellSize.MEDIUM);
         final List<CellHardware> bigCells = createCellsOfSize(NUMBER_OF_BIG_CELLS, CellSize.BIG);
@@ -27,7 +29,7 @@ public class VaultHardware {
                 .collect(ImmutableSet.toImmutableSet());
     }
 
-    VaultHardware(final EnumMap<CellSize, List<Cell>> cellsEntitiesBySize) {
+    public VaultHardware(final EnumMap<CellSize, List<Cell>> cellsEntitiesBySize) {
         cells = cellsEntitiesBySize.entrySet().stream().flatMap(entry -> entry.getValue().stream())
                 .map(cell -> new CellHardware(cell.getId(), cell.getSize()))
                 .collect(ImmutableSet.toImmutableSet());

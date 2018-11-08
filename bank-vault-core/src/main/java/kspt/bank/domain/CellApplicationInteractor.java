@@ -3,28 +3,39 @@ package kspt.bank.domain;
 import com.google.common.base.Preconditions;
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.ClientsRepository;
+import kspt.bank.domain.entities.Cell;
+import kspt.bank.domain.entities.CellApplication;
+import kspt.bank.domain.entities.Client;
+import kspt.bank.domain.entities.PassportInfo;
 import kspt.bank.enums.CellApplicationStatus;
 import kspt.bank.enums.CellSize;
 import kspt.bank.external.Invoice;
 import kspt.bank.external.PaymentSystem;
-import kspt.bank.domain.entities.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.time.Period;
 
-@RequiredArgsConstructor
+@Component
+@AllArgsConstructor
 public class CellApplicationInteractor {
+    @Autowired
     private final ClientsRepository clientsRepository;
 
     @Getter
+    @Autowired
     private final ApplicationsRepository applicationsRepository;
 
+    @Autowired
     private final PaymentSystem paymentSystem;
 
     @Autowired
-    private Vault vault;
+    private final Vault vault;
+
+    @Autowired
+    private final LeasingController leasingController;
 
     public CellApplication createApplication(final PassportInfo passportInfo, final String phone,
             final String email)
@@ -80,7 +91,7 @@ public class CellApplicationInteractor {
         Preconditions.checkState(invoice.isPaid());
         application.setStatus(CellApplicationStatus.PAID);
         applicationsRepository.save(application);
-        vault.getLeasingController().startLeasing(
+        leasingController.startLeasing(
                 application.getCell(), application.getLeaseholder(), application.getLeasePeriod());
     }
 

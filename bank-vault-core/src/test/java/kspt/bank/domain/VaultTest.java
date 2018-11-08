@@ -1,6 +1,7 @@
 package kspt.bank.domain;
 
 import kspt.bank.boundaries.CellsRepository;
+import kspt.bank.config.VaultConfig;
 import kspt.bank.dao.InMemoryCellRepository;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.enums.CellSize;
@@ -26,11 +27,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(webEnvironment = WebEnvironment.NONE, classes = VaultTest.TestConfiguration.class)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE,
+        classes = { Vault.class, VaultConfig.class, VaultTest.TestConfiguration.class })
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 class VaultTest {
     @Autowired
     private Vault vault;
+
+    @Autowired
+    private LeasingController leasingController;
 
     @Autowired
     private CellsRepository cellsRepository;
@@ -66,7 +71,7 @@ class VaultTest {
     }
 
     private void startLeasingForSomeClient(final Cell cell) {
-        vault.getLeasingController()
+        leasingController
                 .startLeasing(cell, TestDataGenerator.getSampleClient(), Period.ofMonths(1));
     }
 
@@ -115,11 +120,6 @@ class VaultTest {
 
     @Configuration
     static class TestConfiguration {
-        @Bean
-        public Vault vault(final CellsRepository cellsRepository) {
-            return new Vault(cellsRepository);
-        }
-
         @Bean
         public CellsRepository cellsRepository() {
             return new InMemoryCellRepository();

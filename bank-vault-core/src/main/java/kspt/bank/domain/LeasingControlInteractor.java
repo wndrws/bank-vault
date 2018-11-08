@@ -5,40 +5,36 @@ import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.NotificationGate;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.CellApplication;
-import kspt.bank.enums.CellApplicationStatus;
 import kspt.bank.domain.entities.Client;
+import kspt.bank.enums.CellApplicationStatus;
 import kspt.bank.external.Invoice;
 import kspt.bank.external.PaymentSystem;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Period;
 
 @Component
+@AllArgsConstructor
 public class LeasingControlInteractor {
+    @Autowired
     private final NotificationGate notificationGate;
 
+    @Autowired
     private final ApplicationsRepository applicationsRepository;
 
+    @Autowired
     private final PaymentSystem paymentSystem;
 
     @Autowired
-    private Vault vault;
-
-    public LeasingControlInteractor(final Clock clock, final NotificationGate notificationGate,
-            final ApplicationsRepository applicationsRepository, final PaymentSystem paymentSystem) {
-        Vault.CLOCK = clock;
-        this.notificationGate = notificationGate;
-        this.applicationsRepository = applicationsRepository;
-        this.paymentSystem = paymentSystem;
-    }
+    private LeasingController leasingController;
 
     public void sendNotifications() {
-        vault.getLeasingController().getCellsAndLeaseholders()
+        leasingController.getCellsAndLeaseholders()
                 .forEach((cell, leaseholder) -> {
-                    if (vault.getLeasingController().isLeasingExpired(cell)) {
+                    if (leasingController.isLeasingExpired(cell)) {
                         notificationGate.notifyClientAboutLeasingExpiration(leaseholder, cell);
                     }
                 });
@@ -61,7 +57,7 @@ public class LeasingControlInteractor {
         Preconditions.checkState(invoice.isPaid());
         application.setStatus(CellApplicationStatus.PAID);
         applicationsRepository.save(application);
-        vault.getLeasingController().startLeasing(
+        leasingController.startLeasing(
                 application.getCell(), application.getLeaseholder(), application.getLeasePeriod());
     }
 
@@ -69,7 +65,7 @@ public class LeasingControlInteractor {
         if (!cell.isEmpty()) {
             notificationGate.notifyManagerAboutLeasingEnd(cell);
         } else {
-            vault.getLeasingController().endLeasing(cell);
+            leasingController.endLeasing(cell);
             notificationGate.notifyClient(client, "Your leasing for cell " + cell + " has ended");
         }
     }

@@ -7,18 +7,18 @@ import kspt.bank.boundaries.CellsRepository;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.CellLeaseRecord;
 import kspt.bank.domain.entities.Client;
+import kspt.bank.enums.CellSize;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class LeasingController {
     private final static int TIMERS_POOL_SIZE = 1;
@@ -33,17 +33,26 @@ public class LeasingController {
 
     private final CellsRepository cellsRepository;
 
-    LeasingController(final Clock clock,final CellsRepository cellsRepository) {
+    public LeasingController(final Clock clock,final CellsRepository cellsRepository) {
         this.clock = clock;
         this.leasingInfo = new HashMap<>();
         this.cellsRepository = cellsRepository;
     }
 
-    LeasingController(final Clock clock, final Map<Cell, CellLeaseRecord> leasingInfo,
+    public LeasingController(final Clock clock, final EnumMap<CellSize, List<Cell>> cells,
             final CellsRepository cellsRepository) {
         this.clock = clock;
-        this.leasingInfo = leasingInfo;
+        this.leasingInfo = collectLeasingInfo(cells);
         this.cellsRepository = cellsRepository;
+    }
+
+    private Map<Cell, CellLeaseRecord> collectLeasingInfo(
+            EnumMap<CellSize, List<Cell>> cells) {
+        return cells.entrySet().stream()
+                .flatMap(entry -> entry.getValue().stream())
+                .map(cell -> new AbstractMap.SimpleEntry<>(cell, cell.getCellLeaseRecord()))
+                .filter(entry -> entry.getValue() != null)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private final ScheduledExecutorService timersPool =

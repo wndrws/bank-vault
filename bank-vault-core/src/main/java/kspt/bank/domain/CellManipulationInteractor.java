@@ -6,24 +6,31 @@ import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.Client;
 import kspt.bank.domain.entities.ManipulationLog;
 import kspt.bank.domain.entities.Precious;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
+@Component
+@AllArgsConstructor
 public class CellManipulationInteractor {
+    @Autowired
     private final ManipulationLog manipulationLog;
 
+    @Autowired
     private final NotificationGate notificationGate;
 
     @Autowired
-    private Vault vault;
+    private final VaultHardware vaultHardware;
+
+    @Autowired
+    private final LeasingController leasingController;
 
     public List<Cell> getClientsCells(final Client client) {
-        return vault.getLeasingController().getCellsAndLeaseholders().entrySet().stream()
+        return leasingController.getCellsAndLeaseholders().entrySet().stream()
                 .filter(cellToClient -> cellToClient.getValue().equals(client))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
@@ -45,12 +52,12 @@ public class CellManipulationInteractor {
     }
 
     public void openCell(final Cell cell, final Client client) {
-        Vault.getVaultHardware().openCell(cell);
+        vaultHardware.openCell(cell);
         manipulationLog.logEvent("Cell opened", client, cell);
     }
 
     public void closeCell(final Cell cell, final Client client) {
-        Vault.getVaultHardware().closeCell(cell);
+        vaultHardware.closeCell(cell);
         manipulationLog.logEvent("Cell closed", client, cell);
     }
 

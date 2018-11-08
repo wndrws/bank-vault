@@ -4,13 +4,15 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.ClientsRepository;
+import kspt.bank.domain.ClientPassportValidator.IncorrectPassportInfo;
+import kspt.bank.domain.entities.CellApplication;
+import kspt.bank.domain.entities.Client;
+import kspt.bank.domain.entities.PassportInfo;
 import kspt.bank.enums.CellApplicationStatus;
 import kspt.bank.enums.CellSize;
 import kspt.bank.enums.PaymentMethod;
 import kspt.bank.external.Invoice;
 import kspt.bank.external.PaymentSystem;
-import kspt.bank.domain.ClientPassportValidator.IncorrectPassportInfo;
-import kspt.bank.domain.entities.*;
 import kspt.bank.external.SimplePaymentSystem;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
@@ -20,8 +22,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Period;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -30,8 +30,8 @@ import static org.mockito.Mockito.*;
 
 @SuppressWarnings("ConstantConditions")
 class CellApplicationInteractorTest {
-    @Autowired // TODO ?
-    private Vault vault;
+    @Autowired
+    private LeasingController leasingController;
 
     private final ClientsRepository clientsRepository = mock(ClientsRepository.class);
 
@@ -41,8 +41,8 @@ class CellApplicationInteractorTest {
 
     private final PaymentSystem paymentSystem = new SimplePaymentSystem(invoiceMap);
 
-    private final CellApplicationInteractor interactor =
-            new CellApplicationInteractor(clientsRepository, applicationsRepository, paymentSystem);
+    @Autowired
+    private CellApplicationInteractor interactor;
 
     @Test
     void testCreateApplication_NewClient() {
@@ -147,6 +147,6 @@ class CellApplicationInteractorTest {
         interactor.acceptPayment(invoice);
         // then
         assertThat(cellApplication.getStatus()).isEqualTo(CellApplicationStatus.PAID);
-        assertTrue(vault.getLeasingController().isLeased(cellApplication.getCell()));
+        assertTrue(leasingController.isLeased(cellApplication.getCell()));
     }
 }

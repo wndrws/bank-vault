@@ -1,7 +1,10 @@
 package kspt.bank.domain;
 
 import kspt.bank.boundaries.NotificationGate;
-import kspt.bank.domain.entities.*;
+import kspt.bank.domain.entities.Cell;
+import kspt.bank.domain.entities.Client;
+import kspt.bank.domain.entities.ManipulationLog;
+import kspt.bank.domain.entities.Precious;
 import kspt.bank.enums.CellSize;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,29 +12,32 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.lang.reflect.Field;
 import java.time.Period;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 class CellManipulationInteractorTest {
-    @Autowired // TODO ?
+    @Autowired
     private Vault vault;
+
+    @Autowired
+    private VaultHardware vaultHardware;
+
+    @Autowired
+    private LeasingController leasingController;
 
     private final ManipulationLog manipulationLog = mock(ManipulationLog.class);
 
     private final NotificationGate notificationGate = mock(NotificationGate.class);
 
-    private final CellManipulationInteractor interactor =
-            new CellManipulationInteractor(manipulationLog, notificationGate);
+    @Autowired
+    private CellManipulationInteractor interactor;
 
     private final Client client = TestDataGenerator.getSampleClient();
 
@@ -48,9 +54,9 @@ class CellManipulationInteractorTest {
     @Test
     void testGetClientsCells() {
         // given
-        vault.getLeasingController().startLeasing(cellOne, client, Period.ofMonths(1));
-        vault.getLeasingController().startLeasing(cellTwo, client, Period.ofMonths(2));
-        vault.getLeasingController().startLeasing(cellThree, client, Period.ofMonths(3));
+        leasingController.startLeasing(cellOne, client, Period.ofMonths(1));
+        leasingController.startLeasing(cellTwo, client, Period.ofMonths(2));
+        leasingController.startLeasing(cellThree, client, Period.ofMonths(3));
         // when
         final List<Cell> clientsCells = interactor.getClientsCells(client);
         // then
@@ -60,7 +66,7 @@ class CellManipulationInteractorTest {
     @Test
     void testPutPrecious() {
         // given
-        vault.getLeasingController().startLeasing(cellOne, client, Period.ofMonths(1));
+        leasingController.startLeasing(cellOne, client, Period.ofMonths(1));
         // when
         interactor.putPrecious(cellOne, myPrecious, client);
         // then
@@ -71,7 +77,7 @@ class CellManipulationInteractorTest {
     @Test
     void testPutPrecious_TooBigPrecious() {
         // given
-        vault.getLeasingController().startLeasing(cellThree, client, Period.ofMonths(3));
+        leasingController.startLeasing(cellThree, client, Period.ofMonths(3));
         // then
         assertThrows(PutManipulationValidator.ManipulationNotAllowed.class, // when
                 () -> interactor.putPrecious(cellThree, tooBigPrecious, client));
@@ -80,7 +86,7 @@ class CellManipulationInteractorTest {
     @Test
     void testPutPrecious_NotEmptyCell() {
         // given
-        vault.getLeasingController().startLeasing(cellTwo, client, Period.ofMonths(2));
+        leasingController.startLeasing(cellTwo, client, Period.ofMonths(2));
         cellThree.setContainedPrecious(myPrecious);
         // then
         assertThrows(PutManipulationValidator.ManipulationNotAllowed.class, // when
@@ -101,11 +107,11 @@ class CellManipulationInteractorTest {
     @Test
     void testOpenCell() {
         // given
-        Assumptions.assumeFalse(Vault.getVaultHardware().isOpened(cellOne));
+        Assumptions.assumeFalse(vaultHardware.isOpened(cellOne));
         // when
         interactor.openCell(cellOne, client);
         // then
-        assertTrue(Vault.getVaultHardware().isOpened(cellOne));
+        assertTrue(vaultHardware.isOpened(cellOne));
         verify(manipulationLog).logEvent(anyString(), eq(client), eq(cellOne));
     }
 
@@ -113,11 +119,11 @@ class CellManipulationInteractorTest {
     void testCloseCell() {
         // given
         interactor.openCell(cellOne, client);
-        Assumptions.assumeTrue(Vault.getVaultHardware().isOpened(cellOne));
+        Assumptions.assumeTrue(vaultHardware.isOpened(cellOne));
         // when
         interactor.closeCell(cellOne, client);
         // then
-        assertFalse(Vault.getVaultHardware().isOpened(cellOne));
+        assertFalse(vaultHardware.isOpened(cellOne));
         verify(manipulationLog, Mockito.times(2)).logEvent(anyString(), eq(client), eq(cellOne));
     }
 

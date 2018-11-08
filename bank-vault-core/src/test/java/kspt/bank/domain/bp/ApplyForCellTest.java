@@ -4,20 +4,20 @@ import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.dao.InMemoryApplicationsRepository;
 import kspt.bank.dao.InMemoryClientsRepository;
+import kspt.bank.domain.*;
+import kspt.bank.domain.entities.CellApplication;
+import kspt.bank.domain.entities.Client;
+import kspt.bank.domain.entities.PassportInfo;
 import kspt.bank.enums.CellApplicationStatus;
 import kspt.bank.enums.CellSize;
 import kspt.bank.enums.PaymentMethod;
 import kspt.bank.external.Invoice;
 import kspt.bank.external.PaymentSystem;
-import kspt.bank.domain.*;
-import kspt.bank.domain.entities.*;
 import kspt.bank.external.SimplePaymentSystem;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.lang.reflect.Field;
 import java.time.Period;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,8 +34,11 @@ class ApplyForCellTest  /* extends TestUsingDatabase */ {
 
     private final PaymentSystem paymentSystem = new SimplePaymentSystem();
 
-    private final CellApplicationInteractor caInteractor =
-            new CellApplicationInteractor(clientsRepository, applicationsRepository, paymentSystem);
+    @Autowired
+    private CellApplicationInteractor caInteractor;
+
+    @Autowired
+    private LeasingController leasingController;
 
     private final RoleClient roleClient = new RoleClient();
 
@@ -71,7 +74,7 @@ class ApplyForCellTest  /* extends TestUsingDatabase */ {
 
     private void assertThatRightCellIsReserved(CellSize size, Period period) {
         assertFalse(vault.isAvailable(cellApplication.getCell()));
-        assertFalse(vault.getLeasingController().isLeased(cellApplication.getCell()));
+        assertFalse(leasingController.isLeased(cellApplication.getCell()));
         assertThat(cellApplication.getCell().getSize()).isEqualTo(size);
         assertThat(cellApplication.getLeasePeriod()).isEqualTo(period);
         assertThat(cellApplication.getStatus()).isEqualTo(CellApplicationStatus.CELL_CHOSEN);
@@ -84,7 +87,7 @@ class ApplyForCellTest  /* extends TestUsingDatabase */ {
 
     private void assertThatCellIsLeased() {
         assertTrue(invoice.isPaid());
-        assertTrue(vault.getLeasingController().isLeased(cellApplication.getCell()));
+        assertTrue(leasingController.isLeased(cellApplication.getCell()));
         assertThat(cellApplication.getStatus()).isEqualTo(CellApplicationStatus.PAID);
     }
 
