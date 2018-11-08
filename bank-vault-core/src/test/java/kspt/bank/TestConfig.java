@@ -7,6 +7,7 @@ import kspt.bank.boundaries.NotificationGate;
 import kspt.bank.dao.InMemoryApplicationsRepository;
 import kspt.bank.dao.InMemoryCellsRepository;
 import kspt.bank.dao.InMemoryClientsRepository;
+import kspt.bank.domain.entities.ManipulationLog;
 import kspt.bank.external.PaymentSystem;
 import kspt.bank.external.SimplePaymentSystem;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -37,4 +38,7 @@ public class TestConfig {
 
     @MockBean
     private NotificationGate notificationGate;
+
+    @MockBean
+    private ManipulationLog manipulationLog;
 }

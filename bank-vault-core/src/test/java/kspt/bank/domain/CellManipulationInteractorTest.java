@@ -1,6 +1,10 @@
 package kspt.bank.domain;
 
+import kspt.bank.TestConfig;
+import kspt.bank.boundaries.CellsRepository;
+import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.boundaries.NotificationGate;
+import kspt.bank.config.VaultConfig;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.Client;
 import kspt.bank.domain.entities.ManipulationLog;
@@ -9,9 +13,15 @@ import kspt.bank.enums.CellSize;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.Clock;
 import java.time.Period;
 import java.util.List;
 
@@ -19,9 +29,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(SpringExtension.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = {
+        CellManipulationInteractor.class, Vault.class, VaultConfig.class, TestConfig.class,
+        CellManipulationInteractorTest.Config.class })
 class CellManipulationInteractorTest {
     @Autowired
     private Vault vault;
@@ -32,9 +45,14 @@ class CellManipulationInteractorTest {
     @Autowired
     private LeasingController leasingController;
 
-    private final ManipulationLog manipulationLog = mock(ManipulationLog.class);
+    @Autowired
+    private ManipulationLog manipulationLog;
 
-    private final NotificationGate notificationGate = mock(NotificationGate.class);
+    @Autowired
+    private NotificationGate notificationGate;
+
+    @Autowired
+    private ClientsRepository clientsRepository;
 
     @Autowired
     private CellManipulationInteractor interactor;
@@ -140,5 +158,14 @@ class CellManipulationInteractorTest {
         cellOne = vault.requestCell(CellSize.SMALL);
         cellTwo = vault.requestCell(CellSize.MEDIUM);
         cellThree = vault.requestCell(CellSize.BIG);
+        clientsRepository.add(client);
+    }
+
+    @Configuration
+    static class Config {
+        @Bean
+        LeasingController leasingController(final Clock clock, final CellsRepository cellsRepository) {
+            return new LeasingController(clock, cellsRepository);
+        }
     }
 }
