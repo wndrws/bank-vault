@@ -18,7 +18,7 @@ public class VaultConfig {
     @Bean
     public LeasingController leasingController(final Clock clock,
             final CellsRepository cellsRepository) {
-        if (cellsRepository.findAll().isEmpty()) {
+        if (cellsRepository.findAllCells().isEmpty()) {
             return new LeasingController(clock, cellsRepository);
         } else {
             return new LeasingController(clock, collectCells(cellsRepository), cellsRepository);
@@ -26,7 +26,7 @@ public class VaultConfig {
     }
 
     private EnumMap<CellSize, List<Cell>> collectCells(CellsRepository cellsRepository) {
-        return cellsRepository.findAll().stream()
+        return cellsRepository.findAllCells().stream()
                 .collect(Collectors.groupingBy(Cell::getSize,
                         () -> new EnumMap<>(CellSize.class), Collectors.toList()));
     }
@@ -38,7 +38,7 @@ public class VaultConfig {
 
     @Bean
     public VaultHardware vaultHardware(final CellsRepository cellsRepository) {
-        if (cellsRepository.findAll().isEmpty()) {
+        if (cellsRepository.findAllCells().isEmpty()) {
             return new VaultHardware();
         } else {
             return new VaultHardware(collectCells(cellsRepository));

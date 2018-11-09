@@ -8,11 +8,11 @@ import java.util.Collection;
 public interface ApplicationsRepository {
     CellApplication save(CellApplication application);
 
-    Collection<CellApplication> findAllByClient(Client client);
+    Collection<CellApplication> findAllByLeaseholder(Client client);
 
     CellApplication find(Integer id);
 
     Collection<CellApplication> findAll();
 
-    void deleteApplication(Integer id);
+    void deleteById(Integer id);
 }

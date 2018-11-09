@@ -69,7 +69,7 @@ public class UserStorage implements Serializable {
         try {
             mapper.writeValue(file, this);
         } catch (IOException e) {
-            log.error("Could not save users credentials: ", e.getMessage());
+            log.error("Could not saveCell users credentials: ", e.getMessage());
         }
     }
 }

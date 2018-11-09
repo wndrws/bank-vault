@@ -16,4 +16,19 @@ public interface JpaCellsRepository extends CellsRepository, JpaRepository<Cell,
     @Override
     @Query("SELECT c.pending FROM Cell c WHERE c=:cell")
     boolean isPending(@Param("cell") final Cell cell);
+
+    @Override
+    default Cell saveCell(Cell cell) {
+        return save(cell);
+    }
+
+    @Override
+    default List<Cell> findAllCells() {
+        return findAll();
+    }
+
+    @Override
+    default Cell findCell(int id) {
+        return findById(id).orElse(null);
+    }
 }

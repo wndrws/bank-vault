@@ -4,13 +4,16 @@ import kspt.bank.domain.PriceCalculator;
 import kspt.bank.enums.CellApplicationStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.Period;
 
+@Entity
 @EqualsAndHashCode(exclude = "cell")
 @Data
+@NoArgsConstructor
 public class CellApplication {
     @Id
     @GeneratedValue

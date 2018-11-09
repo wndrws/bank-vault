@@ -67,7 +67,7 @@ class ApplyForCellTest  /* extends TestUsingDatabase */ {
     private void assertExistenceOfClientAndCellApplication() {
         assertTrue(clientsRepository.containsClientWith(roleClient.passportInfo));
         final Client client = clientsRepository.getClientWith(roleClient.passportInfo);
-        assertThat(applicationsRepository.findAllByClient(client)).contains(cellApplication);
+        assertThat(applicationsRepository.findAllByLeaseholder(client)).contains(cellApplication);
         assertThat(cellApplication.getStatus()).isEqualTo(CellApplicationStatus.CREATED);
     }
 

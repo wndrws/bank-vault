@@ -9,10 +9,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 
+@Entity
 @EqualsAndHashCode
 @Data
 @NoArgsConstructor
-@Entity
 public class Precious {
     @Id
     @GeneratedValue

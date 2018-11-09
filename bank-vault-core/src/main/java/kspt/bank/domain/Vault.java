@@ -48,7 +48,7 @@ public final class Vault implements Closeable {
         cells.put(CellSize.SMALL, vaultHardware.getCellsOfSize(CellSize.SMALL));
         cells.put(CellSize.MEDIUM, vaultHardware.getCellsOfSize(CellSize.MEDIUM));
         cells.put(CellSize.BIG, vaultHardware.getCellsOfSize(CellSize.BIG));
-        cells.values().stream().flatMap(Collection::stream).forEach(cellsRepository::save);
+        cells.values().stream().flatMap(Collection::stream).forEach(cellsRepository::saveCell);
     }
 
     @Synchronized
@@ -76,12 +76,12 @@ public final class Vault implements Closeable {
 
     void pend(final Cell cell, final Duration duration) {
         cell.setPending(true);
-        cellsRepository.save(cell);
+        cellsRepository.saveCell(cell);
         pendingKeepersPool.submit(() -> {
             try {
                 Thread.sleep(duration.toMillis());
                 cell.setPending(false);
-                cellsRepository.save(cell);
+                cellsRepository.saveCell(cell);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

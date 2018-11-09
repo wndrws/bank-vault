@@ -9,11 +9,11 @@ import lombok.ToString;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
+@Entity
 @EqualsAndHashCode(exclude = {"cellLeaseRecord", "containedPrecious"}) // "id",
 @ToString(exclude = "cellLeaseRecord")
 @Data
 @NoArgsConstructor
-@Entity
 public class Cell {
     @Id
     @GeneratedValue

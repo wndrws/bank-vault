@@ -150,7 +150,7 @@ public class LeasingControlInteractorTest {
     private CellApplication createApprovedCellApplication() {
         final CellApplication cellApplication =
                 TestDataGenerator.getCellApplication(CellApplicationStatus.APPROVED);
-        cellsRepository.save(cellApplication.getCell());
+        cellsRepository.saveCell(cellApplication.getCell());
         clientsRepository.add(cellApplication.getLeaseholder());
         applicationsRepository.save(cellApplication);
         return cellApplication;

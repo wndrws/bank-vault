@@ -141,7 +141,7 @@ public class BankVaultFacade {
 
     @Transactional
     public void declineApplication(Integer appId) {
-        applicationsRepository.deleteApplication(appId);
+        applicationsRepository.deleteById(appId);
     }
 
     @Transactional

@@ -148,9 +148,9 @@ class CellApplicationInteractorTest {
     }
 //
 //    private CellApplication saveCellApplication(final CellApplication cellApplication) {
-//        cellsRepository.save(cellApplication.getCell());
+//        cellsRepository.saveCell(cellApplication.getCell());
 //        clientsRepository.add(cellApplication.getLeaseholder());
-//        applicationsRepository.save(cellApplication);
+//        applicationsRepository.saveCell(cellApplication);
 //        return cellApplication;
 //    }
 
@@ -175,7 +175,7 @@ class CellApplicationInteractorTest {
         // given
         final CellApplication cellApplication =
                 TestDataGenerator.getCellApplication(CellApplicationStatus.APPROVED);
-        cellsRepository.save(cellApplication.getCell());
+        cellsRepository.saveCell(cellApplication.getCell());
         final Invoice invoice = new Invoice(cellApplication.calculateLeaseCost());
         INVOICE_MAP.put(invoice, cellApplication.getId());
         when(applicationsRepository.find(cellApplication.getId())).thenReturn(cellApplication);

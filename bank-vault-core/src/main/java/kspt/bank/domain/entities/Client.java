@@ -2,15 +2,17 @@ package kspt.bank.domain.entities;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+@Entity
 @EqualsAndHashCode
 @Data
-@Entity
+@NoArgsConstructor
 public class Client {
     @Id
     @GeneratedValue

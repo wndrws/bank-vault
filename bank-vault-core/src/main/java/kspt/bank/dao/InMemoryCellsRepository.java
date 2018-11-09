@@ -15,7 +15,7 @@ public class InMemoryCellsRepository implements CellsRepository {
     private final List<Cell> cells = Collections.synchronizedList(new ArrayList<>());
 
     @Override
-    public Cell find(final int id) {
+    public Cell findCell(final int id) {
         return cells.stream()
                 .filter(c -> c.getId() == id)
                 .findFirst()
@@ -23,7 +23,7 @@ public class InMemoryCellsRepository implements CellsRepository {
     }
 
     @Override
-    public List<Cell> findAll() {
+    public List<Cell> findAllCells() {
         return cells;
     }
 
@@ -44,7 +44,7 @@ public class InMemoryCellsRepository implements CellsRepository {
     }
 
     @Override
-    public Cell save(final Cell cell) {
+    public Cell saveCell(final Cell cell) {
         if (cell.getId() == null) {
             cell.setId(ID_COUNTER.getAndIncrement());
         } else {

@@ -30,7 +30,7 @@ public class InMemoryApplicationsRepository implements ApplicationsRepository {
     }
 
     @Override
-    public Collection<CellApplication> findAllByClient(Client client) {
+    public Collection<CellApplication> findAllByLeaseholder(Client client) {
         return clientIdToApplications.getOrDefault(client.getId(), new HashSet<>());
     }
 
@@ -49,7 +49,7 @@ public class InMemoryApplicationsRepository implements ApplicationsRepository {
     }
 
     @Override
-    public void deleteApplication(Integer id) {
+    public void deleteById(Integer id) {
         final Optional<CellApplication> application = clientIdToApplications.values().stream()
                 .flatMap(Collection::stream)
                 .filter(app -> app.getId().equals(id)).findFirst();

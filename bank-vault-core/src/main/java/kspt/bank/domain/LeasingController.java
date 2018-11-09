@@ -63,7 +63,7 @@ public class LeasingController {
         final LocalDate today = LocalDate.now(clock);
         leasingInfo.put(cell, new CellLeaseRecord(leaseholder, today, today.plus(period), false));
         cell.setCellLeaseRecord(leasingInfo.get(cell));
-        cellsRepository.save(cell);
+        cellsRepository.saveCell(cell);
         timersPool.scheduleAtFixedRate(this::checkLeasingPeriods,
                 timersCheckPeriodMillis, timersCheckPeriodMillis, TimeUnit.MILLISECONDS);
     }
@@ -80,7 +80,7 @@ public class LeasingController {
     public void endLeasing(final Cell cell) {
         leasingInfo.remove(cell);
         cell.setCellLeaseRecord(null);
-        cellsRepository.save(cell);
+        cellsRepository.saveCell(cell);
     }
 
     public boolean isLeased(final Cell cell) {
