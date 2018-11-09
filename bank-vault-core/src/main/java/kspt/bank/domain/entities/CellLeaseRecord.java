@@ -22,5 +22,5 @@ public class CellLeaseRecord {
 
     public LocalDate leaseEnd;
 
-    public boolean expired = false;
+    public Boolean expired = false;
 }

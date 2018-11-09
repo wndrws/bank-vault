@@ -75,4 +75,30 @@ class JpaCellsRepositoryTest {
         // then
         assertThat(foundCells).containsExactlyInAnyOrder(cell1, cell2, cell3);
     }
+
+    @Test
+    void testIsPending() {
+        // given
+        final Cell cellOne = entityManager.persistAndFlush(new Cell(CellSize.MEDIUM));
+        final Cell cellTwo = entityManager.persistAndFlush(new Cell(CellSize.BIG, null, null, true));
+        // when
+        final boolean cellOnePending = cellsRepository.isPending(cellOne);
+        final boolean cellTwoPending = cellsRepository.isPending(cellTwo);
+        // then
+        assertThat(cellOnePending).isFalse();
+        assertThat(cellTwoPending).isTrue();
+    }
+
+    @Test
+    void testFindAllPendingCells() {
+        // given
+        final Cell cell1 = entityManager.persistAndFlush(new Cell(CellSize.BIG));
+        final Cell cell2 = entityManager.persistAndFlush(new Cell(CellSize.BIG, null, null, true));
+        final Cell cell3 = entityManager.persistAndFlush(new Cell(CellSize.BIG, null, null, true));
+        // when
+        final List<Cell> allPendingCells = cellsRepository.findAllPendingCells();
+        // then
+        assertThat(allPendingCells).containsExactlyInAnyOrder(cell2, cell3);
+    }
+
 }
