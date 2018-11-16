@@ -1,8 +1,9 @@
-package kspt.bank.domain.bp;
+package kspt.bank;
 
 import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.boundaries.NotificationGate;
-import kspt.bank.dao.InMemoryClientsRepository;
+import kspt.bank.config.VaultConfig;
+import kspt.bank.dao.JpaCellsRepository;
 import kspt.bank.domain.*;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.Client;
@@ -10,9 +11,17 @@ import kspt.bank.domain.entities.ManipulationLog;
 import kspt.bank.domain.entities.Precious;
 import kspt.bank.enums.CellSize;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Period;
 
@@ -20,10 +29,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-class ManipulationTest /* extends TestUsingDatabase */ {
+@DataJpaTest
+@ExtendWith(SpringExtension.class)
+@EnableAutoConfiguration
+@AutoConfigurationPackage
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = {
+        Vault.class, VaultConfig.class, CellManipulationInteractor.class,
+        ManipulationTest.Config.class })
+class ManipulationTest {
     @Autowired
     private Vault vault;
 
@@ -33,11 +48,17 @@ class ManipulationTest /* extends TestUsingDatabase */ {
     @Autowired
     private LeasingController leasingController;
 
-    private final ManipulationLog manipulationLog = mock(ManipulationLog.class);
+    @Autowired
+    private ManipulationLog manipulationLog;
 
-    private final NotificationGate notificationGate = mock(NotificationGate.class);
+    @Autowired
+    private NotificationGate notificationGate;
 
-    private final ClientsRepository clientsRepository = new InMemoryClientsRepository();
+    @Autowired
+    private ClientsRepository clientsRepository;
+
+    @Autowired
+    private JpaCellsRepository cellsRepository;
 
     @Autowired
     private CellManipulationInteractor cmInteractor;
@@ -157,5 +178,15 @@ class ManipulationTest /* extends TestUsingDatabase */ {
         leasingController.startLeasing(smallCell, roleClient.client, Period.ofMonths(1));
         leasingController.startLeasing(mediumCell, roleClient.client, Period.ofMonths(2));
         leasingController.startLeasing(bigCell, roleClient.client, Period.ofMonths(3));
+    }
+
+
+    @Configuration
+    static class Config {
+        @MockBean
+        NotificationGate notificationGate;
+
+        @MockBean
+        ManipulationLog manipulationLog;
     }
 }

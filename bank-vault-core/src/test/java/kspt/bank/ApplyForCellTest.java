@@ -1,9 +1,8 @@
-package kspt.bank.domain.bp;
+package kspt.bank;
 
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.ClientsRepository;
-import kspt.bank.dao.InMemoryApplicationsRepository;
-import kspt.bank.dao.InMemoryClientsRepository;
+import kspt.bank.config.VaultConfig;
 import kspt.bank.domain.*;
 import kspt.bank.domain.entities.CellApplication;
 import kspt.bank.domain.entities.Client;
@@ -14,9 +13,17 @@ import kspt.bank.enums.PaymentMethod;
 import kspt.bank.external.Invoice;
 import kspt.bank.external.PaymentSystem;
 import kspt.bank.external.SimplePaymentSystem;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Period;
 
@@ -24,15 +31,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ApplyForCellTest  /* extends TestUsingDatabase */ {
+@DataJpaTest
+@ExtendWith(SpringExtension.class)
+@EnableAutoConfiguration
+@AutoConfigurationPackage
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = {
+        Vault.class, VaultConfig.class, CellApplicationInteractor.class,
+        ApplyForCellTest.Config.class })
+class ApplyForCellTest {
     @Autowired
     private Vault vault;
 
-    private final ClientsRepository clientsRepository = new InMemoryClientsRepository();
+    @Autowired
+    private ClientsRepository clientsRepository;
 
-    private final ApplicationsRepository applicationsRepository = new InMemoryApplicationsRepository();
+    @Autowired
+    private ApplicationsRepository applicationsRepository;
 
-    private final PaymentSystem paymentSystem = new SimplePaymentSystem();
+    @Autowired
+    private PaymentSystem paymentSystem;
 
     @Autowired
     private CellApplicationInteractor caInteractor;
@@ -115,6 +132,14 @@ class ApplyForCellTest  /* extends TestUsingDatabase */ {
     private class RoleManager {
         Invoice approve() {
             return caInteractor.approveApplication(cellApplication);
+        }
+    }
+
+    @Configuration
+    static class Config {
+        @Bean
+        PaymentSystem paymentSystem() {
+            return new SimplePaymentSystem();
         }
     }
 }

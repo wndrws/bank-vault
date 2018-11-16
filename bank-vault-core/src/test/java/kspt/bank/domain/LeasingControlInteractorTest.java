@@ -1,7 +1,7 @@
 package kspt.bank.domain;
 
 import com.statemachinesystems.mockclock.MockClock;
-import kspt.bank.TestConfig;
+import kspt.bank.NoJpaTestConfig;
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.CellsRepository;
 import kspt.bank.boundaries.ClientsRepository;
@@ -42,7 +42,7 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = {
-        LeasingControlInteractor.class, Vault.class, VaultConfig.class, TestConfig.class,
+        LeasingControlInteractor.class, Vault.class, VaultConfig.class, NoJpaTestConfig.class,
         LeasingControlInteractorTest.Config.class})
 public class LeasingControlInteractorTest {
     public final static long LEASING_TIMERS_CHECK_PERIOD_MS = 100;

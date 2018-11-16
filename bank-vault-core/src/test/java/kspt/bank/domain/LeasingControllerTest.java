@@ -1,7 +1,7 @@
 package kspt.bank.domain;
 
 import com.statemachinesystems.mockclock.MockClock;
-import kspt.bank.TestConfig;
+import kspt.bank.NoJpaTestConfig;
 import kspt.bank.boundaries.CellsRepository;
 import kspt.bank.config.VaultConfig;
 import kspt.bank.domain.entities.Cell;
@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,
-        classes = { Vault.class, VaultConfig.class, TestConfig.class })
+        classes = { Vault.class, VaultConfig.class, NoJpaTestConfig.class })
 class LeasingControllerTest {
     @Autowired
     private Vault vault;

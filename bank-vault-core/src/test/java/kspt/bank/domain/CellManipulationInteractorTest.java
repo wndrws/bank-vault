@@ -1,6 +1,6 @@
 package kspt.bank.domain;
 
-import kspt.bank.TestConfig;
+import kspt.bank.NoJpaTestConfig;
 import kspt.bank.boundaries.CellsRepository;
 import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.boundaries.NotificationGate;
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = {
-        CellManipulationInteractor.class, Vault.class, VaultConfig.class, TestConfig.class,
+        CellManipulationInteractor.class, Vault.class, VaultConfig.class, NoJpaTestConfig.class,
         CellManipulationInteractorTest.Config.class })
 class CellManipulationInteractorTest {
     @Autowired

@@ -2,7 +2,7 @@ package kspt.bank.domain;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import kspt.bank.TestConfig;
+import kspt.bank.NoJpaTestConfig;
 import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.CellsRepository;
 import kspt.bank.boundaries.ClientsRepository;
@@ -42,7 +42,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = {
-        CellApplicationInteractor.class, Vault.class, VaultConfig.class, TestConfig.class,
+        CellApplicationInteractor.class, Vault.class, VaultConfig.class, NoJpaTestConfig.class,
         CellApplicationInteractorTest.Config.class })
 class CellApplicationInteractorTest {
     private static final BiMap<Invoice, Integer> INVOICE_MAP = HashBiMap.create();

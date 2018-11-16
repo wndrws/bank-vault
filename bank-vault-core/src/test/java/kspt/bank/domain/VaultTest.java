@@ -1,6 +1,6 @@
 package kspt.bank.domain;
 
-import kspt.bank.TestConfig;
+import kspt.bank.NoJpaTestConfig;
 import kspt.bank.boundaries.CellsRepository;
 import kspt.bank.config.VaultConfig;
 import kspt.bank.domain.entities.Cell;
@@ -25,7 +25,7 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = WebEnvironment.NONE,
-        classes = { Vault.class, VaultConfig.class, TestConfig.class })
+        classes = { Vault.class, VaultConfig.class, NoJpaTestConfig.class })
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 class VaultTest {
     @Autowired

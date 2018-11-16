@@ -1,11 +1,11 @@
-package kspt.bank.domain.bp;
+package kspt.bank;
 
 import com.statemachinesystems.mockclock.MockClock;
 import kspt.bank.boundaries.ApplicationsRepository;
+import kspt.bank.boundaries.CellsRepository;
 import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.boundaries.NotificationGate;
-import kspt.bank.dao.InMemoryApplicationsRepository;
-import kspt.bank.dao.InMemoryClientsRepository;
+import kspt.bank.config.VaultConfig;
 import kspt.bank.domain.*;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.Client;
@@ -18,9 +18,19 @@ import kspt.bank.external.SimplePaymentSystem;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.lang.reflect.Field;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
@@ -29,23 +39,37 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-class LeasingExpiryTest  /* extends TestUsingDatabase */ {
+
+@DataJpaTest
+@ExtendWith(SpringExtension.class)
+@EnableAutoConfiguration
+@AutoConfigurationPackage
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = {
+        Vault.class, VaultConfig.class, LeasingControlInteractor.class,
+        LeasingExpiryTest.Config.class })
+class LeasingExpiryTest {
     @Autowired
     private LeasingController leasingController;
 
-    private final ClientsRepository clientsRepository = new InMemoryClientsRepository();
+    @Autowired
+    private ClientsRepository clientsRepository;
 
-    private final ApplicationsRepository applicationsRepository = new InMemoryApplicationsRepository();
+    @Autowired
+    private ApplicationsRepository applicationsRepository;
 
-    private final PaymentSystem paymentSystem = new SimplePaymentSystem();
+    @Autowired
+    private CellsRepository cellsRepository;
 
-    private final NotificationGate notificationGate = mock(NotificationGate.class);
+    @Autowired
+    private PaymentSystem paymentSystem;
 
-    private final MockClock mockedClock =
-            MockClock.at(2018, 4, 10, 19, 0, ZoneId.systemDefault());
+    @Autowired
+    private NotificationGate notificationGate;
+
+    @Autowired
+    private MockClock mockedClock;
 
     @Autowired
     private LeasingControlInteractor lcInteractor;
@@ -189,18 +213,34 @@ class LeasingExpiryTest  /* extends TestUsingDatabase */ {
     }
 
     @BeforeEach
-    void setUp()
-    throws Exception {
-        resetSingleton();
+    void setUp() {
+        cellsRepository.saveCell(roleClient.cell);
         leasingController.setTimersCheckPeriodMillis(
                 LeasingControlInteractorTest.LEASING_TIMERS_CHECK_PERIOD_MS);
         clientsRepository.add(roleClient.client);
     }
 
-    private void resetSingleton()
-    throws Exception {
-        Field instance = Vault.class.getDeclaredField("instance");
-        instance.setAccessible(true);
-        instance.set(null, null);
+
+    @Configuration
+    static class Config {
+        @Bean
+        @Primary
+        PaymentSystem paymentSystem() {
+            return new SimplePaymentSystem();
+        }
+
+        @MockBean
+        NotificationGate notificationGate;
+
+        @Bean
+        @Primary
+        Clock clock() {
+            return MockClock.at(2018, 4, 10, 19, 0, ZoneId.systemDefault());
+        }
+
+        @Bean
+        MockClock mockedClock() {
+            return (MockClock) clock();
+        }
     }
 }
