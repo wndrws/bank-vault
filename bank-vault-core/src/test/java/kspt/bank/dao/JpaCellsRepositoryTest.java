@@ -30,13 +30,14 @@ class JpaCellsRepositoryTest {
     @EnumSource(CellSize.class)
     void testSave(final CellSize size) {
         // given
-        final Cell cell = new Cell(size);
+        final Cell cell = new Cell(1, size);
         // when
         final Cell savedCell = cellsRepository.saveCell(cell);
-        final Cell sameCell = entityManager.find(Cell.class, savedCell.getId());
+        final Cell sameCell = entityManager.find(Cell.class, savedCell.getDbid());
         // then
         assertThat(savedCell).isEqualTo(sameCell);
-        assertThat(savedCell.getId()).isNotNull();
+        assertThat(savedCell.getId()).isEqualTo(cell.getId());
+        assertThat(savedCell.getDbid()).isNotNull();
         assertThat(savedCell.getSize()).isEqualTo(size);
         assertThat(savedCell.isPending()).isEqualTo(false);
         assertThat(savedCell.isEmpty()).isEqualTo(true);
@@ -47,7 +48,7 @@ class JpaCellsRepositoryTest {
     @Test
     void testFindCell_Existent() {
         // given
-        final Cell cell = entityManager.persistAndFlush(new Cell(CellSize.MEDIUM));
+        final Cell cell = entityManager.persistAndFlush(new Cell(10, CellSize.MEDIUM));
         // when
         final Cell foundCell = cellsRepository.findCell(cell.getId());
         // then
@@ -57,7 +58,7 @@ class JpaCellsRepositoryTest {
     @Test
     void testFindCell_NonExistent() {
         // given
-        final Cell cell = entityManager.persistAndFlush(new Cell(CellSize.MEDIUM));
+        final Cell cell = entityManager.persistAndFlush(new Cell(1, CellSize.MEDIUM));
         // when
         final Cell foundCell = cellsRepository.findCell(cell.getId() + 1);
         // then
@@ -67,9 +68,9 @@ class JpaCellsRepositoryTest {
     @Test
     void testFindAllCells() {
         // given
-        final Cell cell1 = entityManager.persist(new Cell(CellSize.SMALL));
-        final Cell cell2 = entityManager.persist(new Cell(CellSize.MEDIUM));
-        final Cell cell3 = entityManager.persist(new Cell(CellSize.BIG));
+        final Cell cell1 = entityManager.persist(new Cell(1, CellSize.SMALL));
+        final Cell cell2 = entityManager.persist(new Cell(2, CellSize.MEDIUM));
+        final Cell cell3 = entityManager.persist(new Cell(3, CellSize.BIG));
         // when
         final List<Cell> foundCells = cellsRepository.findAllCells();
         // then
@@ -79,8 +80,8 @@ class JpaCellsRepositoryTest {
     @Test
     void testIsPending() {
         // given
-        final Cell cellOne = entityManager.persistAndFlush(new Cell(CellSize.MEDIUM));
-        final Cell cellTwo = entityManager.persistAndFlush(new Cell(CellSize.BIG, null, null, true));
+        final Cell cellOne = entityManager.persistAndFlush(new Cell(1, CellSize.MEDIUM));
+        final Cell cellTwo = entityManager.persistAndFlush(new Cell(2, CellSize.BIG, null, null, true));
         // when
         final boolean cellOnePending = cellsRepository.isPending(cellOne);
         final boolean cellTwoPending = cellsRepository.isPending(cellTwo);
@@ -92,9 +93,9 @@ class JpaCellsRepositoryTest {
     @Test
     void testFindAllPendingCells() {
         // given
-        final Cell cell1 = entityManager.persistAndFlush(new Cell(CellSize.BIG));
-        final Cell cell2 = entityManager.persistAndFlush(new Cell(CellSize.BIG, null, null, true));
-        final Cell cell3 = entityManager.persistAndFlush(new Cell(CellSize.BIG, null, null, true));
+        final Cell cell1 = entityManager.persistAndFlush(new Cell(1, CellSize.BIG));
+        final Cell cell2 = entityManager.persistAndFlush(new Cell(2, CellSize.BIG, null, null, true));
+        final Cell cell3 = entityManager.persistAndFlush(new Cell(3, CellSize.BIG, null, null, true));
         // when
         final List<Cell> allPendingCells = cellsRepository.findAllPendingCells();
         // then

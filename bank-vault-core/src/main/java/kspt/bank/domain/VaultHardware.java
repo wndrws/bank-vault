@@ -44,7 +44,7 @@ public class VaultHardware {
     List<Cell> getCellsOfSize(final CellSize size) {
         return cells.stream()
                 .filter(cellHardware -> cellHardware.getSize() == size)
-                .map(cellHardware -> new Cell(cellHardware.getSize()))
+                .map(cellHardware -> new Cell(cellHardware.getId(), cellHardware.getSize()))
                 .collect(Collectors.toList());
     }
 

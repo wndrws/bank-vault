@@ -18,7 +18,7 @@ public interface JpaCellsRepository extends CellsRepository, JpaRepository<Cell,
     boolean isPending(@Param("cell") final Cell cell);
 
     @Override
-    default Cell saveCell(Cell cell) {
+    default Cell saveCell(final Cell cell) {
         return save(cell);
     }
 
@@ -28,7 +28,6 @@ public interface JpaCellsRepository extends CellsRepository, JpaRepository<Cell,
     }
 
     @Override
-    default Cell findCell(int id) {
-        return findById(id).orElse(null);
-    }
+    @Query("SELECT c FROM Cell c WHERE real_id=:id")
+    Cell findCell(@Param("id") final int id);
 }

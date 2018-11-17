@@ -43,7 +43,7 @@ public class TestDataGenerator {
 
     public CellApplication getCellApplication(final CellApplicationStatus status) {
         final CellApplication application = new CellApplication(getSampleClient());
-        application.setCell(new Cell(CellSize.SMALL)); // TODO check against Vault.requestAnyCell()
+        application.setCell(new Cell(1, CellSize.SMALL));
         application.setLeasePeriod(Period.ofDays(30));
         application.setStatus(status);
         return application;

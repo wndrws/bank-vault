@@ -3,6 +3,7 @@ CREATE TYPE cell_app_status as ENUM ('CREATED','CELL_CHOSEN','APPROVED','PAID');
 
 CREATE TABLE Cell (
     id          integer     PRIMARY KEY,
+    real_id     integer     NOT NULL UNIQUE,
     size        cell_size   NOT NULL,
     precious_id integer     DEFAULT NULL REFERENCES Precious(id),
     client_id   integer     DEFAULT NULL REFERENCES Client(id),

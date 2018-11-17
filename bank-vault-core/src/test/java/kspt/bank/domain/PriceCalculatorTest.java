@@ -16,7 +16,7 @@ class PriceCalculatorTest {
         final long expectedCost =
                 PriceCalculator.PRICE_OF_VOLUME_UNIT_PER_DAY * numOfDays * size.getVolume();
         // when
-        final long cost = PriceCalculator.getCostOf(new Cell(size), numOfDays);
+        final long cost = PriceCalculator.getCostOf(new Cell(1, size), numOfDays);
         // then
         assertThat(cost).isEqualTo(expectedCost);
     }

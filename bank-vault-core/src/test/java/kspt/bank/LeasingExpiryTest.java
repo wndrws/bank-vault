@@ -99,7 +99,7 @@ class LeasingExpiryTest {
     @Test
     void testBusinessProcess_StopLeasingWhenPreciousIsInCell()
     throws InterruptedException {
-        assumeThatCellContainsPrecious();
+        ensureThatCellContainsPrecious();
         assumeThatCellIsLeased();
 
         waitForLeasingExpiry();
@@ -159,8 +159,7 @@ class LeasingExpiryTest {
         verify(notificationGate).notifyManagerAboutLeasingEnd(roleClient.cell);
     }
 
-    private void assumeThatCellContainsPrecious() {
-        Assumptions.assumeTrue(roleClient.cell != null);
+    private void ensureThatCellContainsPrecious() {
         roleClient.cell.setContainedPrecious(roleClient.precious);
     }
 
@@ -170,7 +169,6 @@ class LeasingExpiryTest {
     }
 
     private void assumeThatCellIsEmpty() {
-        Assumptions.assumeTrue(roleClient.cell != null);
         Assumptions.assumeTrue(roleClient.cell.isEmpty());
     }
 
@@ -184,7 +182,7 @@ class LeasingExpiryTest {
 
         final Precious precious = new Precious(1, "The Ring Of Power");
 
-        final Cell cell = new Cell(CellSize.SMALL);
+        final Cell cell = new Cell(1, CellSize.SMALL);
 
         final Period initialLeasingPeriod = Period.ofDays(10);
 

@@ -10,13 +10,18 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@EqualsAndHashCode(exclude = {"cellLeaseRecord", "containedPrecious"}) // "id",
+@EqualsAndHashCode(exclude = { "dbid","cellLeaseRecord", "containedPrecious"})
 @ToString(exclude = "cellLeaseRecord")
 @Data
 @NoArgsConstructor
 public class Cell {
     @Id
     @GeneratedValue
+    @Column(name = "id")
+    private Integer dbid;
+
+    @NotNull
+    @Column(name = "real_id", unique = true)
     private Integer id;
 
     @Enumerated(EnumType.STRING)
@@ -32,12 +37,14 @@ public class Cell {
 
     private boolean pending = false;
 
-    public Cell(final CellSize size) {
+    public Cell(final int id, final CellSize size) {
+        this.id = id;
         this.size = size;
     }
 
-    public Cell(final CellSize size, final Precious containedPrecious,
+    public Cell(final int id, final CellSize size, final Precious containedPrecious,
             final CellLeaseRecord cellLeaseRecord, final boolean pending) {
+        this.id = id;
         this.size = size;
         this.containedPrecious = containedPrecious;
         this.cellLeaseRecord = cellLeaseRecord;
