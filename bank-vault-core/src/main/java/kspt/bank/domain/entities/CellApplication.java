@@ -10,13 +10,13 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.Period;
 
-@Entity
+@Entity(name = "cellapplication")
 @EqualsAndHashCode(exclude = "cell")
 @Data
 @NoArgsConstructor
 public class CellApplication {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @OneToOne(optional = false)

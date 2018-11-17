@@ -101,7 +101,7 @@ public class BankVaultFacade {
 
     public List<CellDTO> findCellsInfoByClient(Integer clientId) {
         final List<CellApplication> applications = applicationsRepository.findAll().stream()
-                .filter(app -> app.getLeaseholder().getId() == clientId)
+                .filter(app -> app.getLeaseholder().getId().equals(clientId))
                 .collect(Collectors.toList());
         return applications.stream()
                 .map(app -> {

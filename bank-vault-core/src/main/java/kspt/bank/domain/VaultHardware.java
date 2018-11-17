@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableSet;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.enums.CellSize;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
 import java.util.EnumMap;
@@ -12,6 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+@Slf4j
 public class VaultHardware {
     final static int NUMBER_OF_SMALL_CELLS = 20;
 
@@ -19,9 +22,12 @@ public class VaultHardware {
 
     final static int NUMBER_OF_BIG_CELLS = 5;
 
+    private static int CURRENT_CELL_ID = 0;
+
     private final ImmutableSet<CellHardware> cells;
 
     public VaultHardware() {
+        log.warn("Creating new cells as the Vault is empty...");
         final List<CellHardware> smallCells = createCellsOfSize(NUMBER_OF_SMALL_CELLS, CellSize.SMALL);
         final List<CellHardware> mediumCells = createCellsOfSize(NUMBER_OF_MEDIUM_CELLS, CellSize.MEDIUM);
         final List<CellHardware> bigCells = createCellsOfSize(NUMBER_OF_BIG_CELLS, CellSize.BIG);
@@ -30,21 +36,23 @@ public class VaultHardware {
     }
 
     public VaultHardware(final EnumMap<CellSize, List<Cell>> cellsEntitiesBySize) {
+        log.warn("Loading cells from the database...");
         cells = cellsEntitiesBySize.entrySet().stream().flatMap(entry -> entry.getValue().stream())
-                .map(cell -> new CellHardware(cell.getId(), cell.getSize()))
+                .map(cell -> new CellHardware(cell.getId(), cell.getSize(), cell))
                 .collect(ImmutableSet.toImmutableSet());
     }
 
     static private List<CellHardware> createCellsOfSize(final int numberOfCells, final CellSize cellSize) {
         return IntStream.range(0, numberOfCells)
-                .mapToObj(__ -> new CellHardware(cellSize))
+                .map(__ -> CURRENT_CELL_ID++)
+                .mapToObj(i -> new CellHardware(i, cellSize, new Cell(i, cellSize)))
                 .collect(Collectors.toList());
     }
 
     List<Cell> getCellsOfSize(final CellSize size) {
         return cells.stream()
                 .filter(cellHardware -> cellHardware.getSize() == size)
-                .map(cellHardware -> new Cell(cellHardware.getId(), cellHardware.getSize()))
+                .map(CellHardware::getCellRef)
                 .collect(Collectors.toList());
     }
 
@@ -71,24 +79,15 @@ public class VaultHardware {
     }
 
     @Getter
+    @RequiredArgsConstructor
     private static class CellHardware {
-        private static int currentId;
-
-        private int id;
+        private final int id;
 
         private boolean opened = false;
 
         private final CellSize size;
 
-        CellHardware(CellSize size) {
-            id = ++currentId;
-            this.size = size;
-        }
-
-        CellHardware(int id, CellSize size) {
-            this.id = id;
-            this.size = size;
-        }
+        private final Cell cellRef;
 
         void open() {
             opened = true;

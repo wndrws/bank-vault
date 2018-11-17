@@ -1,6 +1,7 @@
 package kspt.bank.domain;
 
 import com.google.common.base.Preconditions;
+import kspt.bank.boundaries.CellsRepository;
 import kspt.bank.boundaries.NotificationGate;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.Client;
@@ -29,6 +30,9 @@ public class CellManipulationInteractor {
     @Autowired
     private final LeasingController leasingController;
 
+    @Autowired
+    private final CellsRepository cellsRepository;
+
     public List<Cell> getClientsCells(final Client client) {
         return leasingController.getCellsAndLeaseholders().entrySet().stream()
                 .filter(cellToClient -> cellToClient.getValue().equals(client))
@@ -47,6 +51,7 @@ public class CellManipulationInteractor {
         final Precious precious = cell.getContainedPrecious();
         Preconditions.checkState(precious != null, "No precious in the cell " + cell);
         cell.removeContainedPrecious();
+        cellsRepository.saveCell(cell);
         manipulationLog.logGetManipulation("Precious got from cell", client, cell);
         return precious;
     }

@@ -15,7 +15,11 @@ public class PutManipulationValidator {
         }
     }
 
-    static boolean canBeFit(final Cell cell, final Precious precious) {
+    private static String prettyPrint(final Precious precious) {
+        return "\"" + precious.getName() + "\" with volume " + precious.getVolume();
+    }
+
+    private static boolean canBeFit(final Cell cell, final Precious precious) {
         return cell.getSize().getVolume() >= precious.getVolume();
     }
 
