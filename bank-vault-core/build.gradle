@@ -25,6 +25,8 @@ dependencies {
     compile springBoot
     compile group: 'com.google.guava', name: 'guava', version: '23.0'
     compile group: 'com.statemachinesystems', name: 'mock-clock', version: '1.0'
+    compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
+    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
     runtime group: 'org.postgresql', name: 'postgresql', version: '42.2.5'
     testCompile group: 'org.assertj', name: 'assertj-core', version: '3.8.0'
     testCompile group: 'org.mockito', name: 'mockito-core', version: '2.11.0'
