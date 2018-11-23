@@ -1,6 +1,7 @@
 package kspt.bank;
 
 import kspt.bank.boundaries.NotificationGate;
+import kspt.bank.services.DummyNotificationGate;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
@@ -18,7 +19,7 @@ public class BankVaultCoreApplication {
     @Getter
     private static ConfigurableApplicationContext applicationContext;
 
-    private static NotificationGate notificationGate;
+    private static NotificationGate notificationGate = new DummyNotificationGate();
 
     @Bean
     public NotificationGate notificationGate() {

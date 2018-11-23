@@ -66,14 +66,12 @@ public class BankVaultFacade {
 
     public Optional<CellDTO> findCellInfo(Integer cellApplicationId) {
         final CellApplication app = applicationsRepository.find(cellApplicationId);
+        if (app == null) return Optional.empty();
         final Cell cell = app.getCell();
-        if (cell == null) {
-            return Optional.empty();
-        } else {
-            return Optional.of(new CellDTO(getCodeName(cell), cell.getSize(), app.getStatus(),
-                    getLeaseBegin(cell), app.getLeasePeriod(), getContainedPreciousName(cell),
-                    app.getId()));
-        }
+        if (cell == null) return Optional.empty();
+        return Optional.of(new CellDTO(getCodeName(cell), cell.getSize(), app.getStatus(),
+                getLeaseBegin(cell), app.getLeasePeriod(), getContainedPreciousName(cell),
+                app.getId()));
     }
 
     private static String getContainedPreciousName(final Cell cell) {
