@@ -94,7 +94,7 @@ public final class Vault implements Closeable {
                 final CellApplication app = applicationsRepository.findByCell(cell);
                 if (app.getStatus() != CellApplicationStatus.PAID) {
                     applicationsRepository.deleteById(app.getId());
-                    log.info("Cell application {} is NOT PAID on pending end - so it was deleted");
+                    log.info("Cell application {} was deleted as NOT PAID on pending", app.getId());
                 }
             } catch (InterruptedException e) {
                 log.warn("{} was interrupted", this.getClass().getSimpleName());
