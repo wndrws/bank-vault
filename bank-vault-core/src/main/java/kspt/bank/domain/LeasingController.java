@@ -1,7 +1,6 @@
 package kspt.bank.domain;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Range;
+import com.google.common.collect.*;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import kspt.bank.boundaries.CellsRepository;
 import kspt.bank.domain.entities.Cell;
@@ -14,11 +13,13 @@ import lombok.Setter;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class LeasingController {
     private final static int TIMERS_POOL_SIZE = 1;
@@ -26,16 +27,16 @@ public class LeasingController {
     private final Clock clock;
 
     @Getter @Setter
-    private long timersCheckPeriodMillis = 100;
+    private long timersCheckPeriodMillis = 500;
 
     @Getter
-    private final Map<Cell, CellLeaseRecord> leasingInfo;
+    private final BiMap<Cell, CellLeaseRecord> leasingInfo;
 
     private final CellsRepository cellsRepository;
 
     public LeasingController(final Clock clock,final CellsRepository cellsRepository) {
         this.clock = clock;
-        this.leasingInfo = new HashMap<>();
+        this.leasingInfo = HashBiMap.create();
         this.cellsRepository = cellsRepository;
     }
 
@@ -46,13 +47,13 @@ public class LeasingController {
         this.cellsRepository = cellsRepository;
     }
 
-    private Map<Cell, CellLeaseRecord> collectLeasingInfo(
+    private BiMap<Cell, CellLeaseRecord> collectLeasingInfo(
             EnumMap<CellSize, List<Cell>> cells) {
         return cells.entrySet().stream()
                 .flatMap(entry -> entry.getValue().stream())
                 .map(cell -> new AbstractMap.SimpleEntry<>(cell, cell.getCellLeaseRecord()))
                 .filter(entry -> entry.getValue() != null)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(ImmutableBiMap.toImmutableBiMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private final ScheduledExecutorService timersPool =
@@ -73,6 +74,7 @@ public class LeasingController {
         leasingInfo.values().forEach(leaseRecord -> {
             if (!leaseRecord.expired && leaseRecord.leaseEnd.isBefore(today)) {
                 leaseRecord.expired = true;
+                cellsRepository.saveCell(leasingInfo.inverse().get(leaseRecord));
             }
         });
     }

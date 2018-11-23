@@ -1,8 +1,11 @@
 package kspt.bank.domain;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import kspt.bank.boundaries.ApplicationsRepository;
 import kspt.bank.boundaries.CellsRepository;
 import kspt.bank.domain.entities.Cell;
+import kspt.bank.domain.entities.CellApplication;
+import kspt.bank.enums.CellApplicationStatus;
 import kspt.bank.enums.CellSize;
 import lombok.RequiredArgsConstructor;
 import lombok.Synchronized;
@@ -14,6 +17,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.Closeable;
 import java.time.Duration;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -33,6 +37,9 @@ public final class Vault implements Closeable {
 
     @Autowired
     private final CellsRepository cellsRepository;
+
+    @Autowired
+    private final ApplicationsRepository applicationsRepository;
 
     @Autowired
     private final LeasingController leasingController;
@@ -79,10 +86,18 @@ public final class Vault implements Closeable {
         cellsRepository.saveCell(cell);
         pendingKeepersPool.submit(() -> {
             try {
+                log.info("Cell {} is pending until {}", cell.getId(), LocalTime.now().plus(duration));
                 Thread.sleep(duration.toMillis());
                 cell.setPending(false);
                 cellsRepository.saveCell(cell);
+                log.info("Cell {} is no more pending", cell.getId());
+                final CellApplication app = applicationsRepository.findByCell(cell);
+                if (app.getStatus() != CellApplicationStatus.PAID) {
+                    applicationsRepository.deleteById(app.getId());
+                    log.info("Cell application {} is NOT PAID on pending end - so it was deleted");
+                }
             } catch (InterruptedException e) {
+                log.warn("{} was interrupted", this.getClass().getSimpleName());
                 Thread.currentThread().interrupt();
             }
         });

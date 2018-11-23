@@ -2,6 +2,7 @@ package kspt.bank.dao;
 
 
 import kspt.bank.boundaries.ApplicationsRepository;
+import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.CellApplication;
 import kspt.bank.domain.entities.Client;
 
@@ -56,5 +57,13 @@ public class InMemoryApplicationsRepository implements ApplicationsRepository {
         application.ifPresent(cellApplication -> clientIdToApplications
                 .get(cellApplication.getLeaseholder().getId())
                 .remove(cellApplication));
+    }
+
+    @Override
+    public CellApplication findByCell(Cell cell) {
+        return clientIdToApplications.values().stream()
+                .flatMap(Collection::stream)
+                .filter(app -> app.getCell().equals(cell))
+                .findFirst().orElse(null);
     }
 }

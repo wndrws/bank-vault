@@ -1,5 +1,6 @@
 package kspt.bank.boundaries;
 
+import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.CellApplication;
 import kspt.bank.domain.entities.Client;
 
@@ -15,4 +16,6 @@ public interface ApplicationsRepository {
     Collection<CellApplication> findAll();
 
     void deleteById(Integer id);
+
+    CellApplication findByCell(Cell cell);
 }
