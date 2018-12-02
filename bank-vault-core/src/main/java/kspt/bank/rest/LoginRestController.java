@@ -30,7 +30,7 @@ public class LoginRestController {
         } catch (IllegalArgumentException __) {
             return ResponseEntity.badRequest().body(-1);
         } catch (ClientPassportValidator.IncorrectPassportInfo __) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(-1);
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(-1);
         }
     }
 
