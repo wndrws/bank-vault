@@ -45,4 +45,8 @@ public class LoginService {
     public Optional<ClientDTO> getUserInfo(Integer userId) {
         return bankVaultFacade.findClientInfo(userId);
     }
+
+    public boolean isRegistered(final String username) {
+        return userStorage.containsUserWithName(username);
+    }
 }

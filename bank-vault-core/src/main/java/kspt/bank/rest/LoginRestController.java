@@ -6,9 +6,7 @@ import kspt.bank.services.LoginService;
 import lombok.AllArgsConstructor;
 import lombok.Value;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
@@ -23,7 +21,16 @@ public class LoginRestController {
 
     @PostMapping("register")
     public Integer register(@RequestBody final CredentialsWithClientInto fullInfo) {
-        return loginService.registerUser(fullInfo.userCredentials, fullInfo.clientInfo);
+        try {
+            return loginService.registerUser(fullInfo.userCredentials, fullInfo.clientInfo);
+        } catch (IllegalArgumentException ex) {
+            return -1;
+        }
+    }
+
+    @GetMapping("isRegistered")
+    public Boolean isRegistered(@RequestParam("username") final String username) {
+        return loginService.isRegistered(username);
     }
 
     @Value

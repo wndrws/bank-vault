@@ -36,6 +36,9 @@ public class UserStorage implements Serializable {
     }
 
     public void createUser(Credentials credentials, Integer id) {
+        if (containsUserWithName(credentials.getLogin())) {
+            throw new IllegalArgumentException("User " + credentials.getLogin() + " already registered");
+        }
         usernameToUserId.put(credentials.getLogin(), id);
         usernameToPasswordHash.put(credentials.getLogin(), credentials.getPassword().hashCode());
     }
@@ -47,6 +50,10 @@ public class UserStorage implements Serializable {
         } else {
             return null;
         }
+    }
+
+    public boolean containsUserWithName(String username) {
+        return usernameToUserId.containsKey(username);
     }
 
     @PostConstruct
