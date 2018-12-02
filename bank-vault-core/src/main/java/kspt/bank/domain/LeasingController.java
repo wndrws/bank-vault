@@ -1,5 +1,6 @@
 package kspt.bank.domain;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.*;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import kspt.bank.boundaries.CellsRepository;
@@ -8,7 +9,6 @@ import kspt.bank.domain.entities.CellLeaseRecord;
 import kspt.bank.domain.entities.Client;
 import kspt.bank.enums.CellSize;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -24,10 +24,9 @@ import java.util.concurrent.TimeUnit;
 public class LeasingController {
     private final static int TIMERS_POOL_SIZE = 1;
 
-    private final Clock clock;
+    public static final long LEASING_TIMERS_CHECK_PERIOD_MS = 500;
 
-    @Getter @Setter
-    private long timersCheckPeriodMillis = 500;
+    private final Clock clock;
 
     @Getter
     private final BiMap<Cell, CellLeaseRecord> leasingInfo;
@@ -45,9 +44,10 @@ public class LeasingController {
         scheduleLeasingCheck();
     }
 
-    private void scheduleLeasingCheck() {
+    @VisibleForTesting
+    public void scheduleLeasingCheck() {
         timersPool.scheduleAtFixedRate(this::checkLeasingPeriods,
-                timersCheckPeriodMillis, timersCheckPeriodMillis, TimeUnit.MILLISECONDS);
+                LEASING_TIMERS_CHECK_PERIOD_MS, LEASING_TIMERS_CHECK_PERIOD_MS, TimeUnit.MILLISECONDS);
     }
 
     private void checkLeasingPeriods() {
@@ -76,6 +76,8 @@ public class LeasingController {
                 .map(cell -> new AbstractMap.SimpleEntry<>(cell, cell.getCellLeaseRecord()))
                 .filter(entry -> entry.getValue() != null)
                 .collect(ImmutableBiMap.toImmutableBiMap(Map.Entry::getKey, Map.Entry::getValue));
+//                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+//                (a, b) -> b, HashBiMap::create));
     }
 
     private Cell maintainCellLeaseRecordId(final Cell cell) {

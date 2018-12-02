@@ -17,6 +17,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.time.Period;
 import java.time.ZoneId;
 
+import static kspt.bank.domain.LeasingController.LEASING_TIMERS_CHECK_PERIOD_MS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
@@ -42,8 +43,6 @@ class LeasingControllerTest {
     @Test
     void testLeasingExpiration()
     throws InterruptedException {
-        Assumptions.assumeTrue(leasingController.getTimersCheckPeriodMillis() <= 1000L,
-                "LeasingController's timers check period is inappropriate for unit-testing");
         // given
         final Cell cell = vault.requestAnyCell();
         final Client client = TestDataGenerator.getSampleClient();
@@ -56,7 +55,7 @@ class LeasingControllerTest {
         assertThat(leasingController.isLeasingExpired(cell)).isFalse();
         // and when
         mockedClock.advanceByDays(64);
-        Thread.sleep(2*leasingController.getTimersCheckPeriodMillis());
+        Thread.sleep(2*LEASING_TIMERS_CHECK_PERIOD_MS);
         // then
         assertThat(leasingController.isLeased(cell)).isTrue();
         assertThat(leasingController.isLeasingExpired(cell)).isTrue();
