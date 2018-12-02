@@ -41,7 +41,7 @@ public class LoginService {
     }
 
     private void saveNewClient(Client newClient) {
-        if (clientsRepository.containsClientWith(newClient.getPassportInfo())) {
+        if (clientsRepository.containsClientWithSerial(newClient.getPassportInfo().getSerial())) {
             throw new ClientPassportValidator.IncorrectPassportInfo("Person with the passport" +
                     "having this serial is already registered!");
         }
