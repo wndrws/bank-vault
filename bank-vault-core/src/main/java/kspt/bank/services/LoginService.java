@@ -8,12 +8,14 @@ import kspt.bank.dto.ClientDTO;
 import kspt.bank.recognition.Credentials;
 import kspt.bank.recognition.UserStorage;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class LoginService {
@@ -33,9 +35,17 @@ public class LoginService {
                 clientInfo.patronymic, clientInfo.birthday);
         ClientPassportValidator.checkValidity(passportInfo);
         final Client newClient = new Client(passportInfo, clientInfo.phone, clientInfo.email);
-        clientsRepository.add(newClient);
+        saveNewClient(newClient);
         userStorage.createUser(userCredentials, newClient.getId());
         return newClient.getId();
+    }
+
+    private void saveNewClient(Client newClient) {
+        if (clientsRepository.containsClientWith(newClient.getPassportInfo())) {
+            throw new ClientPassportValidator.IncorrectPassportInfo("Person with the passport" +
+                    "having this serial is already registered!");
+        }
+        clientsRepository.add(newClient);
     }
 
     public Optional<Integer> login(Credentials userCredentials) {

@@ -83,7 +83,6 @@ class JpaClientsRepositoryTest {
         assertThat(contains).isFalse();
     }
 
-
     @Test
     void testGetClientWith_Existent() {
         // given
@@ -104,5 +103,27 @@ class JpaClientsRepositoryTest {
         final Client foundClient = clientsRepository.getClientWith(info);
         // then
         assertThat(foundClient).isNull();
+    }
+
+    @Test
+    void testContainsClientWithSerial_Existent() {
+        // given
+        final Client client = entityManager.persistAndFlush(TestDataGenerator.getSampleClient());
+        final String serial = client.getPassportInfo().getSerial();
+        // when
+        final boolean contains = clientsRepository.containsClientWithSerial(serial);
+        // then
+        assertThat(contains).isTrue();
+    }
+
+    @Test
+    void testContainsClientWithSerial_NonExistent() {
+        // given
+        final Client client = entityManager.persistAndFlush(TestDataGenerator.getSampleClient());
+        final String serial = client.getPassportInfo().getSerial();
+        // when
+        final boolean contains = clientsRepository.containsClientWithSerial(serial + "1");
+        // then
+        assertThat(contains).isFalse();
     }
 }

@@ -1,11 +1,14 @@
 package kspt.bank.rest;
 
+import kspt.bank.domain.ClientPassportValidator;
 import kspt.bank.dto.ClientDTO;
 import kspt.bank.recognition.Credentials;
 import kspt.bank.services.LoginService;
 import lombok.AllArgsConstructor;
 import lombok.Value;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,11 +23,14 @@ public class LoginRestController {
     }
 
     @PostMapping("register")
-    public Integer register(@RequestBody final CredentialsWithClientInto fullInfo) {
+    public ResponseEntity<Integer> register(@RequestBody final CredentialsWithClientInto fullInfo) {
         try {
-            return loginService.registerUser(fullInfo.userCredentials, fullInfo.clientInfo);
-        } catch (IllegalArgumentException ex) {
-            return -1;
+            final int id = loginService.registerUser(fullInfo.userCredentials, fullInfo.clientInfo);
+            return ResponseEntity.ok(id);
+        } catch (IllegalArgumentException __) {
+            return ResponseEntity.badRequest().body(-1);
+        } catch (ClientPassportValidator.IncorrectPassportInfo __) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(-1);
         }
     }
 

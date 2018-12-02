@@ -44,4 +44,11 @@ public class InMemoryClientsRepository implements ClientsRepository {
         }
         clients.add(client);
     }
+
+    @Override
+    public boolean containsClientWithSerial(String serial) {
+        return clients.stream()
+                .map(c -> c.getPassportInfo().getSerial())
+                .anyMatch(it -> it.equals(serial));
+    }
 }
