@@ -3,6 +3,7 @@ package kspt.bank.domain.entities;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Embeddable;
 import javax.persistence.JoinColumn;
@@ -15,19 +16,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CellLeaseRecord {
-    private static int CURRENT_ID = 0;
-
     @Transient
+    @Setter
     private Integer id;
-
-    public CellLeaseRecord(final Client leaseholder, final LocalDate leaseBegin,
-            final LocalDate leaseEnd, final Boolean expired) {
-        id = CURRENT_ID++;
-        this.leaseholder = leaseholder;
-        this.leaseBegin = leaseBegin;
-        this.leaseEnd = leaseEnd;
-        this.expired = expired;
-    }
 
     @OneToOne
     @JoinColumn(name = "client_id")

@@ -34,37 +34,18 @@ public class LeasingController {
 
     private final CellsRepository cellsRepository;
 
+    private final ScheduledExecutorService timersPool =
+            Executors.newScheduledThreadPool(TIMERS_POOL_SIZE,
+                    new ThreadFactoryBuilder().setNameFormat("vault-leasectrl-timersPool-%d").build());
+
     public LeasingController(final Clock clock,final CellsRepository cellsRepository) {
         this.clock = clock;
         this.leasingInfo = HashBiMap.create();
         this.cellsRepository = cellsRepository;
+        scheduleLeasingCheck();
     }
 
-    public LeasingController(final Clock clock, final EnumMap<CellSize, List<Cell>> cells,
-            final CellsRepository cellsRepository) {
-        this.clock = clock;
-        this.leasingInfo = collectLeasingInfo(cells);
-        this.cellsRepository = cellsRepository;
-    }
-
-    private BiMap<Cell, CellLeaseRecord> collectLeasingInfo(
-            EnumMap<CellSize, List<Cell>> cells) {
-        return cells.entrySet().stream()
-                .flatMap(entry -> entry.getValue().stream())
-                .map(cell -> new AbstractMap.SimpleEntry<>(cell, cell.getCellLeaseRecord()))
-                .filter(entry -> entry.getValue() != null)
-                .collect(ImmutableBiMap.toImmutableBiMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    private final ScheduledExecutorService timersPool =
-            Executors.newScheduledThreadPool(TIMERS_POOL_SIZE,
-            new ThreadFactoryBuilder().setNameFormat("vault-leasectrl-timersPool-%d").build());
-
-    public void startLeasing(final Cell cell, final Client leaseholder, final Period period) {
-        final LocalDate today = LocalDate.now(clock);
-        leasingInfo.put(cell, new CellLeaseRecord(leaseholder, today, today.plus(period), false));
-        cell.setCellLeaseRecord(leasingInfo.get(cell));
-        cellsRepository.saveCell(cell);
+    private void scheduleLeasingCheck() {
         timersPool.scheduleAtFixedRate(this::checkLeasingPeriods,
                 timersCheckPeriodMillis, timersCheckPeriodMillis, TimeUnit.MILLISECONDS);
     }
@@ -77,6 +58,39 @@ public class LeasingController {
                 cellsRepository.saveCell(leasingInfo.inverse().get(leaseRecord));
             }
         });
+    }
+
+    public LeasingController(final Clock clock, final EnumMap<CellSize, List<Cell>> cells,
+            final CellsRepository cellsRepository) {
+        this.clock = clock;
+        this.leasingInfo = collectLeasingInfo(cells);
+        this.cellsRepository = cellsRepository;
+        scheduleLeasingCheck();
+    }
+
+    private BiMap<Cell, CellLeaseRecord> collectLeasingInfo(
+            EnumMap<CellSize, List<Cell>> cells) {
+        return cells.entrySet().stream()
+                .flatMap(entry -> entry.getValue().stream())
+                .map(this::maintainCellLeaseRecordId)
+                .map(cell -> new AbstractMap.SimpleEntry<>(cell, cell.getCellLeaseRecord()))
+                .filter(entry -> entry.getValue() != null)
+                .collect(ImmutableBiMap.toImmutableBiMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private Cell maintainCellLeaseRecordId(final Cell cell) {
+        if (cell.getCellLeaseRecord() != null) {
+            cell.getCellLeaseRecord().setId(cell.getId());
+        }
+        return cell;
+    }
+
+    public void startLeasing(final Cell cell, final Client leaseholder, final Period period) {
+        final LocalDate today = LocalDate.now(clock);
+        leasingInfo.put(cell,
+                new CellLeaseRecord(cell.getId(), leaseholder, today, today.plus(period), false));
+        cell.setCellLeaseRecord(leasingInfo.get(cell));
+        cellsRepository.saveCell(cell);
     }
 
     public void endLeasing(final Cell cell) {
