@@ -5,7 +5,6 @@ import kspt.bank.enums.CellSize;
 import lombok.Value;
 
 import java.time.LocalDate;
-import java.time.Period;
 
 @Value
 public final class CellDTO {
@@ -17,7 +16,7 @@ public final class CellDTO {
 
     public final LocalDate leaseBegin;
 
-    public final Period leasePeriod;
+    public final Integer leaseDays;
 
     public final String containedPreciousName;
 

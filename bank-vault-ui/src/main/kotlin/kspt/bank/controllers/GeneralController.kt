@@ -1,6 +1,8 @@
 package kspt.bank.controllers
 
-import kspt.bank.*
+import kspt.bank.BankVaultCoreApplication
+import kspt.bank.asCellStatus
+import kspt.bank.asChoosableCellSize
 import kspt.bank.dto.CellApplicationDTO
 import kspt.bank.dto.CellDTO
 import kspt.bank.enums.CellApplicationStatus
@@ -23,7 +25,7 @@ open class GeneralController : ErrorHandlingController() {
                     this.size.asChoosableCellSize().displayName,
                     this.containedPreciousName,
                     this.leaseBegin?.toString() ?: "",
-                    this.leasePeriod.days,
+                    this.leaseDays,
                     this.applicationId)
 
     fun fillCellsTable() {
