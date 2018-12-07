@@ -1,7 +1,10 @@
 package kspt.bank.domain;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.*;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Range;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import kspt.bank.boundaries.CellsRepository;
 import kspt.bank.domain.entities.Cell;
@@ -20,11 +23,12 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class LeasingController {
-    private final static int TIMERS_POOL_SIZE = 1;
+    public final static long LEASING_TIMERS_CHECK_PERIOD_MS = 500;
 
-    public static final long LEASING_TIMERS_CHECK_PERIOD_MS = 500;
+    private final static int TIMERS_POOL_SIZE = 1;
 
     private final Clock clock;
 
@@ -37,7 +41,7 @@ public class LeasingController {
             Executors.newScheduledThreadPool(TIMERS_POOL_SIZE,
                     new ThreadFactoryBuilder().setNameFormat("vault-leasectrl-timersPool-%d").build());
 
-    public LeasingController(final Clock clock,final CellsRepository cellsRepository) {
+    public LeasingController(final Clock clock, final CellsRepository cellsRepository) {
         this.clock = clock;
         this.leasingInfo = HashBiMap.create();
         this.cellsRepository = cellsRepository;
@@ -75,9 +79,8 @@ public class LeasingController {
                 .map(this::maintainCellLeaseRecordId)
                 .map(cell -> new AbstractMap.SimpleEntry<>(cell, cell.getCellLeaseRecord()))
                 .filter(entry -> entry.getValue() != null)
-                .collect(ImmutableBiMap.toImmutableBiMap(Map.Entry::getKey, Map.Entry::getValue));
-//                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-//                (a, b) -> b, HashBiMap::create));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                        (a, b) -> b, HashBiMap::create));
     }
 
     private Cell maintainCellLeaseRecordId(final Cell cell) {
@@ -101,15 +104,15 @@ public class LeasingController {
         cellsRepository.saveCell(cell);
     }
 
-    public boolean isLeased(final Cell cell) {
-        return leasingInfo.containsKey(cell);
-    }
-
     public boolean isLeasingExpired(final Cell cell) {
         if (isLeased(cell)) {
             return leasingInfo.get(cell).expired;
         }
         return false;
+    }
+
+    public boolean isLeased(final Cell cell) {
+        return leasingInfo.containsKey(cell);
     }
 
     public void stop() {
