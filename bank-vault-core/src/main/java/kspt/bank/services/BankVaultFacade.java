@@ -59,8 +59,15 @@ public class BankVaultFacade {
     }
 
     @Transactional
-    public Boolean requestCell(CellSize size, Period leasePeriod, Integer cellApplicationId) {
-        return cellApplicationInteractor.requestCell(size, leasePeriod,
+    public Integer acceptClientInfo(Client client) {
+        final CellApplication cellApplication = cellApplicationInteractor.createApplication(
+                client.getPassportInfo(), client.getPhone(), client.getEmail());
+        return cellApplication.getId();
+    }
+
+    @Transactional
+    public Boolean requestCell(CellSize size, Integer leaseDays, Integer cellApplicationId) {
+        return cellApplicationInteractor.requestCell(size, Period.ofDays(leaseDays),
                 cellApplicationInteractor.getApplicationsRepository().find(cellApplicationId));
     }
 

@@ -2,31 +2,25 @@ package kspt.bank.controllers
 
 import javafx.stage.StageStyle
 import kspt.bank.BankVaultCoreApplication
-import kspt.bank.CellStatus
 import kspt.bank.ChoosableCellSize
 import kspt.bank.ChoosablePaymentMethod
-import kspt.bank.dto.CellApplicationDTO
-import kspt.bank.dto.CellDTO
-import kspt.bank.enums.CellApplicationStatus
 import kspt.bank.enums.CellSize
 import kspt.bank.enums.PaymentMethod
 import kspt.bank.external.Invoice
-import kspt.bank.services.BankVaultFacade
 import kspt.bank.services.PaymentService
 import kspt.bank.views.ErrorModalView
 import kspt.bank.views.client.CellChoiceView
 import kspt.bank.views.client.ClientMainView
-import java.time.Period
 
 class CellApplicationController : GeneralController() {
     private val paymentService by lazy {
         BankVaultCoreApplication.getApplicationContext().getBean(PaymentService::class.java)
     }
 
-    fun processCellRequest(size: ChoosableCellSize, period: Period) {
+    fun processCellRequest(size: ChoosableCellSize, leaseDays: Int) {
         errorAware("processCellRequest") {
             val applicationId = bankVaultFacade.acceptClientInfo(userModel.clientInfo.value)
-            val success = bankVaultFacade.requestCell(size.asCellSize(), period, applicationId)
+            val success = bankVaultFacade.requestCell(size.asCellSize(), leaseDays, applicationId)
             if (!success) {
                 val errorWindow = find<ErrorModalView>(
                         "message" to "Нет доступной ячейки запрошенного размера!")
