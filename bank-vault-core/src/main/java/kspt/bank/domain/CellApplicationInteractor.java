@@ -63,6 +63,7 @@ public class CellApplicationInteractor {
         Preconditions.checkState(application.getStatus() == CellApplicationStatus.CREATED);
         final Cell cell = vault.requestCell(size);
         if (cell == null) {
+            applicationsRepository.deleteById(application.getId());
             return false;
         } else {
             application.setCell(cell);

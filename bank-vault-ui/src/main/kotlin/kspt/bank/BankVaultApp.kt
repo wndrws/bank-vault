@@ -1,6 +1,7 @@
 package kspt.bank
 
 import kspt.bank.controllers.NotificationController
+import org.springframework.boot.WebApplicationType
 import tornadofx.App
 
 open class BankVaultApp : App() {
@@ -11,7 +12,7 @@ open class BankVaultApp : App() {
     private val notificationController: NotificationController by inject()
 
     init {
-        BankVaultCoreApplication.start(notificationController, argv);
+        BankVaultCoreApplication.start(notificationController, WebApplicationType.NONE, argv);
     }
 
     override fun stop() {

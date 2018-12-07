@@ -59,8 +59,15 @@ public class BankVaultFacade {
     }
 
     @Transactional
-    public Boolean requestCell(CellSize size, Period leasePeriod, Integer cellApplicationId) {
-        return cellApplicationInteractor.requestCell(size, leasePeriod,
+    public Integer acceptClientInfo(Client client) {
+        final CellApplication cellApplication = cellApplicationInteractor.createApplication(
+                client.getPassportInfo(), client.getPhone(), client.getEmail());
+        return cellApplication.getId();
+    }
+
+    @Transactional
+    public Boolean requestCell(CellSize size, Integer leaseDays, Integer cellApplicationId) {
+        return cellApplicationInteractor.requestCell(size, Period.ofDays(leaseDays),
                 cellApplicationInteractor.getApplicationsRepository().find(cellApplicationId));
     }
 
@@ -70,7 +77,7 @@ public class BankVaultFacade {
         final Cell cell = app.getCell();
         if (cell == null) return Optional.empty();
         return Optional.of(new CellDTO(getCodeName(cell), cell.getSize(), app.getStatus(),
-                getLeaseBegin(cell), app.getLeasePeriod(), getContainedPreciousName(cell),
+                getLeaseBegin(cell), app.getLeasePeriod().getDays(), getContainedPreciousName(cell),
                 app.getId()));
     }
 
@@ -105,7 +112,7 @@ public class BankVaultFacade {
                 .map(app -> {
                     final Cell cell = app.getCell();
                     return cell == null ? null : new CellDTO(getCodeName(cell), cell.getSize(),
-                            app.getStatus(), getLeaseBegin(cell), app.getLeasePeriod(),
+                            app.getStatus(), getLeaseBegin(cell), app.getLeasePeriod().getDays(),
                             getContainedPreciousName(cell), app.getId());
                 }).filter(Objects::nonNull).collect(Collectors.toList());
     }

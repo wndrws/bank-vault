@@ -29,4 +29,13 @@ public interface JpaClientsRepository extends ClientsRepository, JpaRepository<C
     @Override
     @Query("SELECT c FROM Client c WHERE c.passportInfo = :info")
     Client getClientWith(@Param("info") final PassportInfo passportInfo);
+
+    @Override
+    default boolean containsClientWithSerial(String serial) {
+        final Client client = findClientWithSerial(serial);
+        return client != null;
+    }
+
+    @Query("SELECT c FROM Client c WHERE c.passportInfo.serial = :serial")
+    Client findClientWithSerial(@Param("serial") String serial);
 }

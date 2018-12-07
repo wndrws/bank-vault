@@ -6,7 +6,10 @@ import kspt.bank.boundaries.CellsRepository;
 import kspt.bank.boundaries.ClientsRepository;
 import kspt.bank.boundaries.NotificationGate;
 import kspt.bank.config.VaultConfig;
-import kspt.bank.domain.*;
+import kspt.bank.domain.LeasingControlInteractor;
+import kspt.bank.domain.LeasingController;
+import kspt.bank.domain.TestDataGenerator;
+import kspt.bank.domain.Vault;
 import kspt.bank.domain.entities.Cell;
 import kspt.bank.domain.entities.Client;
 import kspt.bank.domain.entities.Precious;
@@ -35,6 +38,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
 
+import static kspt.bank.domain.LeasingController.LEASING_TIMERS_CHECK_PERIOD_MS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -73,6 +77,9 @@ class LeasingExpiryTest {
 
     @Autowired
     private LeasingControlInteractor lcInteractor;
+
+    @Autowired
+    private Vault vault;
 
     private final RoleClient roleClient = new RoleClient();
 
@@ -136,7 +143,7 @@ class LeasingExpiryTest {
     private void waitForLeasingExpiry()
     throws InterruptedException {
         mockedClock.advanceByDays(roleClient.initialLeasingPeriod.getDays() + 1);
-        Thread.sleep(2 * leasingController.getTimersCheckPeriodMillis());
+        Thread.sleep(2 * LEASING_TIMERS_CHECK_PERIOD_MS);
     }
 
     private void assertThatLeasingExpired() {
@@ -182,7 +189,7 @@ class LeasingExpiryTest {
 
         final Precious precious = new Precious(1, "The Ring Of Power");
 
-        final Cell cell = new Cell(1, CellSize.SMALL);
+        Cell cell;
 
         final Period initialLeasingPeriod = Period.ofDays(10);
 
@@ -212,9 +219,8 @@ class LeasingExpiryTest {
 
     @BeforeEach
     void setUp() {
-        cellsRepository.saveCell(roleClient.cell);
-        leasingController.setTimersCheckPeriodMillis(
-                LeasingControlInteractorTest.LEASING_TIMERS_CHECK_PERIOD_MS);
+        leasingController.scheduleLeasingCheck();
+        roleClient.cell = vault.requestCell(CellSize.SMALL);
         clientsRepository.add(roleClient.client);
     }
 

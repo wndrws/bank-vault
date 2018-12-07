@@ -11,4 +11,6 @@ public interface ClientsRepository {
     Client find(Integer id);
 
     void add(Client client);
+
+    boolean containsClientWithSerial(String serial);
 }

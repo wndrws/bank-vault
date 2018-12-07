@@ -7,7 +7,6 @@ import javafx.geometry.Insets
 import kspt.bank.ChoosableCellSize
 import kspt.bank.controllers.CellApplicationController
 import tornadofx.*
-import java.time.Period
 
 class CellChoiceView : View() {
     private val model = ViewModel()
@@ -51,8 +50,7 @@ class CellChoiceView : View() {
                 anchorpaneConstraints { rightAnchor = 0 }
                 enableWhen(model.valid)
                 action {
-                    cellApplicationController.processCellRequest(selectedSize.value,
-                            Period.ofDays(period.value.toInt()))
+                    cellApplicationController.processCellRequest(selectedSize.value, period.value.toInt())
                 }
             }
         }

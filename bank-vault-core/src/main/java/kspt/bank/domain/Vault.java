@@ -88,10 +88,11 @@ public final class Vault implements Closeable {
             try {
                 log.info("Cell {} is pending until {}", cell.getId(), LocalTime.now().plus(duration));
                 Thread.sleep(duration.toMillis());
-                cell.setPending(false);
-                cellsRepository.saveCell(cell);
-                log.info("Cell {} is no more pending", cell.getId());
-                final CellApplication app = applicationsRepository.findByCell(cell);
+                final Cell refreshedCell = cellsRepository.findCell(cell.getId());
+                refreshedCell.setPending(false);
+                cellsRepository.saveCell(refreshedCell);
+                log.info("Cell {} is no more pending", refreshedCell.getId());
+                final CellApplication app = applicationsRepository.findByCell(refreshedCell);
                 if (app.getStatus() != CellApplicationStatus.PAID) {
                     applicationsRepository.deleteById(app.getId());
                     log.info("Cell application {} was deleted as NOT PAID on pending", app.getId());

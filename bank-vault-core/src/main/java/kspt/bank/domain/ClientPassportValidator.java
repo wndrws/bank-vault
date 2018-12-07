@@ -32,8 +32,8 @@ public class ClientPassportValidator {
         }
     }
 
-    static class IncorrectPassportInfo extends RuntimeException {
-        IncorrectPassportInfo(String msg) {
+    public static class IncorrectPassportInfo extends RuntimeException {
+        public IncorrectPassportInfo(String msg) {
             super(msg);
         }
     }

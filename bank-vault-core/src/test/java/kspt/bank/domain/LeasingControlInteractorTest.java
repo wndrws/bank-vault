@@ -17,7 +17,6 @@ import kspt.bank.enums.PaymentMethod;
 import kspt.bank.external.Invoice;
 import kspt.bank.external.PaymentSystem;
 import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -33,6 +32,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
 
+import static kspt.bank.domain.LeasingController.LEASING_TIMERS_CHECK_PERIOD_MS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -45,8 +45,6 @@ import static org.mockito.Mockito.verify;
         LeasingControlInteractor.class, Vault.class, VaultConfig.class, NoJpaTestConfig.class,
         LeasingControlInteractorTest.Config.class})
 public class LeasingControlInteractorTest {
-    public final static long LEASING_TIMERS_CHECK_PERIOD_MS = 100;
-
     private final static MockClock MOCKED_CLOCK =
             MockClock.at(2018, 4, 10, 19, 0, ZoneId.systemDefault());
 
@@ -192,11 +190,6 @@ public class LeasingControlInteractorTest {
         // then
         verify(notificationGate).notifyClientAboutArrangement(
                 eq(client), anyString(), eq(preciousExtractionDay));
-    }
-
-    @BeforeEach
-    void setUp() {
-        leasingController.setTimersCheckPeriodMillis(LEASING_TIMERS_CHECK_PERIOD_MS);
     }
 
     @Configuration
