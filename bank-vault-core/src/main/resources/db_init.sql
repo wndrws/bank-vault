@@ -38,5 +38,5 @@ CREATE TABLE CellApplication (
     period_y    integer     ,
     period_m    integer     ,
     period_d    integer     ,
-    status      varchar     NOT NULL CHECK (status <> ''), -- cell_app_status
+    status      varchar     NOT NULL CHECK (status <> '') -- cell_app_status
 );
