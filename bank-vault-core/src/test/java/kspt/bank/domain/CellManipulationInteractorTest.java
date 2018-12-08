@@ -107,7 +107,7 @@ class CellManipulationInteractorTest {
         leasingController.startLeasing(cellTwo, client, Period.ofMonths(2));
         cellThree.setContainedPrecious(myPrecious);
         // then
-        assertThrows(PutManipulationValidator.ManipulationNotAllowed.class, // when
+        assertThrows(IllegalStateException.class, // when
                 () -> interactor.putPrecious(cellThree, new Precious(1, ""), client));
     }
 

@@ -6,12 +6,12 @@ import kspt.bank.domain.entities.Precious;
 public class PutManipulationValidator {
     static void checkManipulation(final Cell cell, final Precious precious) {
         if (!cell.isEmpty()) {
-            throw new ManipulationNotAllowed(
-                    "Cell " + cell + " already contains a precious " + cell.getContainedPrecious());
+            throw new IllegalStateException("Cell " + cell + " already contains a precious "
+                    + prettyPrint(cell.getContainedPrecious()));
         }
         if (!canBeFit(cell, precious)) {
-           throw new ManipulationNotAllowed(
-                   "Precious " + precious + " is too big for cell of size " + cell.getSize());
+           throw new ManipulationNotAllowed("Precious " + prettyPrint(precious)
+                   + " is too big for cell of size " + cell.getSize());
         }
     }
 
