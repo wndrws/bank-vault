@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 @Slf4j
 @RequiredArgsConstructor
 public final class Vault implements Closeable {
-    final static Duration DEFAULT_PENDING_DURATION = Duration.ofMinutes(5);
+    final static Duration DEFAULT_PENDING_DURATION = Duration.ofMinutes(30);
 
     @Autowired
     private final VaultHardware vaultHardware;
