@@ -41,6 +41,7 @@ public class UserStorage implements Serializable {
         }
         usernameToUserId.put(credentials.getLogin(), id);
         usernameToPasswordHash.put(credentials.getLogin(), credentials.getPassword().hashCode());
+        save();
     }
 
     public Integer findUser(Credentials credentials) {
