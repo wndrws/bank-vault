@@ -11,8 +11,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,12 +23,6 @@ public class WebServer {
 
     @Autowired
     private final ManipulationLog manipulationLog;
-
-    @GetMapping("/")
-    void hello(HttpServletResponse httpResponse)
-    throws IOException {
-        httpResponse.sendRedirect("index.html");
-    }
 
     @GetMapping("/apps")
     String applications()
