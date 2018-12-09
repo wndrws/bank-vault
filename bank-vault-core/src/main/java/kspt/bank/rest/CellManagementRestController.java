@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping(value = "manage")
+@RequestMapping(value = "/api/manage")
 public class CellManagementRestController {
     @Autowired
     private final BankVaultFacade bankVaultFacade;

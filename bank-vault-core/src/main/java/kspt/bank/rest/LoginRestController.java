@@ -8,21 +8,23 @@ import lombok.AllArgsConstructor;
 import lombok.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
+@RequestMapping("/api")
 public class LoginRestController {
     @Autowired
     private final LoginService loginService;
 
-    @PostMapping("login")
+    @PostMapping(value = "login", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Integer login(@RequestBody final Credentials credentials) {
         return loginService.login(credentials).orElse(-1);
     }
 
-    @PostMapping("register")
+    @PostMapping(value = "register", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Integer> register(@RequestBody final CredentialsWithClientInto fullInfo) {
         try {
             final int id = loginService.registerUser(fullInfo.userCredentials, fullInfo.clientInfo);

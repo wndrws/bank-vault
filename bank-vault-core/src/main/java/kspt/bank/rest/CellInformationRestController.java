@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping(value = "info", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/info", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CellInformationRestController {
     @Autowired
     private final BankVaultFacade bankVaultFacade;

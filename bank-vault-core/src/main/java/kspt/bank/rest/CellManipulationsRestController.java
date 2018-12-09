@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping(value = "manipulate")
+@RequestMapping(value = "/api/manipulate")
 public class CellManipulationsRestController {
     @Autowired
     private final BankVaultFacade bankVaultFacade;

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping(value = "apply", consumes = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/apply", consumes = MediaType.APPLICATION_JSON_VALUE)
 public class CellApplicationsRestController {
     @Autowired
     private final BankVaultFacade bankVaultFacade;
