@@ -25,7 +25,7 @@ public class CellApplicationsRestController {
     public ResponseEntity<Integer> createApplicatioon(@PathVariable("clientId") Integer clientId) {
         final Client client = clientsRepository.find(clientId);
         if (client == null) {
-            return ResponseEntity.badRequest().body(-1);
+            return ResponseEntity.unprocessableEntity().body(-1);
         } else {
             final Integer createdApplicationId = bankVaultFacade.acceptClientInfo(client);
             return ResponseEntity.ok(createdApplicationId);

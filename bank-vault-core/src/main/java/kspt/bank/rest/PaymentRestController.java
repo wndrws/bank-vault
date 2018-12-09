@@ -21,7 +21,7 @@ public class PaymentRestController {
     ResponseEntity<Invoice> getInvoice(@PathVariable("appId") Integer appId) {
         return paymentService.getInvoiceForApplication(appId)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.badRequest().body(null));
+                .orElse(ResponseEntity.unprocessableEntity().build());
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
